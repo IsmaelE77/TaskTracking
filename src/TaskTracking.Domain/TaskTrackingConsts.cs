@@ -2,7 +2,7 @@
 
 public static class TaskTrackingConsts
 {
-    public const string DbTablePrefix = "App";
+    public const string DbTablePrefix = "TaskTracking";
 
     public const string DbSchema = null;
 }

@@ -61,10 +61,6 @@ public class TaskTrackingDbContext :
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(builder);
-
-        /* Include modules to your migration db context */
-
         builder.ConfigurePermissionManagement();
         builder.ConfigureSettingManagement();
         builder.ConfigureBackgroundJobs();
@@ -73,14 +69,8 @@ public class TaskTrackingDbContext :
         builder.ConfigureOpenIddict();
         builder.ConfigureFeatureManagement();
         builder.ConfigureTenantManagement();
+        builder.ConfigureGoTrackEntities();
 
-        /* Configure your own tables/entities inside here */
-
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(TaskTrackingConsts.DbTablePrefix + "YourEntities", TaskTrackingConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+        base.OnModelCreating(builder);
     }
 }
