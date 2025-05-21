@@ -1,4 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TaskTracking.TaskGroupAggregate.TaskGroups;
+using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.UserTaskGroups;
+using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -24,6 +28,10 @@ public class TaskTrackingDbContext :
     ITenantManagementDbContext
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
+    public DbSet<TaskGroup> TaskGroups { get; set; }
+    public DbSet<TaskItem> TaskItems { get; set; }
+    public DbSet<UserTaskGroup> UserTaskGroups { get; set; }
+    public DbSet<UserTaskProgress> UserTaskProgresses { get; set; }
 
     #region Entities from the modules
 
@@ -69,7 +77,7 @@ public class TaskTrackingDbContext :
         builder.ConfigureOpenIddict();
         builder.ConfigureFeatureManagement();
         builder.ConfigureTenantManagement();
-        builder.ConfigureGoTrackEntities();
+        builder.ConfigureTaskTrackingEntities();
 
         base.OnModelCreating(builder);
     }
