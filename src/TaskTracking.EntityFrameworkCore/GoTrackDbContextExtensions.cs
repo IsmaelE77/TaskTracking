@@ -43,6 +43,9 @@ public static class GoTrackDbContextExtensions
                 .WithOne(x => x.TaskItem)
                 .HasForeignKey(x => x.TaskItemId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            b.OwnsOne(x => x.RecurrencePattern);
+
         });
 
         builder.Entity<UserTaskGroup>(b =>
