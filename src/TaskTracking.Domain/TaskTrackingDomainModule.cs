@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TaskTracking.MultiTenancy;
+using TaskTracking.TaskGroupAggregate.TaskGroups;
 using Volo.Abp.AuditLogging;
 using Volo.Abp.BackgroundJobs;
+using Volo.Abp.Data;
 using Volo.Abp.Emailing;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
@@ -60,6 +62,13 @@ public class TaskTrackingDomainModule : AbpModule
         {
             options.IsEnabled = MultiTenancyConsts.IsEnabled;
         });
+
+        Configure<AbpDataFilterOptions>(options =>
+        {
+            options.DefaultStates[typeof(IHaveTaskGroup)] = new DataFilterState(isEnabled: true);
+            options.DefaultStates[typeof(IAccessibleTaskGroup)] = new DataFilterState(isEnabled: true);
+        });
+
 
 #if DEBUG
         context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());

@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
@@ -54,7 +57,9 @@ public class TaskTrackingDbContext :
     public DbSet<IdentitySecurityLog> SecurityLogs { get; set; }
     public DbSet<IdentityLinkUser> LinkUsers { get; set; }
     public DbSet<IdentityUserDelegation> UserDelegations { get; set; }
+
     public DbSet<IdentitySession> Sessions { get; set; }
+
     // Tenant Management
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
@@ -64,7 +69,6 @@ public class TaskTrackingDbContext :
     public TaskTrackingDbContext(DbContextOptions<TaskTrackingDbContext> options)
         : base(options)
     {
-
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -80,5 +84,66 @@ public class TaskTrackingDbContext :
         builder.ConfigureTaskTrackingEntities();
 
         base.OnModelCreating(builder);
+    }
+
+    protected override bool ShouldFilterEntity<TEntity>(IMutableEntityType entityType)
+    {
+        if (typeof(IHaveTaskGroup).IsAssignableFrom(typeof(TEntity)))
+            return true;
+
+        if (typeof(IAccessibleTaskGroup).IsAssignableFrom(typeof(TEntity)))
+            return true;
+
+        return base.ShouldFilterEntity<TEntity>(entityType);
+    }
+
+    protected override Expression<Func<TEntity, bool>>? CreateFilterExpression<TEntity>(ModelBuilder modelBuilder)
+    {
+        var expression = base.CreateFilterExpression<TEntity>(modelBuilder);
+
+        expression = TryAddTaskGroupFilterExpression(expression);
+        expression = TryAddAccessibleTaskGroupFilterExpression(expression);
+
+        return expression;
+    }
+
+    private Expression<Func<TEntity, bool>>? TryAddTaskGroupFilterExpression<TEntity>(
+        Expression<Func<TEntity, bool>>? expression) where TEntity : class
+    {
+        if (!typeof(IHaveTaskGroup).IsAssignableFrom(typeof(TEntity)))
+        {
+            return expression;
+        }
+
+        Expression<Func<TEntity, bool>> taskGroupFilterExpression = e =>
+            !DataFilter.IsEnabled<IHaveTaskGroup>() ||
+            LazyServiceProvider.LazyGetRequiredService<CurrentUserTaskGroups>()
+                .GetAccessibleTaskGroupIds().Contains(
+                    EF.Property<Guid>(e, nameof(IHaveTaskGroup.TaskGroupId)));
+
+        expression = expression == null
+            ? taskGroupFilterExpression
+            : QueryFilterExpressionHelper.CombineExpressions(expression, taskGroupFilterExpression);
+
+        return expression;
+    }
+
+    private Expression<Func<TEntity, bool>>? TryAddAccessibleTaskGroupFilterExpression<TEntity>(
+        Expression<Func<TEntity, bool>>? expression) where TEntity : class
+    {
+        if (!typeof(IAccessibleTaskGroup).IsAssignableFrom(typeof(TEntity)))
+            return expression;
+
+        Expression<Func<TEntity, bool>> accessibleTaskGroupFilterExpression = e =>
+            !DataFilter.IsEnabled<IAccessibleTaskGroup>() ||
+            LazyServiceProvider.LazyGetRequiredService<CurrentUserTaskGroups>()
+                .GetAccessibleTaskGroupIds().Contains(
+                    EF.Property<Guid>(e, nameof(IAccessibleTaskGroup.Id)));
+
+        expression = expression == null
+            ? accessibleTaskGroupFilterExpression
+            : QueryFilterExpressionHelper.CombineExpressions(expression, accessibleTaskGroupFilterExpression);
+
+        return expression;
     }
 }

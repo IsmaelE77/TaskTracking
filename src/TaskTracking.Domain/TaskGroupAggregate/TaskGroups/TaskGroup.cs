@@ -9,7 +9,7 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace TaskTracking.TaskGroupAggregate.TaskGroups;
 
-public class TaskGroup : FullAuditedAggregateRoot<Guid>
+public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
 {
     public string Title { get; private set; }
     public string Description { get; private set; }

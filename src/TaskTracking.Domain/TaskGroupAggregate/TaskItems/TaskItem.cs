@@ -7,7 +7,7 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace TaskTracking.TaskGroupAggregate.TaskItems;
 
-public class TaskItem : FullAuditedEntity<Guid>
+public class TaskItem : FullAuditedEntity<Guid>, IHaveTaskGroup
 {
     public string Title { get; private set; }
     public string Description { get; private set; }
