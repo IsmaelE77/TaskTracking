@@ -6,8 +6,15 @@ namespace TaskTracking.Data;
 
 public class DataSeedContributor : IDataSeedContributor, ITransientDependency
 {
-    public Task SeedAsync(DataSeedContext context)
+    private readonly TaskTrackingDataSeedContributor _taskTrackingDataSeedContributor;
+
+    public DataSeedContributor(TaskTrackingDataSeedContributor taskTrackingDataSeedContributor)
     {
-        return Task.CompletedTask;
+        _taskTrackingDataSeedContributor = taskTrackingDataSeedContributor;
+    }
+
+    public async Task SeedAsync(DataSeedContext context)
+    {
+        await _taskTrackingDataSeedContributor.SeedAsync(context);
     }
 }
