@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
@@ -76,9 +77,9 @@ public interface ITaskGroupManager : IDomainService
 
     Task<TaskGroup> GetWithDetailsAsync(Guid taskGroupId);
 
-    Task<List<TaskGroup>> GetUserTaskGroupsAsync(Guid userId);
+    Task<(List<TaskGroup> Items, int TotalCount)> GetUserTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount);
 
-    Task<List<TaskGroup>> GetUserActiveTaskGroupsAsync(Guid userId);
+    Task<(List<TaskGroup> Items, int TotalCount)> GetUserActiveTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount);
 
-    Task<List<TaskGroup>> GetUserOwnedTaskGroupsAsync(Guid userId);
+    Task<(List<TaskGroup> Items, int TotalCount)> GetUserOwnedTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount);
 }

@@ -18,9 +18,11 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
     private readonly IRepository<TaskGroup, Guid> _taskGroupRepository;
     private readonly IIdentityUserRepository _userRepository;
     private readonly IReadOnlyRepository<UserTaskGroup, Guid> _userTaskGroupReadOnlyRepository;
+
     public TaskGroupManager(
         IRepository<TaskGroup, Guid> taskGroupRepository,
-        IIdentityUserRepository userRepository, IReadOnlyRepository<UserTaskGroup, Guid> userTaskGroupReadOnlyRepository)
+        IIdentityUserRepository userRepository,
+        IReadOnlyRepository<UserTaskGroup, Guid> userTaskGroupReadOnlyRepository)
     {
         _taskGroupRepository = taskGroupRepository;
         _userRepository = userRepository;
@@ -269,39 +271,69 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
     /// <summary>
     /// Gets all task groups for a specific user.
     /// </summary>
-    public async Task<List<TaskGroup>> GetUserTaskGroupsAsync(Guid userId)
+    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount)
     {
-        var userTaskGroups = await _userTaskGroupReadOnlyRepository.GetListAsync(utg => utg.UserId == userId);
-        var taskGroupIds = userTaskGroups.Select(utg => utg.TaskGroupId).ToList();
+        var userTaskGroupsQueryable = await _userTaskGroupReadOnlyRepository.GetQueryableAsync();
+        userTaskGroupsQueryable = userTaskGroupsQueryable
+            .Where(utg => utg.UserId == userId);
 
-        return await _taskGroupRepository.GetListAsync(tg => taskGroupIds.Contains(tg.Id));
+        var totalCount = await AsyncExecuter.CountAsync(userTaskGroupsQueryable);
+        var taskGroupIds = await AsyncExecuter.ToListAsync(
+            userTaskGroupsQueryable
+                .Select(utg => utg.Id)
+                .PageBy(skipCount, maxResultCount)
+        );
+
+        var result = await _taskGroupRepository.GetListAsync(tg => taskGroupIds.Contains(tg.Id));
+
+        return (result, totalCount);
     }
 
     /// <summary>
     /// Gets all active task groups for a specific user.
     /// </summary>
-    public async Task<List<TaskGroup>> GetUserActiveTaskGroupsAsync(Guid userId)
+    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserActiveTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount)
     {
-        var userTaskGroups = await _userTaskGroupReadOnlyRepository.GetListAsync(utg => utg.UserId == userId);
-        var taskGroupIds = userTaskGroups.Select(utg => utg.TaskGroupId).ToList();
-        var today = DateTime.Today;
+        var userTaskGroupsQueryable = await _userTaskGroupReadOnlyRepository.GetQueryableAsync();
+        userTaskGroupsQueryable = userTaskGroupsQueryable
+            .Where(utg => utg.UserId == userId);
 
-        return await _taskGroupRepository.GetListAsync(tg =>
+        var totalCount = await AsyncExecuter.CountAsync(userTaskGroupsQueryable);
+        var taskGroupIds = await AsyncExecuter.ToListAsync(
+            userTaskGroupsQueryable
+                .Select(utg => utg.Id)
+                .PageBy(skipCount, maxResultCount)
+        );
+
+        var today = Clock.Now.Date;
+
+        var result = await _taskGroupRepository.GetListAsync(tg =>
             taskGroupIds.Contains(tg.Id) &&
             tg.StartDate <= today &&
             (!tg.EndDate.HasValue || tg.EndDate.Value >= today));
+
+        return (result, totalCount);
     }
 
     /// <summary>
     /// Gets all task groups owned by a specific user.
     /// </summary>
-    public async Task<List<TaskGroup>> GetUserOwnedTaskGroupsAsync(Guid userId)
+    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserOwnedTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount)
     {
-        var userTaskGroups =
-            await _userTaskGroupReadOnlyRepository.GetListAsync(utg =>
-                utg.UserId == userId && utg.Role == UserTaskGroupRole.Owner);
-        var taskGroupIds = userTaskGroups.Select(utg => utg.TaskGroupId).ToList();
+        var userTaskGroupsQueryable = await _userTaskGroupReadOnlyRepository.GetQueryableAsync();
+        userTaskGroupsQueryable = userTaskGroupsQueryable
+            .Where(utg => utg.UserId == userId && utg.Role == UserTaskGroupRole.Owner);
 
-        return await _taskGroupRepository.GetListAsync(tg => taskGroupIds.Contains(tg.Id));
+        var totalCount = await AsyncExecuter.CountAsync(userTaskGroupsQueryable);
+
+        var taskGroupIds =await AsyncExecuter.ToListAsync(
+            userTaskGroupsQueryable
+                .Select(utg => utg.Id)
+                .PageBy(skipCount, maxResultCount)
+        );
+
+        var items = await _taskGroupRepository.GetListAsync(tg => taskGroupIds.Contains(tg.Id));
+
+        return (items, totalCount);
     }
 }
