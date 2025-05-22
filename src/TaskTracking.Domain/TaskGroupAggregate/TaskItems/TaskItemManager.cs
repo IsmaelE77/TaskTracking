@@ -29,135 +29,112 @@ public class TaskItemManager : DomainService
         _userTaskProgressRepository = userTaskProgressRepository;
     }
 
-    public async Task<List<TaskItem>> GetTasksForTodayAsync(Guid userId)
+    public async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForTodayPagedAsync(
+        Guid userId,
+        int skipCount,
+        int maxResultCount)
+    {
+        var today = Clock.Now.Date;
+        return await GetTasksForDateRangePagedAsync(userId, skipCount, maxResultCount, today, today);
+    }
+
+    public async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForNextNDaysPagedAsync(
+        Guid userId,
+        int days,
+        int skipCount,
+        int maxResultCount)
+    {
+        var today = Clock.Now.Date;
+        var endDate = today.AddDays(days);
+        return await GetTasksForDateRangePagedAsync(userId, skipCount, maxResultCount, today, endDate);
+    }
+
+    private async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForDateRangePagedAsync(
+        Guid userId,
+        int skipCount,
+        int maxResultCount,
+        DateTime startDate,
+        DateTime endDate)
     {
         var query = await _taskItemRepository.GetQueryableAsync();
         var userTaskGroups = await _userTaskGroupRepository.GetQueryableAsync();
 
-        var today = Clock.Now.Date;
+        // Calculate bitmask for days of week in the range
+        int daysOfWeekInRangeFlags = 0;
+        for (var date = startDate; date <= endDate; date = date.AddDays(1))
+        {
+            daysOfWeekInRangeFlags |= (1 << (int)date.DayOfWeek);
+        }
 
-        // Get the base query without the problematic condition
+        // Build base query for active tasks in the period
         var baseQuery = from task in query
             join userGroup in userTaskGroups on task.TaskGroupId equals userGroup.TaskGroupId
             where userGroup.UserId == userId &&
-                  task.StartDate.Date <= today &&
-                  (task.EndDate == null || task.EndDate.Value.Date >= today) &&
                   (
-                      // One-time tasks for today
-                      (task.TaskType == TaskType.OneTime && task.StartDate.Date == today) ||
-                      // Recurring daily tasks
+                      // One-time tasks within the date range
+                      (task.TaskType == TaskType.OneTime &&
+                       task.StartDate.Date >= startDate &&
+                       task.StartDate.Date <= endDate) ||
+
+                      // Daily recurring tasks active in the period
                       (task.TaskType == TaskType.Recurring &&
-                       task.RecurrencePattern.RecurrenceType == RecurrenceType.Daily) ||
-                      // Recurring monthly tasks on the same day of month
+                       task.RecurrencePattern.RecurrenceType == RecurrenceType.Daily &&
+                       task.StartDate.Date <= endDate &&
+                       (task.EndDate == null || task.EndDate.Value.Date >= startDate) &&
+                       (task.RecurrencePattern.EndDate == null || task.RecurrencePattern.EndDate.Value.Date >= startDate)) ||
+
+                      // Weekly recurring tasks with at least one occurrence in the period
+                      (task.TaskType == TaskType.Recurring &&
+                       task.RecurrencePattern.RecurrenceType == RecurrenceType.Weekly &&
+                       task.StartDate.Date <= endDate &&
+                       (task.EndDate == null || task.EndDate.Value.Date >= startDate) &&
+                       (task.RecurrencePattern.EndDate == null || task.RecurrencePattern.EndDate.Value.Date >= startDate) &&
+                       (task.RecurrencePattern.DaysOfWeekFlags & daysOfWeekInRangeFlags) != 0) ||
+
+                      // Monthly recurring tasks active in the period
+                      // We'll refine these further in memory
                       (task.TaskType == TaskType.Recurring &&
                        task.RecurrencePattern.RecurrenceType == RecurrenceType.Monthly &&
-                       task.StartDate.Day == today.Day)
+                       task.StartDate.Date <= endDate &&
+                       (task.EndDate == null || task.EndDate.Value.Date >= startDate) &&
+                       (task.RecurrencePattern.EndDate == null || task.RecurrencePattern.EndDate.Value.Date >= startDate))
                   )
             select task;
 
-        // Get the list of tasks that match the base criteria
-        var baseTasks = await AsyncExecuter.ToListAsync(baseQuery);
+        // Get total count
+        var totalCount = await AsyncExecuter.CountAsync(baseQuery);
 
-        // Get weekly recurring tasks separately
-        var weeklyQuery = from task in query
-            join userGroup in userTaskGroups on task.TaskGroupId equals userGroup.TaskGroupId
-            where userGroup.UserId == userId &&
-                  task.StartDate.Date <= today &&
-                  (task.EndDate == null || task.EndDate.Value.Date >= today) &&
-                  task.TaskType == TaskType.Recurring &&
-                  task.RecurrencePattern.RecurrenceType == RecurrenceType.Weekly
-            select task;
+        // Apply paging
+        var pagedQuery = baseQuery.OrderBy(t => t.StartDate)
+                                 .Skip(skipCount)
+                                 .Take(maxResultCount);
 
-        // Evaluate the weekly tasks in memory
-        var weeklyTasks = await AsyncExecuter.ToListAsync(weeklyQuery);
-        var weeklyTasksForToday =
-            weeklyTasks.Where(t => t.RecurrencePattern!.DaysOfWeek!.Contains(today.DayOfWeek)).ToList();
+        var items = await AsyncExecuter.ToListAsync(pagedQuery);
 
-        // Combine the results
-        var result = baseTasks.Union(weeklyTasksForToday).ToList();
-        return result;
+        // For monthly tasks, we need to filter them further
+        var result = items.Where(task =>
+            task.TaskType != TaskType.Recurring ||
+            task.RecurrencePattern!.RecurrenceType != RecurrenceType.Monthly ||
+            DoesMonthlyTaskOccurInRange(task, startDate, endDate)
+        ).ToList();
+
+        return (result, totalCount);
     }
 
-
-    public async Task<List<TaskItem>> GetTasksForNextNDaysAsync(Guid userId, int days)
+    private bool DoesMonthlyTaskOccurInRange(TaskItem task, DateTime startDate, DateTime endDate)
     {
-        var query = await _taskItemRepository.GetQueryableAsync();
-        var userTaskGroups = await _userTaskGroupRepository.GetQueryableAsync();
+        if (task.TaskType != TaskType.Recurring || task.RecurrencePattern!.RecurrenceType != RecurrenceType.Monthly)
+            return false;
 
-        var today = Clock.Now.Date;
-        var endDate = today.AddDays(days);
+        var dayOfMonth = task.StartDate.Day;
 
-        // Get one-time tasks that fall within the date range
-        var oneTimeTasks = from task in query
-            join userGroup in userTaskGroups on task.TaskGroupId equals userGroup.TaskGroupId
-            where userGroup.UserId == userId &&
-                  task.TaskType == TaskType.OneTime &&
-                  task.StartDate.Date >= today &&
-                  task.StartDate.Date <= endDate &&
-                  (task.EndDate == null || task.EndDate.Value.Date >= today)
-            select task;
-
-        // Get recurring tasks that are active during this period
-        // (Without filtering by specific recurrence rules yet)
-        var recurringTasksQuery = from task in query
-            join userGroup in userTaskGroups on task.TaskGroupId equals userGroup.TaskGroupId
-            where userGroup.UserId == userId &&
-                  task.TaskType == TaskType.Recurring &&
-                  task.StartDate.Date <= endDate &&
-                  (task.EndDate == null || task.EndDate.Value.Date >= today) &&
-                  (task.RecurrencePattern.EndDate == null || task.RecurrencePattern.EndDate.Value.Date >= today)
-            select task;
-
-        // Execute the queries
-        var oneTimeTasksList = await AsyncExecuter.ToListAsync(oneTimeTasks);
-        var recurringTasksList = await AsyncExecuter.ToListAsync(recurringTasksQuery);
-
-        // For recurring tasks, we need to filter them further based on recurrence pattern
-        var recurringTasksForPeriod = new List<TaskItem>();
-
-        foreach (var task in recurringTasksList)
+        for (var date = startDate; date <= endDate; date = date.AddDays(1))
         {
-            // For daily tasks, they occur every day in the period
-            if (task.RecurrencePattern!.RecurrenceType == RecurrenceType.Daily)
-            {
-                recurringTasksForPeriod.Add(task);
-                continue;
-            }
-
-            // For weekly tasks, check if they occur on any day in the period
-            if (task.RecurrencePattern.RecurrenceType == RecurrenceType.Weekly)
-            {
-                // Find which days in the date range match the DaysOfWeek pattern
-                for (var date = today; date <= endDate; date = date.AddDays(1))
-                {
-                    if (task.RecurrencePattern.DaysOfWeek!.Contains(date.DayOfWeek))
-                    {
-                        recurringTasksForPeriod.Add(task);
-                        break; // Once we know this task is relevant, we can stop checking
-                    }
-                }
-            }
-
-            // For monthly tasks, check if they occur on any day in the period
-            if (task.RecurrencePattern.RecurrenceType == RecurrenceType.Monthly)
-            {
-                // Check if the day of month falls within our date range
-                var dayOfMonth = task.StartDate.Day;
-
-                // Check each day in the range to see if it matches the monthly pattern
-                for (var date = today; date <= endDate; date = date.AddDays(1))
-                {
-                    if (date.Day == dayOfMonth)
-                    {
-                        recurringTasksForPeriod.Add(task);
-                        break; // Once we know this task is relevant, we can stop checking
-                    }
-                }
-            }
+            if (date.Day == dayOfMonth)
+                return true;
         }
 
-        // Combine the one-time tasks and the filtered recurring tasks
-        var result = oneTimeTasksList.Union(recurringTasksForPeriod).ToList();
-        return result;
+        return false;
     }
+
 }
