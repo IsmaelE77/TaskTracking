@@ -215,7 +215,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>
 
         if (progress == null)
         {
-            throw new BusinessException("progress not found"); //todo
+            throw new BusinessException(TaskTrackingDomainErrorCodes.ProgressNotFound);
         }
 
         progress.SetProgressPercentage(progressPercentage);
