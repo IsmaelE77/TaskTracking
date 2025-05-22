@@ -64,13 +64,6 @@ public interface ITaskGroupManager : IDomainService
         int progressPercentage,
         string notes);
 
-    Task<UserTaskProgress> CreateProgressAsync(
-        Guid taskGroupId,
-        Guid taskItemId,
-        Guid userId,
-        int progressPercentage = 0,
-        string notes = "");
-
     Task<UserTaskProgress> MarkProgressAsCompletedAsync(
         Guid taskGroupId,
         Guid taskItemId,
@@ -82,8 +75,6 @@ public interface ITaskGroupManager : IDomainService
         Guid userId);
 
     Task<TaskGroup> GetWithDetailsAsync(Guid taskGroupId);
-
-    Task<TaskGroup> GetWithDetailsWithItemTaskDetailsAsync(Guid taskGroupId);
 
     Task<List<TaskGroup>> GetUserTaskGroupsAsync(Guid userId);
 

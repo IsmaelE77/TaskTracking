@@ -71,16 +71,6 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>
             throw new BusinessException(TaskTrackingDomainErrorCodes.TaskEndDateExceedsGroupEndDate);
         }
 
-        foreach (var userTaskGroup in _userTaskGroups)
-        {
-            var progress = new UserTaskProgress(
-                userTaskGroup.UserId,
-                task.Id,
-                userTaskGroup.Id);
-
-            task.AddUserProgress(progress);
-        }
-
         _tasks.Add(task);
     }
 
@@ -124,17 +114,6 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>
     internal void AddUserTaskGroup(UserTaskGroup userTaskGroup)
     {
         _userTaskGroups.Add(userTaskGroup);
-
-        foreach (var task in _tasks)
-        {
-            var progress = new UserTaskProgress(
-                userTaskGroup.UserId,
-                task.Id,
-                userTaskGroup.Id);
-
-            task.AddUserProgress(progress);
-            userTaskGroup.AddUserProgress(progress);
-        }
     }
 
     internal UserTaskGroup RemoveUserTaskGroup(Guid userId)
@@ -173,6 +152,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>
     }
 
     internal UserTaskProgress CreateUserTaskProgress(
+        Guid id,
         Guid taskItemId,
         Guid userId,
         int progressPercentage = 0,
@@ -199,6 +179,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>
         }
 
         var progress = new UserTaskProgress(
+            id,
             userId,
             taskItemId,
             userTaskGroup.Id,
@@ -234,20 +215,11 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>
 
         if (progress == null)
         {
-            progress = new UserTaskProgress(
-                userId,
-                taskItemId,
-                userTaskGroup.Id,
-                progressPercentage,
-                notes);
-            taskItem.AddUserProgress(progress);
-            userTaskGroup.AddUserProgress(progress);
+            throw new BusinessException("progress not found"); //todo
         }
-        else
-        {
-            progress.SetProgressPercentage(progressPercentage);
-            progress.SetNotes(notes);
-        }
+
+        progress.SetProgressPercentage(progressPercentage);
+        progress.SetNotes(notes);
 
         return progress;
     }

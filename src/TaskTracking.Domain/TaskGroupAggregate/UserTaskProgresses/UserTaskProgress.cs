@@ -30,11 +30,12 @@ public class UserTaskProgress : FullAuditedEntity<Guid>
     }
 
     internal UserTaskProgress(
+        Guid id,
         Guid userId,
         Guid taskItemId,
         Guid userTaskGroupId,
         int progressPercentage = 0,
-        string notes = "")
+        string notes = "") : base(id)
     {
         UserId = userId;
         TaskItemId = taskItemId;

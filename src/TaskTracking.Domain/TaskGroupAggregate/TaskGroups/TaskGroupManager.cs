@@ -50,6 +50,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
 
         taskGroup.AddUserTaskGroup(userTaskGroup);
 
+
         return await _taskGroupRepository.InsertAsync(taskGroup);
     }
 
@@ -83,7 +84,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         TaskType taskType,
         RecurrencePattern recurrencePattern = null)
     {
-        var taskGroup = await GetWithDetailsWithItemTaskDetailsAsync(taskGroupId);
+        var taskGroup = await GetWithDetailsAsync(taskGroupId);
 
         TaskItem taskItem;
 
@@ -113,6 +114,18 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
                 recurrencePattern,
                 taskGroupId);
         }
+
+        foreach (var userTaskGroup in taskGroup.UserTaskGroups)
+        {
+            var progress = new UserTaskProgress(
+                GuidGenerator.Create(),
+                userTaskGroup.UserId,
+                taskItem.Id,
+                userTaskGroup.Id);
+
+            taskItem.AddUserProgress(progress);
+        }
+
 
         taskGroup.AddTask(taskItem);
 
@@ -158,7 +171,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         Guid userId,
         UserTaskGroupRole role)
     {
-        var taskGroup = await GetWithDetailsWithItemTaskDetailsAsync(taskGroupId);
+        var taskGroup = await GetWithDetailsAsync(taskGroupId);
         var user = await _userRepository.GetAsync(userId);
 
 
@@ -167,6 +180,18 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
             userId,
             taskGroupId,
             role);
+
+        foreach (var task in taskGroup.Tasks)
+        {
+            var progress = new UserTaskProgress(
+                GuidGenerator.Create(),
+                userTaskGroup.UserId,
+                task.Id,
+                userTaskGroup.Id);
+
+            task.AddUserProgress(progress);
+            userTaskGroup.AddUserProgress(progress);
+        }
 
         taskGroup.AddUserTaskGroup(userTaskGroup);
 
@@ -200,34 +225,16 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         int progressPercentage,
         string notes)
     {
-        var taskGroup = await GetWithDetailsWithItemTaskDetailsAsync(taskGroupId);
+        var taskGroup = await GetWithDetailsAsync(taskGroupId);
         var taskProgress = taskGroup.UpdateTaskProgress(taskItemId, userId, progressPercentage, notes);
         await _taskGroupRepository.UpdateAsync(taskGroup);
         return taskProgress;
     }
 
-    public async Task<UserTaskProgress> CreateProgressAsync(
-        Guid taskGroupId,
-        Guid taskItemId,
-        Guid userId,
-        int progressPercentage = 0,
-        string notes = "")
-    {
-        var taskGroup = await GetWithDetailsWithItemTaskDetailsAsync(taskGroupId);
-
-        var progress = taskGroup.CreateUserTaskProgress(
-            taskItemId,
-            userId,
-            progressPercentage,
-            notes);
-
-        await _taskGroupRepository.UpdateAsync(taskGroup);
-        return progress;
-    }
 
     public async Task<UserTaskProgress> MarkProgressAsCompletedAsync(Guid taskGroupId, Guid taskItemId, Guid userId)
     {
-        var taskGroup = await GetWithDetailsWithItemTaskDetailsAsync(taskGroupId);
+        var taskGroup = await GetWithDetailsAsync(taskGroupId);
         var progress = taskGroup.MarkProgressAsCompleted(taskItemId, userId);
         await _taskGroupRepository.UpdateAsync(taskGroup);
         return progress;
@@ -235,7 +242,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
 
     public async Task<UserTaskProgress> MarkProgressAsIncompletedAsync(Guid taskGroupId, Guid taskItemId, Guid userId)
     {
-        var taskGroup = await GetWithDetailsWithItemTaskDetailsAsync(taskGroupId);
+        var taskGroup = await GetWithDetailsAsync(taskGroupId);
         var progress = taskGroup.MarkProgressAsIncompleted(taskItemId, userId);
         await _taskGroupRepository.UpdateAsync(taskGroup);
         return progress;
@@ -247,25 +254,6 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
             .WithDetailsAsync(
                 x => x.Tasks,
                 x => x.UserTaskGroups
-            );
-
-        var taskGroup = await AsyncExecuter.FirstOrDefaultAsync(query.Where(x => x.Id == taskGroupId));
-
-        if (taskGroup is null)
-        {
-            throw new EntityNotFoundException(typeof(TaskGroup), taskGroupId);
-        }
-
-        return taskGroup;
-    }
-
-    public async Task<TaskGroup> GetWithDetailsWithItemTaskDetailsAsync(Guid taskGroupId)
-    {
-        var query = await _taskGroupRepository
-            .WithDetailsAsync(
-                x => x.Tasks,
-                x => x.UserTaskGroups,
-                x => x.Tasks.Select(t => t.UserProgresses)
             );
 
         var taskGroup = await AsyncExecuter.FirstOrDefaultAsync(query.Where(x => x.Id == taskGroupId));
