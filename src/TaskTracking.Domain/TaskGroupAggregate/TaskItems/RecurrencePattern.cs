@@ -18,18 +18,18 @@ public class RecurrencePattern : ValueObject
         // Required by serialization
     }
 
-    internal static RecurrencePattern CreateDaily(int interval, DateTime? endDate = null, int? occurrences = null)
+    public static RecurrencePattern CreateDaily(int interval, DateTime? endDate = null, int? occurrences = null)
     {
         return new RecurrencePattern(RecurrenceType.Daily, interval, null, endDate, occurrences);
     }
 
-    internal static RecurrencePattern CreateWeekly(int interval, List<DayOfWeek> daysOfWeek, DateTime? endDate = null,
+    public static RecurrencePattern CreateWeekly(int interval, List<DayOfWeek> daysOfWeek, DateTime? endDate = null,
         int? occurrences = null)
     {
         return new RecurrencePattern(RecurrenceType.Weekly, interval, daysOfWeek, endDate, occurrences);
     }
 
-    internal static RecurrencePattern CreateMonthly(int interval, DateTime? endDate = null, int? occurrences = null)
+    public static RecurrencePattern CreateMonthly(int interval, DateTime? endDate = null, int? occurrences = null)
     {
         return new RecurrencePattern(RecurrenceType.Monthly, interval, null, endDate, occurrences);
     }
