@@ -23,7 +23,7 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
     private readonly IGuidGenerator _guidGenerator;
     private readonly ILogger<TaskTrackingDataSeedContributor> _logger;
     private readonly IUnitOfWorkManager _unitOfWorkManager;
-
+    private readonly IDataFilter _dataFilter;
 
     // Sample user IDs for reference
     private Guid _adminUserId;
@@ -42,7 +42,7 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         IIdentityUserRepository userRepository,
         IRepository<TaskGroup, Guid> taskGroupRepository,
         IGuidGenerator guidGenerator,
-        ILogger<TaskTrackingDataSeedContributor> logger, IUnitOfWorkManager unitOfWorkManager)
+        ILogger<TaskTrackingDataSeedContributor> logger, IUnitOfWorkManager unitOfWorkManager, IDataFilter dataFilter)
     {
         _taskGroupManager = taskGroupManager;
         _userRepository = userRepository;
@@ -50,6 +50,7 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         _guidGenerator = guidGenerator;
         _logger = logger;
         _unitOfWorkManager = unitOfWorkManager;
+        _dataFilter = dataFilter;
     }
 
     public async Task SeedAsync(DataSeedContext context)
@@ -432,263 +433,150 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
     {
         _logger.LogInformation("Creating sample progress entries...");
 
-        try
+        // Get task groups with details
+        var workTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_workTaskGroupId);
+        var personalTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_personalTaskGroupId);
+        var teamProjectTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_teamProjectTaskGroupId);
+        var longTermGoalsTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_longTermGoalsTaskGroupId);
+
+        // Work Tasks Group - Various progress states
+        var workTasks = workTaskGroup.Tasks.ToList();
+        if (workTasks.Count >= 4)
         {
-            // Use separate unit of work for each task group to avoid entity tracking conflicts
-            await CreateWorkTaskGroupProgressEntriesAsync();
-            await CreatePersonalTaskGroupProgressEntriesAsync();
-            await CreateTeamProjectTaskGroupProgressEntriesAsync();
-            await CreateLongTermGoalsTaskGroupProgressEntriesAsync();
+            // Complete the first task for admin
+            await _taskGroupManager.UpdateProgressAsync(
+                _workTaskGroupId,
+                workTasks[0].Id,
+                _adminUserId,
+                100,
+                "Completed ahead of schedule");
 
-            _logger.LogInformation("Sample progress entries created successfully.");
+            // Partial progress on the second task for admin
+            await _taskGroupManager.UpdateProgressAsync(
+                _workTaskGroupId,
+                workTasks[1].Id,
+                _adminUserId,
+                50,
+                "Working on the presentation slides");
+
+            // Complete the first task for regularUser1
+            await _taskGroupManager.UpdateProgressAsync(
+                _workTaskGroupId,
+                workTasks[0].Id,
+                _regularUser1Id,
+                100,
+                "Reviewed and approved");
+
+            // Partial progress on the third task for regularUser2
+            await _taskGroupManager.UpdateProgressAsync(
+                _workTaskGroupId,
+                workTasks[2].Id,
+                _regularUser2Id,
+                25,
+                "Started preparation for the meeting");
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be tracked because another instance"))
+
+        // Personal Tasks Group - Various progress states
+        var personalTasks = personalTaskGroup.Tasks.ToList();
+        if (personalTasks.Count >= 4)
         {
-            // This is expected if progress entries already exist
-            _logger.LogWarning("Some progress entries already exist. Skipping duplicate creation.");
+            // Complete the first task for regularUser1
+            await _taskGroupManager.UpdateProgressAsync(
+                _personalTaskGroupId,
+                personalTasks[0].Id,
+                _regularUser1Id,
+                100,
+                "Groceries purchased");
+
+            // Partial progress on the third task for regularUser1
+            await _taskGroupManager.UpdateProgressAsync(
+                _personalTaskGroupId,
+                personalTasks[2].Id,
+                _regularUser1Id,
+                75,
+                "Completed 3 out of 4 workout sessions this week");
+
         }
-        catch (Exception ex)
+
+        // Team Project Group - Various progress states
+        var teamProjectTasks = teamProjectTaskGroup.Tasks.ToList();
+        if (teamProjectTasks.Count >= 7)
         {
-            _logger.LogError(ex, "Error creating sample progress entries.");
-            throw;
-        }
-    }
+            // Complete the first task for all team members
+            await _taskGroupManager.UpdateProgressAsync(
+                _teamProjectTaskGroupId,
+                teamProjectTasks[0].Id,
+                _regularUser2Id,
+                100,
+                "Meeting completed, minutes distributed");
 
-    private async Task CreateWorkTaskGroupProgressEntriesAsync()
-    {
-        using (var uow = _unitOfWorkManager.Begin(isTransactional: true))
+            await _taskGroupManager.UpdateProgressAsync(
+                _teamProjectTaskGroupId,
+                teamProjectTasks[0].Id,
+                _adminUserId,
+                100,
+                "Attended and contributed to discussion");
+
+            await _taskGroupManager.UpdateProgressAsync(
+                _teamProjectTaskGroupId,
+                teamProjectTasks[0].Id,
+                _regularUser1Id,
+                100,
+                "Presented project overview");
+
+            await _taskGroupManager.UpdateProgressAsync(
+                _teamProjectTaskGroupId,
+                teamProjectTasks[0].Id,
+                _regularUser3Id,
+                100,
+                "Took meeting notes");
+
+            // Partial progress on the second task for different users
+            await _taskGroupManager.UpdateProgressAsync(
+                _teamProjectTaskGroupId,
+                teamProjectTasks[1].Id,
+                _regularUser2Id,
+                60,
+                "Collected requirements from marketing team");
+
+            await _taskGroupManager.UpdateProgressAsync(
+                _teamProjectTaskGroupId,
+                teamProjectTasks[1].Id,
+                _regularUser1Id,
+                40,
+                "Working on technical requirements");
+        }
+
+        // Long-term Goals Group - Various progress states
+        var longTermTasks = longTermGoalsTaskGroup.Tasks.ToList();
+        if (longTermTasks.Count >= 5)
         {
-            try
-            {
-                // Get task group with details in this unit of work
-                var workTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_workTaskGroupId);
-                var workTasks = workTaskGroup.Tasks.ToList();
+            // Partial progress on the first task for the owner
+            await _taskGroupManager.UpdateProgressAsync(
+                _longTermGoalsTaskGroupId,
+                longTermTasks[0].Id,
+                _regularUser3Id,
+                30,
+                "Started drafting career goals");
 
-                if (workTasks.Count >= 4)
-                {
-                    // Complete the first task for admin
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _workTaskGroupId,
-                        workTasks[0].Id,
-                        _adminUserId,
-                        100,
-                        "Completed ahead of schedule");
+            // Partial progress on the second task for the owner
+            await _taskGroupManager.UpdateProgressAsync(
+                _longTermGoalsTaskGroupId,
+                longTermTasks[1].Id,
+                _regularUser3Id,
+                15,
+                "Completed first module of the course");
 
-                    // Partial progress on the second task for admin
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _workTaskGroupId,
-                        workTasks[1].Id,
-                        _adminUserId,
-                        50,
-                        "Working on the presentation slides");
-
-                    // Complete the first task for regularUser1
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _workTaskGroupId,
-                        workTasks[0].Id,
-                        _regularUser1Id,
-                        100,
-                        "Reviewed and approved");
-
-                    // Partial progress on the third task for regularUser2
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _workTaskGroupId,
-                        workTasks[2].Id,
-                        _regularUser2Id,
-                        25,
-                        "Started preparation for the meeting");
-                }
-
-                await uow.CompleteAsync();
-                _logger.LogInformation("Created progress entries for Work Tasks group.");
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be tracked because another instance"))
-            {
-                // This is expected if progress entries already exist
-                _logger.LogWarning("Some progress entries already exist for Work Tasks group. Skipping duplicate creation.");
-                await uow.CompleteAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating progress entries for Work Tasks group.");
-                throw;
-            }
+            // Partial progress on the first task for the subscriber
+            await _taskGroupManager.UpdateProgressAsync(
+                _longTermGoalsTaskGroupId,
+                longTermTasks[0].Id,
+                _regularUser1Id,
+                20,
+                "Researching career paths");
         }
-    }
 
-    private async Task CreatePersonalTaskGroupProgressEntriesAsync()
-    {
-        using (var uow = _unitOfWorkManager.Begin(isTransactional: true))
-        {
-            try
-            {
-                // Get task group with details in this unit of work
-                var personalTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_personalTaskGroupId);
-                var personalTasks = personalTaskGroup.Tasks.ToList();
-
-                if (personalTasks.Count >= 4)
-                {
-                    // Complete the first task for regularUser1
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _personalTaskGroupId,
-                        personalTasks[0].Id,
-                        _regularUser1Id,
-                        100,
-                        "Groceries purchased");
-
-                    // Partial progress on the third task for regularUser1
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _personalTaskGroupId,
-                        personalTasks[2].Id,
-                        _regularUser1Id,
-                        75,
-                        "Completed 3 out of 4 workout sessions this week");
-
-                }
-
-                await uow.CompleteAsync();
-                _logger.LogInformation("Created progress entries for Personal Tasks group.");
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be tracked because another instance"))
-            {
-                // This is expected if progress entries already exist
-                _logger.LogWarning("Some progress entries already exist for Personal Tasks group. Skipping duplicate creation.");
-                await uow.CompleteAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating progress entries for Personal Tasks group.");
-                throw;
-            }
-        }
-    }
-
-    private async Task CreateTeamProjectTaskGroupProgressEntriesAsync()
-    {
-        using (var uow = _unitOfWorkManager.Begin(isTransactional: true))
-        {
-            try
-            {
-                // Get task group with details in this unit of work
-                var teamProjectTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_teamProjectTaskGroupId);
-                var teamProjectTasks = teamProjectTaskGroup.Tasks.ToList();
-
-                if (teamProjectTasks.Count >= 7)
-                {
-                    // Complete the first task for all team members
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _teamProjectTaskGroupId,
-                        teamProjectTasks[0].Id,
-                        _regularUser2Id,
-                        100,
-                        "Meeting completed, minutes distributed");
-
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _teamProjectTaskGroupId,
-                        teamProjectTasks[0].Id,
-                        _adminUserId,
-                        100,
-                        "Attended and contributed to discussion");
-
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _teamProjectTaskGroupId,
-                        teamProjectTasks[0].Id,
-                        _regularUser1Id,
-                        100,
-                        "Presented project overview");
-
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _teamProjectTaskGroupId,
-                        teamProjectTasks[0].Id,
-                        _regularUser3Id,
-                        100,
-                        "Took meeting notes");
-
-                    // Partial progress on the second task for different users
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _teamProjectTaskGroupId,
-                        teamProjectTasks[1].Id,
-                        _regularUser2Id,
-                        60,
-                        "Collected requirements from marketing team");
-
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _teamProjectTaskGroupId,
-                        teamProjectTasks[1].Id,
-                        _regularUser1Id,
-                        40,
-                        "Working on technical requirements");
-                }
-
-                await uow.CompleteAsync();
-                _logger.LogInformation("Created progress entries for Team Project group.");
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be tracked because another instance"))
-            {
-                // This is expected if progress entries already exist
-                _logger.LogWarning("Some progress entries already exist for Team Project group. Skipping duplicate creation.");
-                await uow.CompleteAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating progress entries for Team Project group.");
-                throw;
-            }
-        }
-    }
-
-    private async Task CreateLongTermGoalsTaskGroupProgressEntriesAsync()
-    {
-        using (var uow = _unitOfWorkManager.Begin(isTransactional: true))
-        {
-            try
-            {
-                // Get task group with details in this unit of work
-                var longTermGoalsTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_longTermGoalsTaskGroupId);
-                var longTermTasks = longTermGoalsTaskGroup.Tasks.ToList();
-
-                if (longTermTasks.Count >= 5)
-                {
-                    // Partial progress on the first task for the owner
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _longTermGoalsTaskGroupId,
-                        longTermTasks[0].Id,
-                        _regularUser3Id,
-                        30,
-                        "Started drafting career goals");
-
-                    // Partial progress on the second task for the owner
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _longTermGoalsTaskGroupId,
-                        longTermTasks[1].Id,
-                        _regularUser3Id,
-                        15,
-                        "Completed first module of the course");
-
-                    // Partial progress on the first task for the subscriber
-                    await _taskGroupManager.UpdateProgressAsync(
-                        _longTermGoalsTaskGroupId,
-                        longTermTasks[0].Id,
-                        _regularUser1Id,
-                        20,
-                        "Researching career paths");
-                }
-
-                await uow.CompleteAsync();
-                _logger.LogInformation("Created progress entries for Long-term Goals group.");
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be tracked because another instance"))
-            {
-                // This is expected if progress entries already exist
-                _logger.LogWarning("Some progress entries already exist for Long-term Goals group. Skipping duplicate creation.");
-                await uow.CompleteAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating progress entries for Long-term Goals group.");
-                throw;
-            }
-        }
+        _logger.LogInformation("Sample progress entries created successfully.");
     }
 
     private int GetDaysUntilNextDayOfWeek(DayOfWeek dayOfWeek)
