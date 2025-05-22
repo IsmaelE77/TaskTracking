@@ -122,8 +122,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
             var progress = new UserTaskProgress(
                 GuidGenerator.Create(),
                 userTaskGroup.UserId,
-                taskItem.Id,
-                userTaskGroup.Id);
+                taskItem.Id);
 
             taskItem.AddUserProgress(progress);
         }
@@ -177,6 +176,11 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         var user = await _userRepository.GetAsync(userId);
 
 
+        if (taskGroup.UserTaskGroups.Any(x => x.UserId == userId && x.TaskGroupId == taskGroupId))
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.UserAlreadyInGroup);
+        }
+
         var userTaskGroup = new UserTaskGroup(
             GuidGenerator.Create(),
             userId,
@@ -188,11 +192,9 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
             var progress = new UserTaskProgress(
                 GuidGenerator.Create(),
                 userTaskGroup.UserId,
-                task.Id,
-                userTaskGroup.Id);
+                task.Id);
 
             task.AddUserProgress(progress);
-            userTaskGroup.AddUserProgress(progress);
         }
 
         taskGroup.AddUserTaskGroup(userTaskGroup);
@@ -252,11 +254,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
 
     public async Task<TaskGroup> GetWithDetailsAsync(Guid taskGroupId)
     {
-        var query = await _taskGroupRepository
-            .WithDetailsAsync(
-                x => x.Tasks,
-                x => x.UserTaskGroups
-            );
+        var query = await _taskGroupRepository.WithDetailsAsync();
 
         var taskGroup = await AsyncExecuter.FirstOrDefaultAsync(query.Where(x => x.Id == taskGroupId));
 

@@ -9,9 +9,8 @@ namespace TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 
 public class UserTaskProgress : FullAuditedEntity<Guid>
 {
-    public Guid UserId { get; private set; }
     public Guid TaskItemId { get; private set; }
-    public Guid UserTaskGroupId { get; private set; }
+    public Guid UserId { get; private set; }
     public int ProgressPercentage { get; private set; }
     public string Notes { get; private set; }
     public DateTime LastUpdatedDate { get; private set; }
@@ -20,8 +19,7 @@ public class UserTaskProgress : FullAuditedEntity<Guid>
     #region Navigation Properties
     public IdentityUser User { get; private set; }
     public TaskItem TaskItem { get; private set; }
-    public UserTaskGroup UserTaskGroup { get; private set; }
-    
+
     #endregion
 
     private UserTaskProgress()
@@ -33,13 +31,11 @@ public class UserTaskProgress : FullAuditedEntity<Guid>
         Guid id,
         Guid userId,
         Guid taskItemId,
-        Guid userTaskGroupId,
         int progressPercentage = 0,
         string notes = "") : base(id)
     {
         UserId = userId;
         TaskItemId = taskItemId;
-        UserTaskGroupId = userTaskGroupId;
         SetProgressPercentage(progressPercentage);
         SetNotes(notes);
         LastUpdatedDate = DateTime.Now;

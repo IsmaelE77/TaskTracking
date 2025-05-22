@@ -1,9 +1,12 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using TaskTracking.TaskGroupAggregate.TaskGroups;
 using Volo.Abp.Uow;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore.MySQL;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity.EntityFrameworkCore;
@@ -48,6 +51,17 @@ public class TaskTrackingEntityFrameworkCoreModule : AbpModule
                 /* The main point to change your DBMS.
                  * See also TaskTrackingMigrationsDbContextFactory for EF Core tooling. */
             options.UseMySQL();
+        });
+
+        Configure<AbpEntityOptions>(options =>
+        {
+            options.Entity<TaskGroup>(orderOptions =>
+            {
+                orderOptions.DefaultWithDetailsFunc = query => query
+                    .Include(tg => tg.UserTaskGroups)
+                    .Include(tg => tg.Tasks)
+                    .ThenInclude(t => t.UserProgresses);
+            });
         });
 
     }

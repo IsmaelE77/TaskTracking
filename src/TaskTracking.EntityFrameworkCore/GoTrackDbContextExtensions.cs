@@ -52,11 +52,6 @@ public static class GoTrackDbContextExtensions
         {
             b.ToTaskTrackingTable();
             b.ConfigureByConvention();
-
-            b.HasMany(x => x.UserProgresses)
-                .WithOne(x => x.UserTaskGroup)
-                .HasForeignKey(x => x.UserTaskGroupId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<UserTaskProgress>(b =>
@@ -69,11 +64,6 @@ public static class GoTrackDbContextExtensions
             b.HasOne(x => x.TaskItem)
                 .WithMany(x => x.UserProgresses)
                 .HasForeignKey(x => x.TaskItemId)
-                .OnDelete(DeleteBehavior.Cascade); // 💥
-
-            b.HasOne(x => x.UserTaskGroup)
-                .WithMany() // Assuming UserTaskGroup doesn't expose UserTaskProgress list
-                .HasForeignKey(x => x.UserTaskGroupId)
                 .OnDelete(DeleteBehavior.Cascade); // 💥
 
             b.HasOne(x => x.User)

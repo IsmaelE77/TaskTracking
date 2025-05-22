@@ -37,21 +37,4 @@ public class UserTaskProgressManager : DomainService
         return await _userTaskProgressRepository.GetListAsync(p => p.TaskItemId == taskItemId);
     }
 
-    /// <summary>
-    /// Gets all progress entries for a specific user in a specific group.
-    /// </summary>
-    public async Task<List<UserTaskProgress>> GetUserGroupProgressAsync(Guid userId,
-        Guid taskGroupId)
-    {
-        var userTaskGroups =
-            await _userTaskGroupRepository.GetListAsync(utg => utg.UserId == userId && utg.TaskGroupId == taskGroupId);
-        if (!userTaskGroups.Any())
-        {
-            return new List<UserTaskProgress>();
-        }
-
-        var userTaskGroupIds = userTaskGroups.Select(utg => utg.Id).ToList();
-        return await _userTaskProgressRepository.GetListAsync(p =>
-            p.UserId == userId && userTaskGroupIds.Contains(p.UserTaskGroupId));
-    }
 }

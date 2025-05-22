@@ -20,9 +20,6 @@ public class UserTaskGroup : CreationAuditedEntity<Guid>
     public IdentityUser User { get; private set; }
     public TaskGroup TaskGroup { get; private set; }
 
-    public IReadOnlyCollection<UserTaskProgress> UserProgresses => _userProgresses.AsReadOnly();
-    private readonly List<UserTaskProgress> _userProgresses = new();
-
     #endregion
 
 
@@ -50,11 +47,6 @@ public class UserTaskGroup : CreationAuditedEntity<Guid>
         }
 
         Role = newRole;
-    }
-
-    internal void AddUserProgress(UserTaskProgress progress)
-    {
-        _userProgresses.Add(progress);
     }
 
 }

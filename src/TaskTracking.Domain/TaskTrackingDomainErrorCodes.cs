@@ -18,6 +18,7 @@ public static class TaskTrackingDomainErrorCodes
 
     /* User Task Group Error Codes */
     public const string CannotRemoveOwner = "TrackingTask:00301";
+    public const string UserAlreadyInGroup = "TrackingTask:00302";
 
     /* User Task Progress Error Codes */
     public const string InvalidProgressPercentage = "TrackingTask:00401";

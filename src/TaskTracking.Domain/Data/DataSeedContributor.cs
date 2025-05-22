@@ -18,9 +18,5 @@ public class DataSeedContributor : IDataSeedContributor, ITransientDependency
 
     public async Task SeedAsync(DataSeedContext context)
     {
-        using var _ = _dataFilter.Disable<IAccessibleTaskGroup>();
-        using var __ = _dataFilter.Disable<IHaveTaskGroup>();
-
-        await _taskTrackingDataSeedContributor.SeedAsync(context);
     }
 }

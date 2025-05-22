@@ -171,7 +171,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         }
 
         var existingProgress = taskItem.UserProgresses
-            .FirstOrDefault(up => up.UserId == userId && up.UserTaskGroupId == userTaskGroup.Id);
+            .FirstOrDefault(up => up.UserId == userId );
 
         if (existingProgress != null)
         {
@@ -182,12 +182,10 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
             id,
             userId,
             taskItemId,
-            userTaskGroup.Id,
             progressPercentage,
             notes);
 
         taskItem.AddUserProgress(progress);
-        userTaskGroup.AddUserProgress(progress);
 
         return progress;
     }
@@ -211,7 +209,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         }
 
         var progress = taskItem.UserProgresses
-            .FirstOrDefault(up => up.UserId == userId && up.UserTaskGroupId == userTaskGroup.Id);
+            .FirstOrDefault(up => up.UserId == userId);
 
         if (progress == null)
         {
@@ -253,7 +251,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         }
 
         var progress = taskItem.UserProgresses
-            .FirstOrDefault(up => up.UserId == userId && up.UserTaskGroupId == userTaskGroup.Id);
+            .FirstOrDefault(up => up.UserId == userId);
 
         if (progress == null)
         {

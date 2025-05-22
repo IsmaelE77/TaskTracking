@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
+using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
@@ -24,6 +25,9 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
     private readonly ILogger<TaskTrackingDataSeedContributor> _logger;
     private readonly IUnitOfWorkManager _unitOfWorkManager;
     private readonly IDataFilter _dataFilter;
+    private readonly IReadOnlyRepository<UserTaskGroup, Guid> _userTaskGroupRepository;
+    private readonly IReadOnlyRepository<TaskItem, Guid> _taskItemRepository;
+    private readonly IReadOnlyRepository<UserTaskProgress, Guid> _userTaskProgressRepository;
 
     // Sample user IDs for reference
     private Guid _adminUserId;
@@ -42,7 +46,7 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         IIdentityUserRepository userRepository,
         IRepository<TaskGroup, Guid> taskGroupRepository,
         IGuidGenerator guidGenerator,
-        ILogger<TaskTrackingDataSeedContributor> logger, IUnitOfWorkManager unitOfWorkManager, IDataFilter dataFilter)
+        ILogger<TaskTrackingDataSeedContributor> logger, IUnitOfWorkManager unitOfWorkManager, IDataFilter dataFilter, IReadOnlyRepository<UserTaskGroup, Guid> userTaskGroupRepository, IReadOnlyRepository<TaskItem, Guid> taskItemRepository, IReadOnlyRepository<UserTaskProgress, Guid> userTaskProgressRepository)
     {
         _taskGroupManager = taskGroupManager;
         _userRepository = userRepository;
@@ -51,11 +55,17 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         _logger = logger;
         _unitOfWorkManager = unitOfWorkManager;
         _dataFilter = dataFilter;
+        _userTaskGroupRepository = userTaskGroupRepository;
+        _taskItemRepository = taskItemRepository;
+        _userTaskProgressRepository = userTaskProgressRepository;
     }
 
     public async Task SeedAsync(DataSeedContext context)
     {
         _logger.LogInformation("Starting TaskTracking data seeding...");
+
+        using var _ = _dataFilter.Disable<IAccessibleTaskGroup>();
+        using var __ = _dataFilter.Disable<IHaveTaskGroup>();
 
         // Get or create sample users
         await GetOrCreateSampleUsersAsync();
@@ -211,6 +221,11 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
     private async Task CreateSampleTaskItemsAsync()
     {
         _logger.LogInformation("Creating sample task items...");
+
+        if (await _taskItemRepository.AnyAsync())
+        {
+            return;
+        }
 
         // Work Tasks Group - One-time tasks
         await _taskGroupManager.CreateTaskItemAsync(
@@ -408,6 +423,11 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
 
     private async Task AddUsersToTaskGroupsAsync()
     {
+        if (await _userTaskGroupRepository.CountAsync() > 4)
+        {
+            return;
+        }
+
         _logger.LogInformation("Adding users to task groups...");
 
         // Work Tasks Group - Add all users with different roles
