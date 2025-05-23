@@ -43,11 +43,6 @@ public class CreateTaskItemDto
     /// <summary>
     ///     The recurrence pattern for recurring tasks. Required for recurring tasks.
     /// </summary>
-    public CreateRecurrencePatternDto RecurrencePattern { get; set; }
+    public CreateRecurrencePatternDto? RecurrencePattern { get; set; }
 
-    /// <summary>
-    ///     The ID of the task group this task belongs to.
-    /// </summary>
-    [Required]
-    public Guid TaskGroupId { get; set; }
 }

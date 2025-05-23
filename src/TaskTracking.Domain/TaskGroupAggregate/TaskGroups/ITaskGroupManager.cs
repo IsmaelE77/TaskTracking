@@ -34,13 +34,14 @@ public interface ITaskGroupManager : IDomainService
         DateTime startDate,
         DateTime? endDate,
         TaskType taskType,
-        RecurrencePattern recurrencePattern = null);
+        RecurrencePattern? recurrencePattern = null);
 
     Task<TaskItem> UpdateTaskItemAsync(
         Guid taskGroupId,
         Guid taskItemId,
         string title,
         string description,
+        TaskType taskType,
         DateTime startDate,
         DateTime? endDate,
         RecurrencePattern? recurrencePattern = null);

@@ -79,6 +79,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         string title,
         string description,
         DateTime startDate,
+        TaskType taskType,
         DateTime? endDate,
         RecurrencePattern? recurrencePattern = null)
     {
@@ -94,7 +95,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
             throw new BusinessException(TaskTrackingDomainErrorCodes.TaskEndDateExceedsGroupEndDate);
         }
 
-        task.UpdateDetails(title, description, startDate, endDate, recurrencePattern);
+        task.UpdateDetails(title, description, startDate, taskType, endDate, recurrencePattern);
 
         return task;
     }
@@ -107,6 +108,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         {
             throw new BusinessException(TaskTrackingDomainErrorCodes.TaskNotInGroup);
         }
+
         _tasks.Remove(task);
         return task;
     }
@@ -170,7 +172,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         }
 
         var existingProgress = taskItem.UserProgresses
-            .FirstOrDefault(up => up.UserId == userId );
+            .FirstOrDefault(up => up.UserId == userId);
 
         if (existingProgress != null)
         {
@@ -202,7 +204,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
             throw new BusinessException(TaskTrackingDomainErrorCodes.UserNotInGroup);
         }
 
-        taskItem.RecordTaskProgress(userId,date);
+        taskItem.RecordTaskProgress(userId, date);
     }
 
     private UserTaskProgress GetUserTaskProgress(Guid taskItemId, Guid userId)
@@ -229,5 +231,4 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
 
         return progress;
     }
-
 }

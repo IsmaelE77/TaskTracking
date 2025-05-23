@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TaskTracking.TaskGroupAggregate.Dtos;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
+using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -103,9 +103,9 @@ public class TaskGroupAppService :
     }
 
 
-    public async Task<UserTaskGroupDto> AddUserAsync(Guid taskGroupId, Guid userId, UserTaskGroupRole role)
+    public async Task<UserTaskGroupDto> AddUserAsync(Guid id, Guid userId, UserTaskGroupRole role)
     {
-        var userTaskGroup = await _taskGroupManager.AddUserToGroupAsync(taskGroupId, userId, role);
+        var userTaskGroup = await _taskGroupManager.AddUserToGroupAsync(id, userId, role);
 
         var dto = ObjectMapper.Map<UserTaskGroup, UserTaskGroupDto>(userTaskGroup);
         var user = await _userRepository.GetAsync(userId);
@@ -114,22 +114,93 @@ public class TaskGroupAppService :
         return dto;
     }
 
-    public async Task RemoveUserAsync(Guid taskGroupId, Guid userId)
+    public async Task RemoveUserAsync(Guid id, Guid userId)
     {
-        await _taskGroupManager.RemoveUserFromGroupAsync(taskGroupId, userId);
+        await _taskGroupManager.RemoveUserFromGroupAsync(id, userId);
     }
 
-    public async Task<UserTaskGroupDto> ChangeUserRoleAsync(Guid taskGroupId, Guid userId, UserTaskGroupRole newRole)
+    public async Task<UserTaskGroupDto> UpdateUserRoleAsync(Guid id, Guid userId, UserTaskGroupRole newRole)
     {
-        await _taskGroupManager.ChangeUserGroupPermissionAsync(taskGroupId, userId, newRole);
+        await _taskGroupManager.ChangeUserGroupPermissionAsync(id, userId, newRole);
 
         var userTaskGroup =
-            await _userTaskGroupRepository.GetAsync(utg => utg.TaskGroupId == taskGroupId && utg.UserId == userId);
+            await _userTaskGroupRepository.GetAsync(utg => utg.TaskGroupId == id && utg.UserId == userId);
 
         var dto = ObjectMapper.Map<UserTaskGroup, UserTaskGroupDto>(userTaskGroup);
         var user = await _userRepository.GetAsync(userId);
         dto.UserName = user.UserName;
 
         return dto;
+    }
+
+    public async Task RecordTaskProgressAsync(Guid id, RecordTaskProgressDto input)
+    {
+        var userId = _currentUser.GetId();
+
+        await _taskGroupManager.RecordTaskProgressAsync(
+            id,
+            input.TaskItemId,
+            userId,
+            input.Date);
+    }
+
+    public async Task<TaskItemDto> CreateTaskItemAsync(
+        Guid id,
+        CreateTaskItemDto input)
+    {
+        RecurrencePattern recurrencePattern = null;
+
+        if (input.TaskType == TaskType.Recurring && input.RecurrencePattern != null)
+        {
+            recurrencePattern =
+                ObjectMapper.Map<CreateRecurrencePatternDto, RecurrencePattern>(input.RecurrencePattern);
+        }
+
+        var taskItem = await _taskGroupManager.CreateTaskItemAsync(
+            id,
+            input.Title,
+            input.Description,
+            input.StartDate,
+            input.EndDate,
+            input.TaskType,
+            recurrencePattern);
+
+        return ObjectMapper.Map<TaskItem, TaskItemDto>(taskItem);
+    }
+
+    public async Task<TaskItemDto> UpdateTaskItemAsync(
+        Guid id,
+        Guid itemTaskId,
+        UpdateTaskItemDto input)
+    {
+        RecurrencePattern recurrencePattern = null;
+        if (input.RecurrencePattern != null)
+        {
+            recurrencePattern =
+                ObjectMapper.Map<CreateRecurrencePatternDto, RecurrencePattern>(input.RecurrencePattern);
+        }
+
+        var updatedTaskItem = await _taskGroupManager.UpdateTaskItemAsync(
+            id,
+            itemTaskId,
+            input.Title,
+            input.Description,
+            input.TaskType,
+            input.StartDate,
+            input.EndDate,
+            recurrencePattern);
+
+        return ObjectMapper.Map<TaskItem, TaskItemDto>(updatedTaskItem);
+    }
+
+    public async Task<TaskItemDto> DeleteTaskItemAsync(
+        Guid id,
+        Guid taskItemId)
+    {
+        var taskItem = await _taskGroupManager.DeleteTaskItemAsync(
+            id,
+            taskItemId);
+
+        return ObjectMapper.Map<TaskItem, TaskItemDto>(taskItem);
     }
 }

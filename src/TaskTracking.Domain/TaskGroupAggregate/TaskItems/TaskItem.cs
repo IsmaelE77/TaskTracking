@@ -119,11 +119,12 @@ public class TaskItem : FullAuditedEntity<Guid>, IHaveTaskGroup
     }
 
 
-    internal void UpdateDetails(string title, string description, DateTime startDate, DateTime? endDate,
+    internal void UpdateDetails(string title, string description, DateTime startDate, TaskType taskType, DateTime? endDate,
         RecurrencePattern? recurrencePattern)
     {
         Title = Check.NotNullOrWhiteSpace(title, nameof(title), TaskItemConsts.MaxTitleLength);
         Description = Check.NotNullOrWhiteSpace(description, nameof(description), TaskItemConsts.MaxDescriptionLength);
+        TaskType = taskType;
         SetDateRange(startDate, endDate);
         SetRecurrencePattern(recurrencePattern);
     }

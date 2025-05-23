@@ -9,12 +9,6 @@ namespace TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 public class RecordTaskProgressDto
 {
     /// <summary>
-    ///     The ID of the task group the task belongs to.
-    /// </summary>
-    [Required]
-    public Guid TaskGroupId { get; set; }
-    
-    /// <summary>
     ///     The ID of the task to record progress for.
     /// </summary>
     [Required]

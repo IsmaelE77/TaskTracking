@@ -35,7 +35,13 @@ public class UpdateTaskItemDto
     public DateTime? EndDate { get; set; }
 
     /// <summary>
+    ///     The type of the task (one-time or recurring).
+    /// </summary>
+    [Required]
+    public TaskType TaskType { get; set; }
+
+    /// <summary>
     ///     The recurrence pattern for recurring tasks. Only applicable for recurring tasks.
     /// </summary>
-    public CreateRecurrencePatternDto RecurrencePattern { get; set; }
+    public CreateRecurrencePatternDto? RecurrencePattern { get; set; }
 }

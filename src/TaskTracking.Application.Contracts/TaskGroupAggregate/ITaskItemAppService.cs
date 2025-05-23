@@ -9,13 +9,7 @@ namespace TaskTracking.TaskGroupAggregate;
 /// <summary>
 ///     Application service interface for managing task items.
 /// </summary>
-public interface ITaskItemAppService :
-    ICrudAppService<
-        TaskItemDto,
-        Guid,
-        PagedAndSortedResultRequestDto,
-        CreateTaskItemDto,
-        UpdateTaskItemDto>
+public interface ITaskItemAppService : IApplicationService
 {
     /// <summary>
     ///     Gets all tasks for a specific task group.
@@ -27,8 +21,4 @@ public interface ITaskItemAppService :
     /// </summary>
     Task<PagedResultDto<TaskItemDto>> GetMyTasksDueTodayAsync(PagedResultRequestDto input);
 
-    /// <summary>
-    ///     Records progress for a task on a specific date.
-    /// </summary>
-    Task RecordTaskProgressAsync(RecordTaskProgressDto input);
 }

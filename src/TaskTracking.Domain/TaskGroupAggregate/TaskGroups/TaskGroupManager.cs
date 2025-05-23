@@ -140,13 +140,14 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         Guid taskItemId,
         string title,
         string description,
+        TaskType taskType,
         DateTime startDate,
         DateTime? endDate,
         RecurrencePattern? recurrencePattern = null)
     {
         var taskGroup = await GetWithDetailsAsync(taskGroupId);
 
-        var taskItem = taskGroup.UpdateTaskItem(taskItemId, title, description, startDate, endDate, recurrencePattern);
+        var taskItem = taskGroup.UpdateTaskItem(taskItemId, title, description, startDate, taskType, endDate, recurrencePattern);
 
         await _taskGroupRepository.UpdateAsync(taskGroup);
 

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using TaskTracking.TaskGroupAggregate.Dtos;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using Volo.Abp.Application.Dtos;
@@ -33,15 +33,42 @@ public interface ITaskGroupAppService :
     /// <summary>
     ///     Adds a user to a task group with the specified role.
     /// </summary>
-    Task<UserTaskGroupDto> AddUserAsync(Guid taskGroupId, Guid userId, UserTaskGroupRole role);
+    Task<UserTaskGroupDto> AddUserAsync(Guid id, Guid userId, UserTaskGroupRole role);
 
     /// <summary>
     ///     Removes a user from a task group.
     /// </summary>
-    Task RemoveUserAsync(Guid taskGroupId, Guid userId);
+    Task RemoveUserAsync(Guid id, Guid userId);
 
     /// <summary>
     ///     Changes the role of a user in a task group.
     /// </summary>
-    Task<UserTaskGroupDto> ChangeUserRoleAsync(Guid taskGroupId, Guid userId, UserTaskGroupRole newRole);
+    Task<UserTaskGroupDto> UpdateUserRoleAsync(Guid id, Guid userId, UserTaskGroupRole newRole);
+
+    /// <summary>
+    ///     Records progress for a task on a specific date.
+    /// </summary>
+    Task RecordTaskProgressAsync(Guid id, RecordTaskProgressDto input);
+
+    /// <summary>
+    ///     Creates a new task item in the specified task group.
+    /// </summary>
+    Task<TaskItemDto> CreateTaskItemAsync(
+        Guid id,
+        CreateTaskItemDto input);
+
+    /// <summary>
+    ///     Updates an existing task item in the specified task group.
+    /// </summary>
+    Task<TaskItemDto> UpdateTaskItemAsync(
+        Guid id,
+        Guid itemTaskId,
+        UpdateTaskItemDto input);
+
+    /// <summary>
+    ///     Deletes a task item from the specified task group.
+    /// </summary>
+    Task<TaskItemDto> DeleteTaskItemAsync(
+        Guid id,
+        Guid taskItemId);
 }
