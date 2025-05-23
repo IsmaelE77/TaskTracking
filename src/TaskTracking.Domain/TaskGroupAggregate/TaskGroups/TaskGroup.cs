@@ -155,8 +155,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         Guid id,
         Guid taskItemId,
         Guid userId,
-        int progressPercentage = 0,
-        string notes = "")
+        int progressPercentage = 0)
     {
         var taskItem = _tasks.FirstOrDefault(t => t.Id == taskItemId);
         if (taskItem == null)
@@ -182,19 +181,14 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
             id,
             userId,
             taskItemId,
-            progressPercentage,
-            notes);
+            progressPercentage);
 
         taskItem.AddUserProgress(progress);
 
         return progress;
     }
 
-    internal UserTaskProgress UpdateTaskProgress(
-        Guid taskItemId,
-        Guid userId,
-        int progressPercentage,
-        string notes)
+    internal void RecordTaskProgress(Guid taskItemId, Guid userId, DateOnly date)
     {
         var taskItem = _tasks.FirstOrDefault(t => t.Id == taskItemId);
         if (taskItem == null)
@@ -208,32 +202,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
             throw new BusinessException(TaskTrackingDomainErrorCodes.UserNotInGroup);
         }
 
-        var progress = taskItem.UserProgresses
-            .FirstOrDefault(up => up.UserId == userId);
-
-        if (progress == null)
-        {
-            throw new BusinessException(TaskTrackingDomainErrorCodes.ProgressNotFound);
-        }
-
-        progress.SetProgressPercentage(progressPercentage);
-        progress.SetNotes(notes);
-
-        return progress;
-    }
-
-    internal UserTaskProgress MarkProgressAsCompleted(Guid taskItemId, Guid userId)
-    {
-        var progress = GetUserTaskProgress(taskItemId, userId);
-        progress.MarkAsCompleted();
-        return progress;
-    }
-
-    internal UserTaskProgress MarkProgressAsIncompleted(Guid taskItemId, Guid userId)
-    {
-        var progress = GetUserTaskProgress(taskItemId, userId);
-        progress.MarkAsIncomplete();
-        return progress;
+        taskItem.RecordTaskProgress(userId,date);
     }
 
     private UserTaskProgress GetUserTaskProgress(Guid taskItemId, Guid userId)

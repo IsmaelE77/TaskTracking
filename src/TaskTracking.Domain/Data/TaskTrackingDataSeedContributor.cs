@@ -289,7 +289,7 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         var weeklyWorkoutRecurrence = RecurrencePattern.CreateWeekly(
             1,
             new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday },
-            null);
+            DateTime.Now.AddDays(8));
         await _taskGroupManager.CreateTaskItemAsync(
             _personalTaskGroupId,
             "Workout session",
@@ -299,7 +299,7 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
             TaskType.Recurring,
             weeklyWorkoutRecurrence);
 
-        var monthlyBudgetRecurrence = RecurrencePattern.CreateMonthly(1, null);
+        var monthlyBudgetRecurrence = RecurrencePattern.CreateMonthly(1, null, 1);
         await _taskGroupManager.CreateTaskItemAsync(
             _personalTaskGroupId,
             "Monthly budget review",
@@ -398,7 +398,7 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
             TaskType.OneTime);
 
         // Long-term Goals Group - Recurring tasks for tracking progress
-        var monthlyGoalReviewRecurrence = RecurrencePattern.CreateMonthly(1, null);
+        var monthlyGoalReviewRecurrence = RecurrencePattern.CreateMonthly(1, null, 2);
         await _taskGroupManager.CreateTaskItemAsync(
             _longTermGoalsTaskGroupId,
             "Monthly goals review",
@@ -408,7 +408,7 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
             TaskType.Recurring,
             monthlyGoalReviewRecurrence);
 
-        var quarterlySkillAssessmentRecurrence = RecurrencePattern.CreateMonthly(3, null);
+        var quarterlySkillAssessmentRecurrence = RecurrencePattern.CreateMonthly(3, null, 1);
         await _taskGroupManager.CreateTaskItemAsync(
             _longTermGoalsTaskGroupId,
             "Quarterly skill assessment",
@@ -464,36 +464,35 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         if (workTasks.Count >= 4)
         {
             // Complete the first task for admin
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _workTaskGroupId,
                 workTasks[0].Id,
                 _adminUserId,
-                100,
-                "Completed ahead of schedule");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
 
             // Partial progress on the second task for admin
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _workTaskGroupId,
                 workTasks[1].Id,
                 _adminUserId,
-                50,
-                "Working on the presentation slides");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
 
             // Complete the first task for regularUser1
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _workTaskGroupId,
                 workTasks[0].Id,
                 _regularUser1Id,
-                100,
-                "Reviewed and approved");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
 
             // Partial progress on the third task for regularUser2
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _workTaskGroupId,
                 workTasks[2].Id,
                 _regularUser2Id,
-                25,
-                "Started preparation for the meeting");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
         }
 
         // Personal Tasks Group - Various progress states
@@ -501,20 +500,20 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         if (personalTasks.Count >= 4)
         {
             // Complete the first task for regularUser1
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _personalTaskGroupId,
                 personalTasks[0].Id,
                 _regularUser1Id,
-                100,
-                "Groceries purchased");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
 
             // Partial progress on the third task for regularUser1
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _personalTaskGroupId,
                 personalTasks[2].Id,
                 _regularUser1Id,
-                75,
-                "Completed 3 out of 4 workout sessions this week");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
 
         }
 
@@ -523,48 +522,48 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         if (teamProjectTasks.Count >= 7)
         {
             // Complete the first task for all team members
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _teamProjectTaskGroupId,
                 teamProjectTasks[0].Id,
                 _regularUser2Id,
-                100,
-                "Meeting completed, minutes distributed");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
 
-            await _taskGroupManager.UpdateProgressAsync(
+
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _teamProjectTaskGroupId,
                 teamProjectTasks[0].Id,
                 _adminUserId,
-                100,
-                "Attended and contributed to discussion");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
 
-            await _taskGroupManager.UpdateProgressAsync(
+
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _teamProjectTaskGroupId,
                 teamProjectTasks[0].Id,
                 _regularUser1Id,
-                100,
-                "Presented project overview");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
 
-            await _taskGroupManager.UpdateProgressAsync(
+
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _teamProjectTaskGroupId,
                 teamProjectTasks[0].Id,
                 _regularUser3Id,
-                100,
-                "Took meeting notes");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
 
             // Partial progress on the second task for different users
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _teamProjectTaskGroupId,
                 teamProjectTasks[1].Id,
                 _regularUser2Id,
-                60,
-                "Collected requirements from marketing team");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
 
-            await _taskGroupManager.UpdateProgressAsync(
+
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _teamProjectTaskGroupId,
                 teamProjectTasks[1].Id,
                 _regularUser1Id,
-                40,
-                "Working on technical requirements");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
         }
 
         // Long-term Goals Group - Various progress states
@@ -572,28 +571,27 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
         if (longTermTasks.Count >= 5)
         {
             // Partial progress on the first task for the owner
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _longTermGoalsTaskGroupId,
                 longTermTasks[0].Id,
                 _regularUser3Id,
-                30,
-                "Started drafting career goals");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
 
             // Partial progress on the second task for the owner
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _longTermGoalsTaskGroupId,
                 longTermTasks[1].Id,
                 _regularUser3Id,
-                15,
-                "Completed first module of the course");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
+
 
             // Partial progress on the first task for the subscriber
-            await _taskGroupManager.UpdateProgressAsync(
+            await _taskGroupManager.RecordTaskProgressAsync(
                 _longTermGoalsTaskGroupId,
                 longTermTasks[0].Id,
                 _regularUser1Id,
-                20,
-                "Researching career paths");
+                DateOnly.FromDateTime(workTasks[0].StartDate.AddDays(1)));
         }
 
         _logger.LogInformation("Sample progress entries created successfully.");

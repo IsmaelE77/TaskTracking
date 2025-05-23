@@ -10,11 +10,13 @@ public static class TaskTrackingDomainErrorCodes
     /* Task Item Error Codes */
     public const string CannotSetRecurrencePatternForOneTimeTask = "TrackingTask:00101";
     public const string RecurrencePatternRequired = "TrackingTask:00102";
+    public const string AlreadyRecorded = "TrackingTask:00103";
 
     /* Recurrence Pattern Error Codes */
     public const string InvalidRecurrenceInterval = "TrackingTask:00201";
     public const string InvalidRecurrenceOccurrences = "TrackingTask:00202";
     public const string WeeklyRecurrenceRequiresDaysOfWeek = "TrackingTask:00203";
+    public const string RecurrenceEndDateExceedsTaskItemEndDate = "TrackingTask:00204";
 
     /* User Task Group Error Codes */
     public const string CannotRemoveOwner = "TrackingTask:00301";
@@ -28,5 +30,7 @@ public static class TaskTrackingDomainErrorCodes
     public const string ProgressNotFound = "TrackingTask:00405";
     public const string CannotChangeOwnerRole = "TrackingTask:00406";
     public const string CannotChangeToOwnerRole = "TrackingTask:00407";
+
+
 
 }

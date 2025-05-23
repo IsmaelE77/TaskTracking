@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Volo.Abp;
 using Volo.Abp.Domain.Values;
 
@@ -17,8 +18,7 @@ public class RecurrencePattern : ValueObject
     public DateTime? EndDate { get; private set; }
     public int? Occurrences { get; private set; }
 
-    [NotMapped]
-    public IReadOnlyCollection<DayOfWeek> DaysOfWeek => GetDaysOfWeekFromFlags();
+    [NotMapped] public IReadOnlyCollection<DayOfWeek> DaysOfWeek => GetDaysOfWeekFromFlags();
 
     private RecurrencePattern()
     {
@@ -63,6 +63,11 @@ public class RecurrencePattern : ValueObject
             throw new BusinessException(TaskTrackingDomainErrorCodes.WeeklyRecurrenceRequiresDaysOfWeek);
         }
 
+        if (endDate == null && occurrences == null)
+        {
+            throw new BusinessException("Recurrence must have an end date or a number of occurrences.");
+        }
+
         RecurrenceType = recurrenceType;
         Interval = interval;
         EndDate = endDate;
@@ -99,6 +104,7 @@ public class RecurrencePattern : ValueObject
     {
         return (DaysOfWeekFlags & (1 << (int)day)) != 0;
     }
+
 
     private IReadOnlyCollection<DayOfWeek> GetDaysOfWeekFromFlags()
     {

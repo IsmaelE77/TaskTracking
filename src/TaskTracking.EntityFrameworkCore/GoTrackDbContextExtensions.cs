@@ -59,8 +59,6 @@ public static class GoTrackDbContextExtensions
             b.ToTaskTrackingTable();
             b.ConfigureByConvention();
 
-            b.Property(x => x.Notes).HasMaxLength(UserTaskProgressConsts.MaxNotesLength);
-
             b.HasOne(x => x.TaskItem)
                 .WithMany(x => x.UserProgresses)
                 .HasForeignKey(x => x.TaskItemId)
@@ -70,6 +68,8 @@ public static class GoTrackDbContextExtensions
                 .WithMany()
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            b.OwnsMany(x => x.ProgressEntries);
         });
     }
 

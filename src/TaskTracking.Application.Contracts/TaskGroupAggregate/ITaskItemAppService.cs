@@ -28,12 +28,7 @@ public interface ITaskItemAppService :
     Task<PagedResultDto<TaskItemDto>> GetMyTasksDueTodayAsync(PagedResultRequestDto input);
 
     /// <summary>
-    ///     Marks a task as completed.
+    ///     Records progress for a task on a specific date.
     /// </summary>
-    Task MarkAsCompletedAsync(Guid id);
-
-    /// <summary>
-    ///     Marks a task as incomplete.
-    /// </summary>
-    Task MarkAsIncompleteAsync(Guid id);
+    Task RecordTaskProgressAsync(RecordTaskProgressDto input);
 }

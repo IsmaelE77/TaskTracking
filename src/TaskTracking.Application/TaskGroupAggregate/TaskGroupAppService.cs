@@ -102,35 +102,6 @@ public class TaskGroupAppService :
         return new PagedResultDto<TaskGroupDto>(taskGroups.TotalCount, taskGroupsDtos);
     }
 
-    public async Task MarkAsCompletedAsync(Guid id)
-    {
-        var taskGroup = await _taskGroupManager.GetWithDetailsAsync(id);
-        var currentUserId = _currentUser.GetId();
-
-        foreach (var task in taskGroup.Tasks)
-        {
-            var userProgress = task.UserProgresses.FirstOrDefault(up => up.UserId == currentUserId);
-            if (userProgress != null && !userProgress.IsCompleted)
-            {
-                await _taskGroupManager.MarkProgressAsCompletedAsync(id, task.Id, currentUserId);
-            }
-        }
-    }
-
-    public async Task MarkAsIncompleteAsync(Guid id)
-    {
-        var taskGroup = await _taskGroupManager.GetWithDetailsAsync(id);
-        var currentUserId = _currentUser.GetId();
-
-        foreach (var task in taskGroup.Tasks)
-        {
-            var userProgress = task.UserProgresses.FirstOrDefault(up => up.UserId == currentUserId);
-            if (userProgress != null && userProgress.IsCompleted)
-            {
-                await _taskGroupManager.MarkProgressAsIncompletedAsync(id, task.Id, currentUserId);
-            }
-        }
-    }
 
     public async Task<UserTaskGroupDto> AddUserAsync(Guid taskGroupId, Guid userId, UserTaskGroupRole role)
     {

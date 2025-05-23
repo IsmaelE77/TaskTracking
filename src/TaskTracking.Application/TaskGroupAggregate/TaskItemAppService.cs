@@ -106,7 +106,7 @@ public class TaskItemAppService :
 
     public async Task<PagedResultDto<TaskItemDto>> GetMyTasksDueTodayAsync(PagedResultRequestDto input)
     {
-        var currentUserId = new Guid("3a1a0988-9ea9-cd87-58e7-25bc14d5170d");
+        var currentUserId = _currentUser.GetId();
 
         var tasks = await _taskItemManager.GetTasksForTodayPagedAsync(currentUserId, input.SkipCount,
             input.MaxResultCount);
@@ -118,7 +118,7 @@ public class TaskItemAppService :
 
     public async Task<PagedResultDto<TaskItemDto>> GetMyTasksDueInNextNDaysAsync(int days, PagedResultRequestDto input)
     {
-        var currentUserId = new Guid("3a1a097d-f6b5-a486-9b69-cce0cfd4d386");
+        var currentUserId = _currentUser.GetId();
         var tasks = await _taskItemManager.GetTasksForNextNDaysPagedAsync(currentUserId, days, input.SkipCount,
             input.MaxResultCount);
 
@@ -127,25 +127,14 @@ public class TaskItemAppService :
         return new PagedResultDto<TaskItemDto>(tasks.TotalCount, taskDtos);
     }
 
-    public async Task MarkAsCompletedAsync(Guid id)
+    public async Task RecordTaskProgressAsync(RecordTaskProgressDto input)
     {
-        var taskItem = await Repository.GetAsync(id);
-        var currentUserId = _currentUser.GetId();
+        var userId = _currentUser.GetId();
 
-        await _taskGroupManager.MarkProgressAsCompletedAsync(
-            taskItem.TaskGroupId,
-            id,
-            currentUserId);
-    }
-
-    public async Task MarkAsIncompleteAsync(Guid id)
-    {
-        var taskItem = await Repository.GetAsync(id);
-        var currentUserId = _currentUser.GetId();
-
-        await _taskGroupManager.MarkProgressAsIncompletedAsync(
-            taskItem.TaskGroupId,
-            id,
-            currentUserId);
+        await _taskGroupManager.RecordTaskProgressAsync(
+            input.TaskGroupId,
+            input.TaskItemId,
+            userId,
+            input.Date);
     }
 }

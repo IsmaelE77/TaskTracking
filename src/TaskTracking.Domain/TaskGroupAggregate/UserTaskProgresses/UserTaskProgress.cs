@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using TaskTracking.TaskGroupAggregate.TaskItems;
-using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.Identity;
@@ -12,9 +12,10 @@ public class UserTaskProgress : FullAuditedEntity<Guid>
     public Guid TaskItemId { get; private set; }
     public Guid UserId { get; private set; }
     public int ProgressPercentage { get; private set; }
-    public string Notes { get; private set; }
     public DateTime LastUpdatedDate { get; private set; }
-    public bool IsCompleted { get; private set; }
+    public IReadOnlyCollection<ProgressEntry> ProgressEntries => _progressEntries.AsReadOnly();
+    private readonly List<ProgressEntry> _progressEntries = [];
+
 
     #region Navigation Properties
     public IdentityUser User { get; private set; }
@@ -31,16 +32,21 @@ public class UserTaskProgress : FullAuditedEntity<Guid>
         Guid id,
         Guid userId,
         Guid taskItemId,
-        int progressPercentage = 0,
-        string notes = "") : base(id)
+        int progressPercentage = 0) : base(id)
     {
         UserId = userId;
         TaskItemId = taskItemId;
         SetProgressPercentage(progressPercentage);
-        SetNotes(notes);
         LastUpdatedDate = DateTime.Now;
-        IsCompleted = false;
     }
+
+    public void RecordProgress(DateOnly date)
+    {
+        var entry = new ProgressEntry(date);
+        _progressEntries.Add(entry);
+        LastUpdatedDate = DateTime.Now;
+    }
+
 
     internal void SetProgressPercentage(int progressPercentage)
     {
@@ -50,29 +56,6 @@ public class UserTaskProgress : FullAuditedEntity<Guid>
         }
 
         ProgressPercentage = progressPercentage;
-        LastUpdatedDate = DateTime.Now;
-        
-        // Automatically mark as completed if progress is 100%
-        IsCompleted = progressPercentage == UserTaskProgressConsts.MaxProgressPercentage;
     }
 
-    internal void SetNotes(string notes)
-    {
-        Notes = Check.Length(notes, nameof(notes), UserTaskProgressConsts.MaxNotesLength);
-        LastUpdatedDate = DateTime.Now;
-    }
-
-    internal void MarkAsCompleted()
-    {
-        IsCompleted = true;
-        ProgressPercentage = UserTaskProgressConsts.MaxProgressPercentage;
-        LastUpdatedDate = DateTime.Now;
-    }
-
-
-    internal void MarkAsIncomplete()
-    {
-        IsCompleted = false;
-        LastUpdatedDate = DateTime.Now;
-    }
 }

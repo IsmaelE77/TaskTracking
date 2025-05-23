@@ -222,34 +222,15 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         await _taskGroupRepository.UpdateAsync(taskGroup);
     }
 
-    public async Task<UserTaskProgress> UpdateProgressAsync(
+    public async Task RecordTaskProgressAsync(
         Guid taskGroupId,
         Guid taskItemId,
         Guid userId,
-        int progressPercentage,
-        string notes)
+        DateOnly date)
     {
         var taskGroup = await GetWithDetailsAsync(taskGroupId);
-        var taskProgress = taskGroup.UpdateTaskProgress(taskItemId, userId, progressPercentage, notes);
+        taskGroup.RecordTaskProgress(taskItemId, userId, date);
         await _taskGroupRepository.UpdateAsync(taskGroup);
-        return taskProgress;
-    }
-
-
-    public async Task<UserTaskProgress> MarkProgressAsCompletedAsync(Guid taskGroupId, Guid taskItemId, Guid userId)
-    {
-        var taskGroup = await GetWithDetailsAsync(taskGroupId);
-        var progress = taskGroup.MarkProgressAsCompleted(taskItemId, userId);
-        await _taskGroupRepository.UpdateAsync(taskGroup);
-        return progress;
-    }
-
-    public async Task<UserTaskProgress> MarkProgressAsIncompletedAsync(Guid taskGroupId, Guid taskItemId, Guid userId)
-    {
-        var taskGroup = await GetWithDetailsAsync(taskGroupId);
-        var progress = taskGroup.MarkProgressAsIncompleted(taskItemId, userId);
-        await _taskGroupRepository.UpdateAsync(taskGroup);
-        return progress;
     }
 
     public async Task<TaskGroup> GetWithDetailsAsync(Guid taskGroupId)

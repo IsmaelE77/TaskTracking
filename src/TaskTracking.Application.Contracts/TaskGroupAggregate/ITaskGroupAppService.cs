@@ -31,16 +31,6 @@ public interface ITaskGroupAppService :
     Task<PagedResultDto<TaskGroupDto>> GetMyActiveTaskGroupsAsync(PagedResultRequestDto input);
 
     /// <summary>
-    ///     Marks a task group as completed.
-    /// </summary>
-    Task MarkAsCompletedAsync(Guid id);
-
-    /// <summary>
-    ///     Marks a task group as incomplete.
-    /// </summary>
-    Task MarkAsIncompleteAsync(Guid id);
-
-    /// <summary>
     ///     Adds a user to a task group with the specified role.
     /// </summary>
     Task<UserTaskGroupDto> AddUserAsync(Guid taskGroupId, Guid userId, UserTaskGroupRole role);

@@ -58,22 +58,11 @@ public interface ITaskGroupManager : IDomainService
 
     Task ChangeUserGroupPermissionAsync(Guid taskGroupId, Guid userId, UserTaskGroupRole newRole);
 
-    Task<UserTaskProgress> UpdateProgressAsync(
+    Task RecordTaskProgressAsync(
         Guid taskGroupId,
         Guid taskItemId,
         Guid userId,
-        int progressPercentage,
-        string notes);
-
-    Task<UserTaskProgress> MarkProgressAsCompletedAsync(
-        Guid taskGroupId,
-        Guid taskItemId,
-        Guid userId);
-
-    Task<UserTaskProgress> MarkProgressAsIncompletedAsync(
-        Guid taskGroupId,
-        Guid taskItemId,
-        Guid userId);
+        DateOnly date);
 
     Task<TaskGroup> GetWithDetailsAsync(Guid taskGroupId);
 
