@@ -281,7 +281,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         var totalCount = await AsyncExecuter.CountAsync(userTaskGroupsQueryable);
         var taskGroupIds = await AsyncExecuter.ToListAsync(
             userTaskGroupsQueryable
-                .Select(utg => utg.Id)
+                .Select(utg => utg.TaskGroupId)
                 .PageBy(skipCount, maxResultCount)
         );
 
@@ -308,7 +308,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
 
         var taskGroupIds =await AsyncExecuter.ToListAsync(
             userTaskGroupsQueryable
-                .Select(utg => utg.Id)
+                .Select(utg => utg.TaskGroupId)
                 .PageBy(skipCount, maxResultCount)
         );
 
