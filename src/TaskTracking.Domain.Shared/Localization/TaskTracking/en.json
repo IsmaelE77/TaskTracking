@@ -4,6 +4,17 @@
     "AppName": "TaskTracking",
     "Menu:Home": "Home",
     "Welcome": "Welcome",
-    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io."
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+    "Permission:TaskTracking": "Task Tracking",
+    "Permission:TaskGroups": "Task Groups",
+    "Permission:TaskGroups.Create": "Create Task Groups",
+    "Permission:TaskGroups.Update": "Update Task Groups",
+    "Permission:TaskGroups.Delete": "Delete Task Groups",
+    "Permission:TaskGroups.ManageUsers": "Manage Task Group Users",
+    "Permission:TaskGroups.RecordProgress": "Record Task Progress",
+    "Permission:TaskGroups.ManageTaskItems": "Manage Task Items",
+    "Permission:TaskGroups.CreateTaskItems": "Create Task Items",
+    "Permission:TaskGroups.UpdateTaskItems": "Update Task Items",
+    "Permission:TaskGroups.DeleteTaskItems": "Delete Task Items"
   }
 }

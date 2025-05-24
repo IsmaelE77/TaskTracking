@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using TaskTracking.Permissions;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
@@ -50,6 +52,7 @@ public class TaskGroupAppService :
         return ObjectMapper.Map<TaskGroup, TaskGroupDto>(taskGroup);
     }
 
+    [Authorize(UserTaskGroupPermissions.Create)]
     public override async Task<TaskGroupDto> CreateAsync(CreateTaskGroupDto input)
     {
         var currentUserId = _currentUser.GetId();
@@ -64,6 +67,7 @@ public class TaskGroupAppService :
         return ObjectMapper.Map<TaskGroup, TaskGroupDto>(taskGroup);
     }
 
+    [Authorize(UserTaskGroupPermissions.Update)]
     public override async Task<TaskGroupDto> UpdateAsync(Guid id, UpdateTaskGroupDto input)
     {
         var taskGroup = await _taskGroupManager.UpdateAsync(
@@ -76,6 +80,7 @@ public class TaskGroupAppService :
         return ObjectMapper.Map<TaskGroup, TaskGroupDto>(taskGroup);
     }
 
+    [Authorize(UserTaskGroupPermissions.Delete)]
     public override async Task DeleteAsync(Guid id)
     {
         await _taskGroupManager.DeleteAsync(id);
@@ -102,7 +107,7 @@ public class TaskGroupAppService :
         return new PagedResultDto<TaskGroupDto>(taskGroups.TotalCount, taskGroupsDtos);
     }
 
-
+    [Authorize(UserTaskGroupPermissions.ManageUsers)]
     public async Task<UserTaskGroupDto> AddUserAsync(Guid id, Guid userId, UserTaskGroupRole role)
     {
         var userTaskGroup = await _taskGroupManager.AddUserToGroupAsync(id, userId, role);
@@ -114,11 +119,13 @@ public class TaskGroupAppService :
         return dto;
     }
 
+    [Authorize(UserTaskGroupPermissions.ManageUsers)]
     public async Task RemoveUserAsync(Guid id, Guid userId)
     {
         await _taskGroupManager.RemoveUserFromGroupAsync(id, userId);
     }
 
+    [Authorize(UserTaskGroupPermissions.ManageUsers)]
     public async Task<UserTaskGroupDto> UpdateUserRoleAsync(Guid id, Guid userId, UserTaskGroupRole newRole)
     {
         await _taskGroupManager.ChangeUserGroupPermissionAsync(id, userId, newRole);
@@ -133,6 +140,7 @@ public class TaskGroupAppService :
         return dto;
     }
 
+    [Authorize(UserTaskGroupPermissions.RecordProgress)]
     public async Task RecordTaskProgressAsync(Guid id, RecordTaskProgressDto input)
     {
         var userId = _currentUser.GetId();
@@ -144,6 +152,7 @@ public class TaskGroupAppService :
             input.Date);
     }
 
+    [Authorize(UserTaskGroupPermissions.CreateTaskItems)]
     public async Task<TaskItemDto> CreateTaskItemAsync(
         Guid id,
         CreateTaskItemDto input)
@@ -168,6 +177,7 @@ public class TaskGroupAppService :
         return ObjectMapper.Map<TaskItem, TaskItemDto>(taskItem);
     }
 
+    [Authorize(UserTaskGroupPermissions.UpdateTaskItems)]
     public async Task<TaskItemDto> UpdateTaskItemAsync(
         Guid id,
         Guid itemTaskId,
@@ -193,6 +203,7 @@ public class TaskGroupAppService :
         return ObjectMapper.Map<TaskItem, TaskItemDto>(updatedTaskItem);
     }
 
+    [Authorize(UserTaskGroupPermissions.DeleteTaskItems)]
     public async Task<TaskItemDto> DeleteTaskItemAsync(
         Guid id,
         Guid taskItemId)

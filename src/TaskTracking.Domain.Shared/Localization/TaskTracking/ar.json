@@ -4,6 +4,17 @@
     "AppName": "TaskTracking",
     "Menu:Home": "الصفحة الرئيسية",
     "Welcome": "مرحباً",
-    "LongWelcomeMessage": "مرحبا بكم في التطبيق. هذا مشروع بدء تشغيل يعتمد على إطار عمل ABP. لمزيد من المعلومات ، يرجى زيارة abp.io."
+    "LongWelcomeMessage": "مرحبا بكم في التطبيق. هذا مشروع بدء تشغيل يعتمد على إطار عمل ABP. لمزيد من المعلومات ، يرجى زيارة abp.io.",
+    "Permission:TaskTracking": "تتبع المهام",
+    "Permission:TaskGroups": "مجموعات المهام",
+    "Permission:TaskGroups.Create": "إنشاء مجموعات المهام",
+    "Permission:TaskGroups.Update": "تحديث مجموعات المهام",
+    "Permission:TaskGroups.Delete": "حذف مجموعات المهام",
+    "Permission:TaskGroups.ManageUsers": "إدارة مستخدمي مجموعات المهام",
+    "Permission:TaskGroups.RecordProgress": "تسجيل تقدم المهام",
+    "Permission:TaskGroups.ManageTaskItems": "إدارة عناصر المهام",
+    "Permission:TaskGroups.CreateTaskItems": "إنشاء عناصر المهام",
+    "Permission:TaskGroups.UpdateTaskItems": "تحديث عناصر المهام",
+    "Permission:TaskGroups.DeleteTaskItems": "حذف عناصر المهام"
   }
 }

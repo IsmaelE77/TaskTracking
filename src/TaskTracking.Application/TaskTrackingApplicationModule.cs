@@ -1,4 +1,7 @@
-﻿using Volo.Abp.Account;
+﻿using TaskTracking.Permissions.ManagementProviders;
+using TaskTracking.Permissions.ValueProviders;
+using Volo.Abp.Account;
+using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
@@ -26,6 +29,17 @@ public class TaskTrackingApplicationModule : AbpModule
         Configure<AbpAutoMapperOptions>(options =>
         {
             options.AddMaps<TaskTrackingApplicationModule>();
+        });
+
+        Configure<PermissionManagementOptions>(options =>
+        {
+            options.ManagementProviders.Add<UserTaskGroupRolePermissionManagementProvider>();
+        });
+
+
+        Configure<AbpPermissionOptions>(options =>
+        {
+            options.ValueProviders.Add<UserTaskGroupRolePermissionValueProvider>();
         });
     }
 }

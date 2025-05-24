@@ -453,6 +453,12 @@ public class TaskTrackingDataSeedContributor : IDataSeedContributor, ITransientD
     {
         _logger.LogInformation("Creating sample progress entries...");
 
+        var taskCount = await _taskItemRepository.CountAsync();
+        if (taskCount < await _userTaskProgressRepository.CountAsync())
+        {
+            return;
+        }
+
         // Get task groups with details
         var workTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_workTaskGroupId);
         var personalTaskGroup = await _taskGroupManager.GetWithDetailsAsync(_personalTaskGroupId);
