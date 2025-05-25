@@ -260,6 +260,7 @@ src/TaskTracking.HttpApi.HostWithIds/Logs/*
 src/TaskTracking.DbMigrator/Logs/*
 src/TaskTracking.Blazor.Server/Logs/*
 src/TaskTracking.Blazor.Server.Tiered/Logs/*
+src/TaskTracking.Blazor/Logs/*
 
 # Use abp install-libs to restore.
 **/wwwroot/libs/*
