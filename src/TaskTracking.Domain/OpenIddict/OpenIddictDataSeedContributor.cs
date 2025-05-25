@@ -104,7 +104,25 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
             );
         }
 
+        // Blazor Client
+        var blazorClientId = configurationSection["TaskTracking_Blazor:ClientId"];
+        if (!blazorClientId.IsNullOrWhiteSpace())
+        {
+            var blazorRootUrl = configurationSection["TaskTracking_Blazor:RootUrl"]?.TrimEnd('/');
 
+            await CreateApplicationAsync(
+                name: blazorClientId!,
+                type: OpenIddictConstants.ClientTypes.Public,
+                consentType: OpenIddictConstants.ConsentTypes.Implicit,
+                displayName: "Blazor Application",
+                secret: null,
+                grantTypes: new List<string> { OpenIddictConstants.GrantTypes.AuthorizationCode, },
+                scopes: commonScopes,
+                redirectUri: $"{blazorRootUrl}/authentication/login-callback",
+                clientUri: blazorRootUrl,
+                postLogoutRedirectUri: $"{blazorRootUrl}/authentication/logout-callback"
+            );
+        }
 
 
 
