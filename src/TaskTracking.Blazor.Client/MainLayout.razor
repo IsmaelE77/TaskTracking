@@ -1,33 +1,166 @@
+@using Microsoft.Extensions.Localization
+@using TaskTracking.Localization
 @inherits LayoutComponentBase
+@inject IJSRuntime JsRuntime
+@inject IStringLocalizer<TaskTrackingResource> L
 
-<MudThemeProvider/>
+<MudThemeProvider Theme="@_theme"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
+<MudRTLProvider RightToLeft="@_rightToLeft">
 
 <MudLayout>
-    <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        My Application
+    <MudAppBar Class="islamic-app-bar" Elevation="2">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="@((e) => DrawerToggle())" />
+        <MudText Typo="Typo.h6" Class="app-title d-none d-sm-flex">
+            <MudIcon Icon="@Icons.Material.Filled.Task" Class="me-2" />
+            @L["TaskManagementSystem"]
+        </MudText>
+        <MudSpacer />
+        <LanguageSwitcher />
+        <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
+            <MudMenuItem Icon="@Icons.Material.Filled.Person">@L["Profile"]</MudMenuItem>
+            <MudMenuItem Icon="@Icons.Material.Filled.Settings">@L["Settings"]</MudMenuItem>
+            <MudDivider />
+            <MudMenuItem Icon="@Icons.Material.Filled.Logout">@L["Logout"]</MudMenuItem>
+        </MudMenu>
     </MudAppBar>
-    <MudDrawer @bind-Open="@_drawerOpen">
-        <MudNavMenu>
-            <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-            <MudNavLink Href="/servers" Match="NavLinkMatch.Prefix">Servers</MudNavLink>
-            <MudNavGroup Title="Settings" Expanded="true">
-                <MudNavLink Href="/users"  Match="NavLinkMatch.Prefix">Users</MudNavLink>
-                <MudNavLink Href="/security"  Match="NavLinkMatch.Prefix">Security</MudNavLink>
+
+    <MudDrawer @bind-Open="@_drawerOpen" Class="islamic-drawer" Elevation="2">
+        <div class="drawer-header">
+            <MudText Typo="Typo.h6" Class="drawer-title">
+                <MudIcon Icon="@Icons.Material.Filled.Dashboard" Class="me-2" />
+                @L["MainMenu"]
+            </MudText>
+        </div>
+
+        <MudNavMenu Class="islamic-nav-menu">
+            <MudNavLink Href="/"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Dashboard">
+                @L["Dashboard"]
+            </MudNavLink>
+
+            <MudNavGroup Title="@L["TaskGroups"]"
+                         Icon="@Icons.Material.Filled.Group"
+                         Expanded="true">
+                <MudNavLink Href="/task-groups"
+                            Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.List">
+                    @L["AllGroups"]
+                </MudNavLink>
+                <MudNavLink Href="/task-groups/my"
+                            Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.Person">
+                    @L["MyGroups"]
+                </MudNavLink>
+                <MudNavLink Href="/task-groups/create"
+                            Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.Add">
+                    @L["CreateGroup"]
+                </MudNavLink>
             </MudNavGroup>
-            <MudNavLink Href="/about"  Match="NavLinkMatch.Prefix">About</MudNavLink>
+
+            <MudNavGroup Title="@L["Tasks"]"
+                         Icon="@Icons.Material.Filled.Assignment"
+                         Expanded="false">
+                <MudNavLink Href="/tasks/today"
+                            Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.Today">
+                    @L["TodayTasks"]
+                </MudNavLink>
+                <MudNavLink Href="/tasks/upcoming"
+                            Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.Schedule">
+                    @L["UpcomingTasks"]
+                </MudNavLink>
+                <MudNavLink Href="/tasks/completed"
+                            Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.CheckCircle">
+                    @L["CompletedTasks"]
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudDivider Class="my-3" />
+
+            <MudNavGroup Title="@L["Settings"]"
+                         Icon="@Icons.Material.Filled.Settings"
+                         Expanded="false">
+                <MudNavLink Href="/users"
+                            Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.People">
+                    @L["Users"]
+                </MudNavLink>
+                <MudNavLink Href="/security"
+                            Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.Security">
+                    @L["Security"]
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudNavLink Href="/about"
+                        Match="NavLinkMatch.Prefix"
+                        Icon="@Icons.Material.Filled.Info">
+                @L["About"]
+            </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
-    <MudMainContent>
+
+    <MudMainContent Class="islamic-main-content">
         @Body
     </MudMainContent>
 </MudLayout>
 
+</MudRTLProvider>
+
 @code {
     bool _drawerOpen = true;
+    bool _rightToLeft = false;
+
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#1e3a8a",
+            Secondary = "#d97706",
+            Tertiary = "#059669",
+            Success = "#10b981",
+            Warning = "#f59e0b",
+            Error = "#ef4444",
+            Info = "#3b82f6",
+            Background = "#fefefe",
+            Surface = "#ffffff",
+            AppbarBackground = "#1e3a8a",
+            AppbarText = "#ffffff",
+            DrawerBackground = "#ffffff",
+            DrawerText = "#1e293b"
+        }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await DetectRtlAsync();
+    }
+
+    private async Task DetectRtlAsync()
+    {
+        var isRtlString = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "Abp.IsRtl");
+        if (!string.IsNullOrEmpty(isRtlString) && bool.TryParse(isRtlString, out var isRtl))
+        {
+            _rightToLeft = isRtl;
+        }
+        else
+        {
+            // Fallback: detect from current culture
+            _rightToLeft = System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
+        }
+
+        StateHasChanged();
+    }
 
     void DrawerToggle()
     {

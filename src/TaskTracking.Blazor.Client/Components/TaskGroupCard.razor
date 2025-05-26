@@ -1,0 +1,136 @@
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups
+@inherits TaskTrackingComponentBase
+
+<MudCard Class="task-group-card h-100" Elevation="3">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <MudText Typo="Typo.h6" Class="task-group-title">
+                        @TaskGroup.Title
+                    </MudText>
+                    <MudText Typo="Typo.caption" Class="text-muted">
+                        <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="me-1" />
+                        @TaskGroup.StartDate.ToString("dd/MM/yyyy")
+                        @if (TaskGroup.EndDate.HasValue)
+                        {
+                            <span> - @TaskGroup.EndDate.Value.ToString("dd/MM/yyyy")</span>
+                        }
+                    </MudText>
+                </div>
+                <div class="task-group-status">
+                    @if (TaskGroup.IsCompleted)
+                    {
+                        <MudChip T="string" Color="Color.Success" Size="Size.Small" Icon="@Icons.Material.Filled.CheckCircle">
+                            @L["Completed"]
+                        </MudChip>
+                    }
+                    else if (TaskGroup.EndDate.HasValue && TaskGroup.EndDate.Value < DateTime.Now)
+                    {
+                        <MudChip T="string" Color="Color.Error" Size="Size.Small" Icon="@Icons.Material.Filled.Warning">
+                            @L["Expired"]
+                        </MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Color="Color.Primary" Size="Size.Small" Icon="@Icons.Material.Filled.PlayArrow">
+                            @L["Active"]
+                        </MudChip>
+                    }
+                </div>
+            </div>
+        </CardHeaderContent>
+    </MudCardHeader>
+    
+    <MudCardContent Class="pb-2">
+        <MudText Typo="Typo.body2" Class="task-group-description">
+            @(TaskGroup.Description.Length > 120 ? TaskGroup.Description.Substring(0, 120) + "..." : TaskGroup.Description)
+        </MudText>
+        
+        <div class="mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <MudText Typo="Typo.caption" Class="text-muted">
+                    <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Small" Class="me-1" />
+                    @L["OverallProgress"]
+                </MudText>
+                <MudText Typo="Typo.caption" Class="progress-text">
+                    @ProgressPercentage%
+                </MudText>
+            </div>
+            <MudProgressLinear Color="@GetProgressColor()" 
+                               Value="@ProgressPercentage" 
+                               Class="progress-bar" />
+        </div>
+    </MudCardContent>
+    
+    <MudCardActions Class="d-flex justify-content-between">
+        <MudButton Variant="Variant.Text" 
+                   Color="Color.Primary" 
+                   StartIcon="@Icons.Material.Filled.Visibility"
+                   Size="Size.Small"
+                   OnClick="@(() => ViewTaskGroup())">
+            @L["View"]
+        </MudButton>
+        
+        <div>
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                           Color="Color.Primary" 
+                           Size="Size.Small"
+                           OnClick="@(() => EditTaskGroup())"
+                           Title="@L["Edit"]" />
+            <MudIconButton Icon="@Icons.Material.Filled.MoreVert" 
+                           Color="Color.Default" 
+                           Size="Size.Small"
+                           OnClick="@(() => ShowOptions())"
+                           Title="@L["Options"]" />
+        </div>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter] public TaskGroupDto TaskGroup { get; set; } = null!;
+    
+    private double ProgressPercentage => CalculateProgress();
+    
+    private double CalculateProgress()
+    {
+        // This is a placeholder calculation
+        // In a real implementation, you would calculate based on completed tasks
+        if (TaskGroup.IsCompleted) return 100;
+        
+        // Mock calculation based on time elapsed
+        var totalDays = (TaskGroup.EndDate ?? DateTime.Now.AddDays(30)) - TaskGroup.StartDate;
+        var elapsedDays = DateTime.Now - TaskGroup.StartDate;
+        
+        if (totalDays.TotalDays <= 0) return 0;
+        
+        var progress = (elapsedDays.TotalDays / totalDays.TotalDays) * 100;
+        return Math.Max(0, Math.Min(100, progress));
+    }
+    
+    private Color GetProgressColor()
+    {
+        return ProgressPercentage switch
+        {
+            >= 80 => Color.Success,
+            >= 50 => Color.Warning,
+            _ => Color.Primary
+        };
+    }
+    
+    private void ViewTaskGroup()
+    {
+        // Navigate to task group details
+        // NavigationManager.NavigateTo($"/task-groups/{TaskGroup.Id}");
+    }
+    
+    private void EditTaskGroup()
+    {
+        // Open edit dialog or navigate to edit page
+    }
+    
+    private void ShowOptions()
+    {
+        // Show context menu with additional options
+    }
+}

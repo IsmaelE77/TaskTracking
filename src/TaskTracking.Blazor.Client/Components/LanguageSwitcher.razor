@@ -1,0 +1,135 @@
+@using Volo.Abp.Localization
+@using System.Globalization
+@using System.Collections.Immutable
+@inject ILanguageProvider LanguageProvider
+@inject IJSRuntime JsRuntime
+@inject ICookieService CookieService
+
+@if (_otherLanguages.Any())
+{
+    <MudMenu Icon="@Icons.Material.Filled.Language"
+             Color="Color.Inherit"
+             AnchorOrigin="Origin.BottomLeft"
+             TransformOrigin="Origin.TopLeft"
+             Class="language-switcher">
+        <ActivatorContent>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Inherit"
+                       StartIcon="@Icons.Material.Filled.Language"
+                       Class="language-button">
+                <span class="current-language">@_currentLanguage?.DisplayName</span>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Size="Size.Small" Class="ms-1" />
+            </MudButton>
+        </ActivatorContent>
+        <ChildContent>
+            @foreach (var language in _otherLanguages)
+            {
+                <MudMenuItem OnClick="@(() => ChangeLanguageAsync(language))"
+                             Class="language-menu-item">
+                    <div class="d-flex align-items-center">
+                        <MudIcon Icon="@GetLanguageIcon(language.CultureName)"
+                                 Size="Size.Small"
+                                 Class="me-2 language-icon" />
+                        <span>@language.DisplayName</span>
+                        @if (IsRtlLanguage(language))
+                        {
+                            <MudChip T="string" Size="Size.Small"
+                                     Color="Color.Secondary"
+                                     Class="ms-auto rtl-badge">
+                                RTL
+                            </MudChip>
+                        }
+                    </div>
+                </MudMenuItem>
+            }
+        </ChildContent>
+    </MudMenu>
+}
+
+@code {
+    private IReadOnlyList<LanguageInfo> _otherLanguages = new List<LanguageInfo>();
+    private LanguageInfo? _currentLanguage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var selectedLanguageName = await JsRuntime.InvokeAsync<string>(
+            "localStorage.getItem",
+            "Abp.SelectedLanguage"
+        );
+
+        var allLanguages = await LanguageProvider.GetLanguagesAsync();
+
+        if (!allLanguages.Any())
+        {
+            return;
+        }
+
+        // Determine current language
+        if (!selectedLanguageName.IsNullOrWhiteSpace())
+        {
+            _currentLanguage = allLanguages.FirstOrDefault(l => l.UiCultureName == selectedLanguageName);
+        }
+
+        if (_currentLanguage == null)
+        {
+            _currentLanguage = allLanguages.FirstOrDefault(l => l.UiCultureName == CultureInfo.CurrentUICulture.Name);
+        }
+
+        if (_currentLanguage == null)
+        {
+            _currentLanguage = allLanguages.FirstOrDefault();
+        }
+
+        // Set other languages (excluding current)
+        _otherLanguages = allLanguages.Where(l => l != _currentLanguage).ToImmutableList();
+    }
+
+    private async Task ChangeLanguageAsync(LanguageInfo language)
+    {
+        // Store selected language in localStorage
+        await JsRuntime.InvokeVoidAsync(
+            "localStorage.setItem",
+            "Abp.SelectedLanguage",
+            language.UiCultureName
+        );
+
+        // Store RTL information
+        await JsRuntime.InvokeVoidAsync(
+            "localStorage.setItem",
+            "Abp.IsRtl",
+            CultureInfo.GetCultureInfo(language.UiCultureName).TextInfo.IsRightToLeft
+        );
+
+        // Set culture cookie
+        await CookieService.SetAsync(
+            ".AspNetCore.Culture",
+            $"c={language.CultureName}|uic={language.UiCultureName}",
+            new CookieOptions
+            {
+                Path = "/"
+            }
+        );
+
+        // Reload the page to apply language changes
+        await JsRuntime.InvokeVoidAsync("location.reload");
+    }
+
+    private string GetLanguageIcon(string cultureName)
+    {
+        return cultureName.ToLower() switch
+        {
+            "ar" or "ar-sa" or "ar-eg" => Icons.Material.Filled.Language, // Arabic
+            "en" or "en-us" or "en-gb" => Icons.Material.Filled.Language, // English
+            "fr" or "fr-fr" => Icons.Material.Filled.Language, // French
+            "es" or "es-es" => Icons.Material.Filled.Language, // Spanish
+            "de" or "de-de" => Icons.Material.Filled.Language, // German
+            "tr" or "tr-tr" => Icons.Material.Filled.Language, // Turkish
+            _ => Icons.Material.Filled.Language
+        };
+    }
+
+    private bool IsRtlLanguage(LanguageInfo language)
+    {
+        return CultureInfo.GetCultureInfo(language.UiCultureName).TextInfo.IsRightToLeft;
+    }
+}

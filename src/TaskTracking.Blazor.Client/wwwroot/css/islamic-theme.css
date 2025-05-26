@@ -1,0 +1,364 @@
+/* Islamic-Arabic Theme Styles */
+
+/* Color Palette */
+:root {
+    --islamic-primary: #1e3a8a;      /* Deep Blue */
+    --islamic-secondary: #d97706;     /* Golden Orange */
+    --islamic-accent: #059669;       /* Emerald Green */
+    --islamic-gold: #f59e0b;         /* Gold */
+    --islamic-navy: #1e293b;         /* Navy Blue */
+    --islamic-cream: #fef7ed;        /* Cream */
+    --islamic-pearl: #f8fafc;        /* Pearl White */
+    --islamic-shadow: rgba(30, 58, 138, 0.1);
+}
+
+/* Background Pattern */
+.islamic-pattern-bg {
+    background-image:
+        radial-gradient(circle at 25% 25%, var(--islamic-shadow) 2px, transparent 2px),
+        radial-gradient(circle at 75% 75%, var(--islamic-shadow) 1px, transparent 1px);
+    background-size: 60px 60px;
+    min-height: 100vh;
+    position: relative;
+}
+
+.islamic-pattern-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(135deg, var(--islamic-primary) 0%, var(--islamic-navy) 100%);
+    opacity: 0.05;
+    z-index: 0;
+}
+
+/* Hero Section */
+.hero-section {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, var(--islamic-primary) 0%, var(--islamic-navy) 100%);
+    color: white;
+    border-radius: 0 0 50px 50px;
+    box-shadow: 0 10px 30px var(--islamic-shadow);
+}
+
+.hero-icon {
+    color: var(--islamic-gold);
+    font-size: 4rem !important;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.hero-title {
+    font-family: 'Amiri', 'Noto Naskh Arabic', 'Cairo', 'Lateef', serif;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    background: linear-gradient(45deg, #ffffff, var(--islamic-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 2;
+}
+
+.hero-subtitle {
+    font-family: 'Tajawal', 'Arial', sans-serif;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* Section Titles */
+.section-title {
+    font-family: 'Amiri', 'Times New Roman', serif;
+    color: var(--islamic-navy);
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--islamic-primary), var(--islamic-gold));
+    border-radius: 2px;
+}
+
+/* Task Group Cards */
+.task-group-card {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px var(--islamic-shadow) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.task-group-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--islamic-primary), var(--islamic-gold), var(--islamic-accent));
+}
+
+.task-group-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px var(--islamic-shadow) !important;
+}
+
+.task-group-title {
+    font-family: 'Tajawal', 'Arial', sans-serif;
+    color: var(--islamic-navy);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.task-group-description {
+    color: #64748b;
+    line-height: 1.6;
+    font-family: 'Tajawal', 'Arial', sans-serif;
+}
+
+.task-group-status .mud-chip {
+    font-family: 'Tajawal', 'Arial', sans-serif;
+    font-weight: 500;
+    border-radius: 20px;
+}
+
+/* Progress Bar */
+.progress-bar {
+    border-radius: 10px !important;
+    height: 8px !important;
+    background-color: #e2e8f0 !important;
+}
+
+.progress-text {
+    font-weight: 600;
+    color: var(--islamic-primary);
+}
+
+/* Buttons */
+.create-btn {
+    border-radius: 25px !important;
+    padding: 12px 24px !important;
+    font-family: 'Tajawal', 'Arial', sans-serif;
+    font-weight: 600;
+    text-transform: none !important;
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3) !important;
+    background: linear-gradient(135deg, var(--islamic-primary), var(--islamic-navy)) !important;
+}
+
+.create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4) !important;
+}
+
+/* Empty State */
+.empty-state {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 4px 20px var(--islamic-shadow);
+    margin: 2rem 0;
+}
+
+.empty-icon {
+    color: var(--islamic-primary);
+    opacity: 0.6;
+    font-size: 5rem !important;
+}
+
+/* Loading States */
+.mud-progress-circular {
+    color: var(--islamic-primary) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .hero-title {
+        font-size: 2rem !important;
+    }
+    
+    .section-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .task-group-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .section-title::after {
+    right: 0;
+    left: auto;
+}
+
+[dir="rtl"] .task-group-card {
+    text-align: right;
+}
+
+
+
+/* Geometric Pattern Decorations */
+.task-group-card::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(45deg, transparent 30%, var(--islamic-gold) 30%, var(--islamic-gold) 70%, transparent 70%);
+    opacity: 0.05;
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+/* Layout Components */
+.islamic-app-bar {
+    background: linear-gradient(135deg, var(--islamic-primary) 0%, var(--islamic-navy) 100%) !important;
+    box-shadow: 0 2px 10px var(--islamic-shadow) !important;
+}
+
+.app-title {
+    font-family: 'Amiri', 'Times New Roman', serif !important;
+    font-weight: 600;
+    color: white !important;
+}
+
+.islamic-drawer {
+    border-right: 3px solid var(--islamic-gold) !important;
+}
+
+.drawer-header {
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, var(--islamic-cream) 0%, var(--islamic-pearl) 100%);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.drawer-title {
+    font-family: 'Amiri', 'Times New Roman', serif !important;
+    color: var(--islamic-navy) !important;
+    font-weight: 600;
+}
+
+.islamic-nav-menu {
+    padding: 1rem 0;
+}
+
+.islamic-nav-menu .mud-nav-link {
+    font-family: 'Tajawal', 'Arial', sans-serif !important;
+    margin: 0.25rem 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.islamic-nav-menu .mud-nav-link:hover {
+    background-color: var(--islamic-cream) !important;
+    color: var(--islamic-primary) !important;
+}
+
+.islamic-nav-menu .mud-nav-link.active {
+    background: linear-gradient(135deg, var(--islamic-primary), var(--islamic-navy)) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px var(--islamic-shadow);
+}
+
+.islamic-nav-menu .mud-nav-group .mud-nav-group-header {
+    font-family: 'Tajawal', 'Arial', sans-serif !important;
+    font-weight: 600;
+    color: var(--islamic-navy) !important;
+}
+
+.islamic-main-content {
+    background: var(--islamic-pearl);
+    min-height: 100vh;
+}
+
+/* Language Switcher Styles */
+.language-switcher {
+    margin: 0 0.5rem;
+}
+
+.language-button {
+    font-family: 'Tajawal', 'Arial', sans-serif !important;
+    text-transform: none !important;
+    border-radius: 20px !important;
+    padding: 6px 12px !important;
+    transition: all 0.3s ease;
+}
+
+.language-button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.current-language {
+    font-weight: 500;
+    margin: 0 4px;
+}
+
+.language-menu-item {
+    font-family: 'Tajawal', 'Arial', sans-serif !important;
+    padding: 8px 16px !important;
+    min-height: 40px !important;
+}
+
+.language-menu-item:hover {
+    background-color: var(--islamic-cream) !important;
+}
+
+.language-icon {
+    color: var(--islamic-primary);
+}
+
+
+/* Language Switcher Styles */
+.language-switcher {
+    margin: 0 0.5rem;
+}
+
+.language-button {
+    font-family: 'Tajawal', 'Arial', sans-serif !important;
+    text-transform: none !important;
+    border-radius: 20px !important;
+    padding: 6px 12px !important;
+    transition: all 0.3s ease;
+}
+
+.language-button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.current-language {
+    font-weight: 500;
+    margin: 0 4px;
+}
+
+.language-menu-item {
+    font-family: 'Tajawal', 'Arial', sans-serif !important;
+    padding: 8px 16px !important;
+    min-height: 40px !important;
+}
+
+.language-menu-item:hover {
+    background-color: var(--islamic-cream) !important;
+}
+
+.language-icon {
+    color: var(--islamic-primary);
+}
+
+.mud-grid-spacing-xs-6
+{
+    width: 100% !important;
+}
