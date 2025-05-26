@@ -54,11 +54,11 @@
                     @L["OverallProgress"]
                 </MudText>
                 <MudText Typo="Typo.caption" Class="progress-text">
-                    @ProgressPercentage%
+                    @TaskGroup.ProgressPercentageCompleted%
                 </MudText>
             </div>
             <MudProgressLinear Color="@GetProgressColor()" 
-                               Value="@ProgressPercentage" 
+                               Value="@TaskGroup.ProgressPercentageCompleted"
                                Class="progress-bar" />
         </div>
     </MudCardContent>
@@ -90,27 +90,10 @@
 @code {
     [Parameter] public TaskGroupDto TaskGroup { get; set; } = null!;
     
-    private double ProgressPercentage => CalculateProgress();
-    
-    private double CalculateProgress()
-    {
-        // This is a placeholder calculation
-        // In a real implementation, you would calculate based on completed tasks
-        if (TaskGroup.IsCompleted) return 100;
-        
-        // Mock calculation based on time elapsed
-        var totalDays = (TaskGroup.EndDate ?? DateTime.Now.AddDays(30)) - TaskGroup.StartDate;
-        var elapsedDays = DateTime.Now - TaskGroup.StartDate;
-        
-        if (totalDays.TotalDays <= 0) return 0;
-        
-        var progress = (elapsedDays.TotalDays / totalDays.TotalDays) * 100;
-        return Math.Max(0, Math.Min(100, progress));
-    }
-    
+
     private Color GetProgressColor()
     {
-        return ProgressPercentage switch
+        return TaskGroup.ProgressPercentageCompleted switch
         {
             >= 80 => Color.Success,
             >= 50 => Color.Warning,
