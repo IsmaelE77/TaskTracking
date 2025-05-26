@@ -264,7 +264,11 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
                 .PageBy(skipCount, maxResultCount)
         );
 
-        var result = await _taskGroupRepository.GetListAsync(tg => taskGroupIds.Contains(tg.Id));
+        var taskGroupQuery = await _taskGroupRepository.WithDetailsAsync();
+
+        var result = await AsyncExecuter.ToListAsync(
+            taskGroupQuery.Where(tg =>
+                taskGroupIds.Contains(tg.Id)));
 
         return (result, totalCount);
     }
@@ -287,10 +291,13 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
 
         var today = Clock.Now.Date;
 
-        var result = await _taskGroupRepository.GetListAsync(tg =>
-            taskGroupIds.Contains(tg.Id) &&
-            tg.StartDate <= today &&
-            (!tg.EndDate.HasValue || tg.EndDate.Value >= today));
+        var taskGroupQuery = await _taskGroupRepository.WithDetailsAsync();
+
+        var result = await AsyncExecuter.ToListAsync(
+            taskGroupQuery.Where(tg =>
+                taskGroupIds.Contains(tg.Id) &&
+                tg.StartDate <= today &&
+                (!tg.EndDate.HasValue || tg.EndDate.Value >= today)));
 
         return (result, totalCount);
     }
@@ -306,13 +313,18 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
 
         var totalCount = await AsyncExecuter.CountAsync(userTaskGroupsQueryable);
 
+
         var taskGroupIds =await AsyncExecuter.ToListAsync(
             userTaskGroupsQueryable
                 .Select(utg => utg.TaskGroupId)
                 .PageBy(skipCount, maxResultCount)
         );
 
-        var items = await _taskGroupRepository.GetListAsync(tg => taskGroupIds.Contains(tg.Id));
+        var taskGroupQuery = await _taskGroupRepository.WithDetailsAsync();
+
+        var items = await AsyncExecuter.ToListAsync(
+            taskGroupQuery.Where(tg =>
+                taskGroupIds.Contains(tg.Id)));
 
         return (items, totalCount);
     }

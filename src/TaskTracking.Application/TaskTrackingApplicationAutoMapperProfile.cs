@@ -17,7 +17,11 @@ public class TaskTrackingApplicationAutoMapperProfile : Profile
         // TaskGroup mappings
         CreateMap<TaskGroup, TaskGroupDto>()
             .ForMember(dest => dest.IsCompleted, opt => opt.MapFrom(src =>
-                src.Tasks.Count > 0 && src.Tasks.All(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100))));
+                src.Tasks.Count > 0 && src.Tasks.All(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100))))
+            .ForMember(dest => dest.ProgressPercentageCompleted,
+                opt => opt.MapFrom(src =>
+                    src.Tasks.Count(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100)) * 100 / src.Tasks.Count
+                ));
 
         CreateMap<TaskGroup, TaskGroupDetailsDto>()
             .ForMember(dest => dest.Tasks, opt => opt.MapFrom(src => src.Tasks))

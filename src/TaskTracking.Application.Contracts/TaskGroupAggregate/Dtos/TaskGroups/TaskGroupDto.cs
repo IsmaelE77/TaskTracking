@@ -32,4 +32,6 @@ public class TaskGroupDto : AuditedEntityDto<Guid>
     ///     Whether the task group is completed.
     /// </summary>
     public bool IsCompleted { get; set; }
+
+    public double ProgressPercentageCompleted { get; set; }
 }
