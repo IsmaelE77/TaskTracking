@@ -1,0 +1,121 @@
+@page "/task-groups/{id:guid}/edit"
+@inherits TaskTrackingComponentBase
+
+<div class="islamic-pattern-bg">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
+        <!-- Header Section -->
+        <div class="d-flex align-items-center mb-4">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                           Color="Color.Primary"
+                           OnClick="@(() => NavigationManager.NavigateTo("/"))"
+                           Class="me-3" />
+            <div>
+                <MudText Typo="Typo.h4" Class="section-title mb-1">
+                    <MudIcon Icon="@Icons.Material.Filled.Edit" Class="me-2" />
+                    @L["EditTaskGroup"]
+                </MudText>
+                <MudText Typo="Typo.body2" Class="text-muted">
+                    @L["UpdateTaskGroupDetails"]
+                </MudText>
+            </div>
+        </div>
+
+        @if (IsLoading)
+        {
+            <div class="text-center py-5">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                <MudText Typo="Typo.body1" Class="mt-3">@L["LoadingTaskGroup"]</MudText>
+            </div>
+        }
+        else if (TaskGroup == null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">
+                <MudText>@L["TaskGroupNotFound"]</MudText>
+            </MudAlert>
+        }
+        else
+        {
+            <!-- Edit Form -->
+            <MudCard Class="islamic-card" Elevation="3">
+                <MudCardContent Class="pa-6">
+                    <EditForm Model="@UpdateDto" OnValidSubmit="@HandleValidSubmit">
+                        <DataAnnotationsValidator />
+
+                        <!-- Title Field -->
+                        <MudTextField @bind-Value="UpdateDto.Title"
+                                      Label="@L["Title"]"
+                                      Variant="Variant.Outlined"
+                                      Class="mb-4"
+                                      Required="true"
+                                      MaxLength="200"
+                                      Counter="200"
+                                      HelperText="@L["EnterTaskGroupTitle"]"
+                                      For="@(() => UpdateDto.Title)" />
+
+                        <!-- Description Field -->
+                        <MudGrid Class="mb-4" Spacing="10">
+                            <MudItem xs="12" md="6">
+                                <MudTextField @bind-Value="UpdateDto.Description"
+                                              Label="@L["Description"]"
+                                              Variant="Variant.Outlined"
+                                              Lines="8"
+                                              Class="mb-4"
+                                              Required="true"
+                                              MaxLength="4000"
+                                              Counter="4000"
+                                              HelperText="@L["EnterTaskGroupDescription"]"
+                                              Immediate="true"
+                                              For="@(() => UpdateDto.Description)"/>
+                            </MudItem>
+
+                            <MudItem xs="12" md="6" Style="margin-top: 20px">
+                                <MudMarkdown Value="@UpdateDto.Description"/>
+                            </MudItem>
+                        </MudGrid>
+
+                        <!-- Date Fields -->
+                        <MudGrid Class="mb-4">
+                            <MudItem xs="12" md="6">
+                                <MudDatePicker @bind-Date="StartDatePicker"
+                                               Label="@L["StartDate"]"
+                                               Variant="Variant.Outlined"
+                                               Required="true"
+                                               DateFormat="dd/MM/yyyy" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudDatePicker @bind-Date="EndDatePicker"
+                                               Label="@L["EndDate"]"
+                                               Variant="Variant.Outlined"
+                                               DateFormat="dd/MM/yyyy"
+                                               Clearable="true"
+                                               HelperText="@L["OptionalEndDate"]" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Default"
+                                       StartIcon="@Icons.Material.Filled.Cancel"
+                                       OnClick="@(() => NavigationManager.NavigateTo("/"))">
+                                @L["Cancel"]
+                            </MudButton>
+
+                            <MudButton ButtonType="ButtonType.Submit"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       Disabled="@IsSubmitting">
+                                @if (IsSubmitting)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                }
+                                @L["SaveChanges"]
+                            </MudButton>
+                        </div>
+                    </EditForm>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudContainer>
+</div>

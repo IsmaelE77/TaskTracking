@@ -50,6 +50,23 @@
     "Profile": "Profile",
     "Logout": "Logout",
     "Notifications": "Notifications",
-    "RTL": "RTL"
+    "RTL": "RTL",
+    "EditTaskGroup": "Edit Task Group",
+    "UpdateTaskGroupDetails": "Update task group details and information",
+    "LoadingTaskGroup": "Loading task group...",
+    "TaskGroupNotFound": "Task group not found or you don't have permission to access it",
+    "Title": "Title",
+    "Description": "Description",
+    "StartDate": "Start Date",
+    "EndDate": "End Date",
+    "EnterTaskGroupTitle": "Enter a descriptive title for the task group",
+    "EnterTaskGroupDescription": "Enter a detailed description of the task group",
+    "OptionalEndDate": "Optional end date for the task group",
+    "Cancel": "Cancel",
+    "SaveChanges": "Save Changes",
+    "TaskGroupUpdatedSuccessfully": "Task group updated successfully!",
+    "ErrorLoadingTaskGroup": "Error loading task group. Please try again.",
+    "ErrorUpdatingTaskGroup": "Error updating task group. Please try again.",
+    "EndDateMustBeAfterStartDate": "End date must be after start date"
   }
 }

@@ -3,6 +3,7 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MudBlazor;
 using MudBlazor.Services;
 using TaskTracking.Blazor.Client.Menus;
 using OpenIddict.Abstractions;
@@ -60,6 +61,7 @@ public class TaskTrackingBlazorClientModule : AbpModule
     private void ConfigureMudBlazor(ServiceConfigurationContext context)
     {
         context.Services.AddMudServices();
+        context.Services.AddMudMarkdownServices();
     }
 
     private static void ConfigureAuthentication(WebAssemblyHostBuilder builder)

@@ -361,3 +361,107 @@
 {
     width: 100% !important;
 }
+
+/* Edit Form Styles */
+.islamic-card {
+    border: none !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 32px var(--islamic-shadow) !important;
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.islamic-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--islamic-primary), var(--islamic-gold), var(--islamic-accent));
+}
+
+/* Form Field Styles */
+.mud-input-outlined .mud-input-outlined-border {
+    border-radius: 12px !important;
+    border-color: #e2e8f0 !important;
+    transition: all 0.3s ease;
+}
+
+.mud-input-outlined:hover .mud-input-outlined-border {
+    border-color: var(--islamic-primary) !important;
+}
+
+.mud-input-outlined.mud-input-focused .mud-input-outlined-border {
+    border-color: var(--islamic-primary) !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1) !important;
+}
+
+.mud-input-label {
+    font-family: "Tajawal", "Arial", sans-serif !important;
+    font-weight: 500;
+    color: var(--islamic-navy) !important;
+}
+
+.mud-input-helper-text {
+    font-family: "Tajawal", "Arial", sans-serif !important;
+    color: #64748b !important;
+}
+
+/* Date Picker Styles */
+.mud-picker-input-button {
+    color: var(--islamic-primary) !important;
+}
+
+/* Form Buttons */
+.mud-button-filled.mud-button-filled-primary {
+    background: linear-gradient(135deg, var(--islamic-primary), var(--islamic-navy)) !important;
+    border-radius: 25px !important;
+    padding: 12px 24px !important;
+    font-family: "Tajawal", "Arial", sans-serif !important;
+    font-weight: 600;
+    text-transform: none !important;
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3) !important;
+    transition: all 0.3s ease;
+}
+
+.mud-button-filled.mud-button-filled-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4) !important;
+}
+
+.mud-button-text {
+    font-family: "Tajawal", "Arial", sans-serif !important;
+    font-weight: 500;
+    text-transform: none !important;
+    border-radius: 20px !important;
+    transition: all 0.3s ease;
+}
+
+.mud-button-text:hover {
+    background-color: var(--islamic-cream) !important;
+}
+
+/* Alert Styles */
+.mud-alert {
+    border-radius: 12px !important;
+    font-family: "Tajawal", "Arial", sans-serif !important;
+}
+
+.mud-alert-filled-error {
+    background: linear-gradient(135deg, #fef2f2, #fee2e2) !important;
+    border-left: 4px solid #ef4444 !important;
+}
+
+/* Back Button */
+.mud-icon-button {
+    border-radius: 50% !important;
+    transition: all 0.3s ease;
+}
+
+.mud-icon-button:hover {
+    transform: scale(1.1);
+    background-color: var(--islamic-cream) !important;
+}

@@ -50,6 +50,23 @@
     "Profile": "الملف الشخصي",
     "Logout": "تسجيل الخروج",
     "Notifications": "الإشعارات",
-    "RTL": "RTL"
+    "RTL": "RTL",
+    "EditTaskGroup": "تعديل مجموعة المهام",
+    "UpdateTaskGroupDetails": "تحديث تفاصيل ومعلومات مجموعة المهام",
+    "LoadingTaskGroup": "جاري تحميل مجموعة المهام...",
+    "TaskGroupNotFound": "مجموعة المهام غير موجودة أو ليس لديك صلاحية للوصول إليها",
+    "Title": "العنوان",
+    "Description": "الوصف",
+    "StartDate": "تاريخ البداية",
+    "EndDate": "تاريخ النهاية",
+    "EnterTaskGroupTitle": "أدخل عنواناً وصفياً لمجموعة المهام",
+    "EnterTaskGroupDescription": "أدخل وصفاً مفصلاً لمجموعة المهام",
+    "OptionalEndDate": "تاريخ نهاية اختياري لمجموعة المهام",
+    "Cancel": "إلغاء",
+    "SaveChanges": "حفظ التغييرات",
+    "TaskGroupUpdatedSuccessfully": "تم تحديث مجموعة المهام بنجاح!",
+    "ErrorLoadingTaskGroup": "خطأ في تحميل مجموعة المهام. يرجى المحاولة مرة أخرى.",
+    "ErrorUpdatingTaskGroup": "خطأ في تحديث مجموعة المهام. يرجى المحاولة مرة أخرى.",
+    "EndDateMustBeAfterStartDate": "يجب أن يكون تاريخ النهاية بعد تاريخ البداية"
   }
 }

@@ -1,5 +1,6 @@
 @using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups
 @inherits TaskTrackingComponentBase
+@inject NavigationManager NavigationManager
 
 <MudCard Class="task-group-card h-100" Elevation="3">
     <MudCardHeader>
@@ -77,19 +78,18 @@
                            Color="Color.Primary" 
                            Size="Size.Small"
                            OnClick="@(() => EditTaskGroup())"
-                           Title="@L["Edit"]" />
+                           title="@L["Edit"]" />
             <MudIconButton Icon="@Icons.Material.Filled.MoreVert" 
                            Color="Color.Default" 
                            Size="Size.Small"
                            OnClick="@(() => ShowOptions())"
-                           Title="@L["Options"]" />
+                           title="@L["Options"]" />
         </div>
     </MudCardActions>
 </MudCard>
 
 @code {
     [Parameter] public TaskGroupDto TaskGroup { get; set; } = null!;
-    
 
     private Color GetProgressColor()
     {
@@ -104,12 +104,12 @@
     private void ViewTaskGroup()
     {
         // Navigate to task group details
-        // NavigationManager.NavigateTo($"/task-groups/{TaskGroup.Id}");
+        NavigationManager.NavigateTo($"/task-groups/{TaskGroup.Id}");
     }
     
     private void EditTaskGroup()
     {
-        // Open edit dialog or navigate to edit page
+        NavigationManager.NavigateTo($"/task-groups/{TaskGroup.Id}/edit");
     }
     
     private void ShowOptions()
