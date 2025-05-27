@@ -1,0 +1,179 @@
+@page "/task-groups/all"
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups
+@inherits TaskTrackingComponentBase
+
+<div class="islamic-pattern-bg">
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
+        <!-- Header Section -->
+        <MudGrid Class="mb-4" AlignItems="Center">
+            <MudItem xs="12" sm="8" md="9">
+                <div class="d-flex align-items-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => NavigationManager.NavigateTo("/"))"
+                                   Class="me-3" />
+                    <div>
+                        <MudText Typo="Typo.h4" Class="section-title mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.Groups" Class="me-2" />
+                            @L["AllGroups"]
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted d-none d-sm-block">
+                            @L["ViewAllTaskGroupsInSystem"]
+                        </MudText>
+                    </div>
+                </div>
+            </MudItem>
+            
+            <!-- Action Buttons -->
+            <MudItem xs="12" sm="4" md="3">
+                <MudStack Row="true" Spacing="2" Class="d-none d-sm-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Person"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/my"))">
+                        @L["MyGroups"]
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/create"))">
+                        @L["CreateNewGroup"]
+                    </MudButton>
+                </MudStack>
+                
+                <!-- Mobile Buttons -->
+                <MudStack Spacing="2" Class="d-block d-sm-none">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Person"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/my"))"
+                               FullWidth="true">
+                        @L["MyGroups"]
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/create"))"
+                               FullWidth="true">
+                        @L["CreateNewGroup"]
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Filters and Search -->
+        <MudCard Class="mb-4" Elevation="2">
+            <MudCardContent Class="pa-4">
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="SearchText"
+                                      Label="@L["SearchTaskGroups"]"
+                                      Variant="Variant.Outlined"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Search"
+                                      OnKeyUp="@OnSearchKeyUp"
+                                      Clearable="true"
+                                      OnClearButtonClick="@ClearSearch" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSelect @bind-Value="StatusFilter"
+                                   Label="@L["Status"]"
+                                   Variant="Variant.Outlined"
+                                   T="TaskGroupStatusFilter">
+                            <MudSelectItem Value="TaskGroupStatusFilter.All">@L["AllStatuses"]</MudSelectItem>
+                            <MudSelectItem Value="TaskGroupStatusFilter.Active">@L["Active"]</MudSelectItem>
+                            <MudSelectItem Value="TaskGroupStatusFilter.Completed">@L["Completed"]</MudSelectItem>
+                            <MudSelectItem Value="TaskGroupStatusFilter.Expired">@L["Expired"]</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSelect @bind-Value="SortBy"
+                                   Label="@L["SortBy"]"
+                                   Variant="Variant.Outlined"
+                                   T="TaskGroupSortBy">
+                            <MudSelectItem Value="TaskGroupSortBy.CreationTime">@L["CreationDate"]</MudSelectItem>
+                            <MudSelectItem Value="TaskGroupSortBy.Title">@L["Title"]</MudSelectItem>
+                            <MudSelectItem Value="TaskGroupSortBy.StartDate">@L["StartDate"]</MudSelectItem>
+                            <MudSelectItem Value="TaskGroupSortBy.Progress">@L["Progress"]</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth="true"
+                                   StartIcon="@Icons.Material.Filled.FilterList"
+                                   OnClick="@ApplyFilters">
+                            @L["Filter"]
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Results Summary -->
+        @if (!IsLoading && TaskGroups.Any())
+        {
+            <MudAlert Severity="Severity.Info" Class="mb-4">
+                <MudText>
+                    @L["ShowingResults", TaskGroups.Count, TotalCount]
+                </MudText>
+            </MudAlert>
+        }
+
+        <!-- Task Groups Grid -->
+        @if (IsLoading)
+        {
+            <div class="text-center py-5">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                <MudText Typo="Typo.body1" Class="mt-3">@L["LoadingTaskGroups"]</MudText>
+            </div>
+        }
+        else if (!TaskGroups.Any())
+        {
+            <MudCard Class="text-center py-5" Elevation="2">
+                <MudCardContent>
+                    <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Default" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">@L["NoTaskGroupsFound"]</MudText>
+                    <MudText Typo="Typo.body2" Class="text-muted mb-4">
+                        @L["NoTaskGroupsMatchingCriteria"]
+                    </MudText>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Refresh"
+                               OnClick="@ClearFiltersAndReload">
+                        @L["ClearFilters"]
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <MudGrid>
+                @foreach (var taskGroup in TaskGroups)
+                {
+                    <MudItem xs="12" sm="6" md="4" lg="3">
+                        <TaskGroupCard TaskGroup="@taskGroup" />
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <!-- Load More Button -->
+            @if (HasMoreData)
+            {
+                <div class="text-center mt-4">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.ExpandMore"
+                               OnClick="@LoadMoreTaskGroups"
+                               Disabled="@IsLoadingMore">
+                        @if (IsLoadingMore)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                        }
+                        @L["LoadMore"]
+                    </MudButton>
+                </div>
+            }
+        }
+    </MudContainer>
+</div>

@@ -465,3 +465,102 @@
     transform: scale(1.1);
     background-color: var(--islamic-cream) !important;
 }
+
+
+/* Statistics Cards Styles */
+.stats-card {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px var(--islamic-shadow) !important;
+    background: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--islamic-primary), var(--islamic-gold), var(--islamic-accent));
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px var(--islamic-shadow) !important;
+}
+
+.stats-card .mud-card-content {
+    padding: 1.5rem !important;
+}
+
+.stats-card .mud-icon-root {
+    margin-bottom: 0.75rem;
+}
+
+.stats-card .mud-typography-h4 {
+    font-family: "Amiri", "Times New Roman", serif !important;
+    font-weight: 700;
+    color: var(--islamic-navy);
+    margin-bottom: 0.25rem;
+}
+
+.stats-card .mud-typography-body2 {
+    font-family: "Tajawal", "Arial", sans-serif !important;
+    font-weight: 500;
+    color: #64748b;
+}
+
+/* Filter Card Enhancements */
+.mud-card .mud-card-content {
+    padding: 1.5rem !important;
+}
+
+.mud-select .mud-input-outlined-border {
+    border-radius: 12px !important;
+}
+
+.mud-select:hover .mud-input-outlined-border {
+    border-color: var(--islamic-primary) !important;
+}
+
+/* Empty State Enhancements */
+.mud-card .mud-icon-root[class*="Large"] {
+    font-size: 4rem !important;
+    opacity: 0.6;
+}
+
+/* Grid Responsive Improvements */
+@media (max-width: 768px) {
+    .stats-card .mud-card-content {
+        padding: 1rem !important;
+    }
+    
+    .stats-card .mud-typography-h4 {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Search and Filter Improvements */
+.mud-input-adornment .mud-icon-root {
+    color: var(--islamic-primary) !important;
+}
+
+.mud-button-filled.mud-button-filled-primary.mud-button-size-medium {
+    padding: 12px 20px !important;
+    font-weight: 600;
+}
+
+/* Alert Enhancements */
+.mud-alert-filled-info {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe) !important;
+    border-left: 4px solid var(--islamic-primary) !important;
+    color: var(--islamic-navy) !important;
+}
+
+.mud-alert .mud-alert-message {
+    font-family: "Tajawal", "Arial", sans-serif !important;
+}

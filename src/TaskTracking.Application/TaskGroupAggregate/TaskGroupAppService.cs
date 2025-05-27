@@ -31,19 +31,31 @@ public class TaskGroupAppService :
     private readonly IIdentityUserRepository _userRepository;
     private readonly IRepository<UserTaskGroup, Guid> _userTaskGroupRepository;
     private readonly ICurrentUser _currentUser;
+    private readonly IReadOnlyRepository<TaskGroup, Guid> _taskGroupRepository;
 
     public TaskGroupAppService(
         IRepository<TaskGroup, Guid> repository,
         ITaskGroupManager taskGroupManager,
         IIdentityUserRepository userRepository,
         IRepository<UserTaskGroup, Guid> userTaskGroupRepository,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser, IReadOnlyRepository<TaskGroup, Guid> taskGroupRepository)
         : base(repository)
     {
         _taskGroupManager = taskGroupManager;
         _userRepository = userRepository;
         _userTaskGroupRepository = userTaskGroupRepository;
         _currentUser = currentUser;
+        _taskGroupRepository = taskGroupRepository;
+    }
+
+    public override async Task<PagedResultDto<TaskGroupDto>> GetListAsync(PagedAndSortedResultRequestDto input)
+    {
+        var taskGroupQuery = await _taskGroupRepository.WithDetailsAsync();
+        var taskGroupsCount = await AsyncExecuter.CountAsync(taskGroupQuery);
+        var taskGroups = await AsyncExecuter.ToListAsync(taskGroupQuery);
+        var taskGroupsDtos = ObjectMapper.Map<List<TaskGroup>,List<TaskGroupDto>>(taskGroups);
+
+        return new PagedResultDto<TaskGroupDto>(taskGroupsCount, taskGroupsDtos);
     }
 
     public override async Task<TaskGroupDto> GetAsync(Guid id)
