@@ -1,25 +1,64 @@
 @page "/task-groups/create"
-@using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups
 @inherits TaskTrackingComponentBase
 
 <div class="islamic-pattern-bg">
     <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
         <!-- Header Section -->
-        <div class="d-flex align-items-center mb-4">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
-                           Color="Color.Primary"
-                           OnClick="@(() => NavigationManager.NavigateTo("/"))"
-                           Class="me-3" />
-            <div>
-                <MudText Typo="Typo.h4" Class="section-title mb-1">
-                    <MudIcon Icon="@Icons.Material.Filled.Add" Class="me-2" />
-                    @L["CreateTaskGroup"]
-                </MudText>
-                <MudText Typo="Typo.body2" Class="text-muted">
-                    @L["CreateNewTaskGroupDetails"]
-                </MudText>
-            </div>
-        </div>
+        <MudGrid Class="mb-4" AlignItems="Center">
+            <MudItem xs="12" sm="8" md="9">
+                <div class="d-flex align-items-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => NavigationManager.NavigateTo("/"))"
+                                   Class="me-3" />
+                    <div>
+                        <MudText Typo="Typo.h4" Class="section-title mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.Add" Class="me-2" />
+                            @L["CreateTaskGroup"]
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted d-none d-sm-block">
+                            @L["CreateNewTaskGroupDetails"]
+                        </MudText>
+                    </div>
+                </div>
+            </MudItem>
+            
+            <!-- Action Buttons -->
+            <MudItem xs="12" sm="4" md="3">
+                <MudStack Row="true" Spacing="2" Class="d-none d-sm-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Groups"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/all"))">
+                        @L["AllGroups"]
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.Person"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/my"))">
+                        @L["MyGroups"]
+                    </MudButton>
+                </MudStack>
+                
+                <!-- Mobile Buttons -->
+                <MudStack Spacing="2" Class="d-block d-sm-none">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Groups"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/all"))"
+                               FullWidth="true">
+                        @L["AllGroups"]
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.Person"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/my"))"
+                               FullWidth="true">
+                        @L["MyGroups"]
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
 
         <!-- Create Form -->
         <MudCard Class="islamic-card" Elevation="3">
@@ -88,7 +127,7 @@
                     </MudAlert>
 
                     <!-- Action Buttons -->
-                    <div class="d-flex justify-content-between align-items-center">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="d-none d-sm-flex">
                         <MudButton Variant="Variant.Text"
                                    Color="Color.Default"
                                    StartIcon="@Icons.Material.Filled.Cancel"
@@ -107,7 +146,30 @@
                             }
                             @L["CreateTaskGroup"]
                         </MudButton>
-                    </div>
+                    </MudStack>
+
+                    <!-- Mobile Action Buttons -->
+                    <MudStack Spacing="2" Class="d-block d-sm-none">
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Save"
+                                   Disabled="@IsSubmitting"
+                                   FullWidth="true">
+                            @if (IsSubmitting)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                            }
+                            @L["CreateTaskGroup"]
+                        </MudButton>
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Default"
+                                   StartIcon="@Icons.Material.Filled.Cancel"
+                                   OnClick="@(() => NavigationManager.NavigateTo("/"))"
+                                   FullWidth="true">
+                            @L["Cancel"]
+                        </MudButton>
+                    </MudStack>
                 </EditForm>
             </MudCardContent>
         </MudCard>
