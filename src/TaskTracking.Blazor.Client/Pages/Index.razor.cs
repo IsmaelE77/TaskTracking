@@ -11,6 +11,7 @@ namespace TaskTracking.Blazor.Client.Pages;
 public partial class Index
 {
     [Inject] private ITaskGroupAppService TaskGroupAppService { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
     private PagedResultDto<TaskGroupDto>? TaskGroups { get; set; }
     private bool IsLoading { get; set; } = true;

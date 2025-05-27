@@ -30,7 +30,8 @@
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Add"
-                       Class="create-btn">
+                       Class="create-btn"
+                       OnClick="@(() => NavigationManager.NavigateTo("/task-groups/create"))">
                 @L["CreateNewGroup"]
             </MudButton>
         </div>
@@ -81,7 +82,8 @@
                 </MudText>
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Add">
+                           StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="@(() => NavigationManager.NavigateTo("/task-groups/create"))">
                     @L["CreateFirstTaskGroup"]
                 </MudButton>
             </div>

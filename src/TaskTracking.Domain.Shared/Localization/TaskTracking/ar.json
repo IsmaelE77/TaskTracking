@@ -67,6 +67,18 @@
     "TaskGroupUpdatedSuccessfully": "تم تحديث مجموعة المهام بنجاح!",
     "ErrorLoadingTaskGroup": "خطأ في تحميل مجموعة المهام. يرجى المحاولة مرة أخرى.",
     "ErrorUpdatingTaskGroup": "خطأ في تحديث مجموعة المهام. يرجى المحاولة مرة أخرى.",
-    "EndDateMustBeAfterStartDate": "يجب أن يكون تاريخ النهاية بعد تاريخ البداية"
+    "EndDateMustBeAfterStartDate": "يجب أن يكون تاريخ النهاية بعد تاريخ البداية",
+    "CreateTaskGroup": "إنشاء مجموعة مهام",
+    "CreateNewTaskGroupDetails": "إنشاء مجموعة مهام جديدة لتنظيم أعمالك",
+    "SelectStartDate": "اختر تاريخ البداية لمجموعة المهام",
+    "CreateTaskGroupInfo": "سيتم تعيينك تلقائياً كمالك لهذه المجموعة. يمكنك إضافة أعضاء الفريق وتعيين المهام بعد الإنشاء.",
+    "QuickStartTips": "نصائح البداية السريعة",
+    "TipChooseDescriptiveTitle": "اختر عنواناً واضحاً ووصفياً يعكس الغرض من مجموعة المهام",
+    "TipAddDetailedDescription": "أضف وصفاً مفصلاً لمساعدة أعضاء الفريق على فهم الأهداف والنطاق",
+    "TipSetRealisticDates": "حدد تواريخ بداية ونهاية واقعية بناءً على الجدول الزمني لمشروعك",
+    "TipEndDateOptional": "تاريخ النهاية اختياري - اتركه فارغاً للمجموعات المستمرة أو غير المحددة المدة",
+    "TaskGroupCreatedSuccessfully": "تم إنشاء مجموعة المهام بنجاح!",
+    "ErrorCreatingTaskGroup": "خطأ في إنشاء مجموعة المهام. يرجى المحاولة مرة أخرى.",
+    "StartDateCannotBeInPast": "لا يمكن أن يكون تاريخ البداية في الماضي"
   }
 }

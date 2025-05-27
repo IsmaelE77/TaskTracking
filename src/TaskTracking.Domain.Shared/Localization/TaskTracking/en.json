@@ -67,6 +67,18 @@
     "TaskGroupUpdatedSuccessfully": "Task group updated successfully!",
     "ErrorLoadingTaskGroup": "Error loading task group. Please try again.",
     "ErrorUpdatingTaskGroup": "Error updating task group. Please try again.",
-    "EndDateMustBeAfterStartDate": "End date must be after start date"
+    "EndDateMustBeAfterStartDate": "End date must be after start date",
+    "CreateTaskGroup": "Create Task Group",
+    "CreateNewTaskGroupDetails": "Create a new task group to organize your work",
+    "SelectStartDate": "Select the start date for the task group",
+    "CreateTaskGroupInfo": "You will be automatically assigned as the owner of this task group. You can add team members and assign tasks after creation.",
+    "QuickStartTips": "Quick Start Tips",
+    "TipChooseDescriptiveTitle": "Choose a clear and descriptive title that reflects the purpose of the task group",
+    "TipAddDetailedDescription": "Add a detailed description to help team members understand the goals and scope",
+    "TipSetRealisticDates": "Set realistic start and end dates based on your project timeline",
+    "TipEndDateOptional": "End date is optional - leave it empty for ongoing or indefinite task groups",
+    "TaskGroupCreatedSuccessfully": "Task group created successfully!",
+    "ErrorCreatingTaskGroup": "Error creating task group. Please try again.",
+    "StartDateCannotBeInPast": "Start date cannot be in the past"
   }
 }
