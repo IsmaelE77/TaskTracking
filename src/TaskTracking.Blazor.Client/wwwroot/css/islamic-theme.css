@@ -564,3 +564,61 @@
 .mud-alert .mud-alert-message {
     font-family: "Tajawal", "Arial", sans-serif !important;
 }
+
+
+/* Fix for content appearing behind navigation drawer */
+.islamic-main-content {
+    position: relative;
+    z-index: 1;
+}
+
+.mud-container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Ensure search and filter components appear above drawer */
+.mud-input-control,
+.mud-select,
+.mud-textfield,
+.mud-input-outlined {
+    position: relative;
+    z-index: 10;
+}
+
+/* Fix for dropdown menus appearing behind drawer */
+.mud-popover,
+.mud-menu,
+.mud-select-popover {
+    z-index: 1400 !important;
+}
+
+.mud-overlay {
+    z-index: 1300 !important;
+}
+
+/* Ensure autocomplete and dropdown lists appear above everything */
+.mud-list,
+.mud-menu-list {
+    z-index: 1500 !important;
+}
+
+/* Fix for date picker popover */
+.mud-picker-popover {
+    z-index: 1400 !important;
+}
+
+/* Ensure drawer has proper z-index */
+.islamic-drawer {
+    z-index: 1200 !important;
+}
+
+/* Fix for mobile drawer overlay */
+.mud-drawer-overlay {
+    z-index: 1100 !important;
+}
+
+/* Ensure app bar stays on top */
+.islamic-app-bar {
+    z-index: 1250 !important;
+}
