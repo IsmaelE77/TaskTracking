@@ -22,12 +22,7 @@
         </MudText>
         <MudSpacer />
         <LanguageSwitcher />
-        <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
-            <MudMenuItem Icon="@Icons.Material.Filled.Person">@L["Profile"]</MudMenuItem>
-            <MudMenuItem Icon="@Icons.Material.Filled.Settings">@L["Settings"]</MudMenuItem>
-            <MudDivider />
-            <MudMenuItem Icon="@Icons.Material.Filled.Logout">@L["Logout"]</MudMenuItem>
-        </MudMenu>
+        <LoginDisplay />
     </MudAppBar>
 
     <MudDrawer @bind-Open="@_drawerOpen" Class="islamic-drawer" Elevation="2">

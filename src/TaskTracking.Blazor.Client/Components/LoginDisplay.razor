@@ -1,0 +1,78 @@
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.Extensions.Localization
+@using TaskTracking.Localization
+@using Microsoft.Extensions.Options
+@using Volo.Abp.AspNetCore.Components.WebAssembly.LeptonXLiteTheme
+@using Volo.Abp.UI.Navigation
+@inherits TaskTrackingComponentBase
+@inject IJSRuntime JsRuntime
+@inject NavigationManager Navigation
+@inject IStringLocalizer<TaskTrackingResource> L
+@inject IOptions<AuthenticationOptions> AuthenticationOptions
+@inject IOptions<AbpAspNetCoreComponentsWebOptions> AbpAspNetCoreComponentsWebOptions
+@inject IMenuManager MenuManager
+
+<AuthorizeView>
+    <Authorized>
+        <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <MudText Typo="Typo.body2" Class="px-4 py-2">
+                @if (CurrentTenant.Name != null)
+                {
+                    <span><i>@CurrentTenant.Name</i>\@CurrentUser.UserName</span>
+                }
+                else
+                {
+                    <span>@CurrentUser.UserName</span>
+                }
+            </MudText>
+            <MudDivider Class="mb-2" />
+            @if (Menu != null)
+            {
+                @foreach (var menuItem in Menu.Items)
+                {
+                    <MudMenuItem Icon="@Icons.Material.Filled.Person" OnClick="@(() => NavigateToAsync(menuItem.Url, menuItem.Target))">
+                        @menuItem.DisplayName
+                    </MudMenuItem>
+                }
+                <MudDivider />
+            }
+            <MudMenuItem Icon="@Icons.Material.Filled.Logout" OnClick="BeginSignOut">@L["Logout"]</MudMenuItem>
+        </MudMenu>
+    </Authorized>
+    <NotAuthorized>
+        <MudButton Variant="Variant.Text" Color="Color.Inherit" Href="@AuthenticationOptions.Value.LoginUrl">@L["Login"]</MudButton>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected ApplicationMenu? Menu { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Menu = await MenuManager.GetAsync(StandardMenus.User);
+    }
+
+    private async Task NavigateToAsync(string uri, string target = null)
+    {
+        if (target == "_blank")
+        {
+            await JsRuntime.InvokeVoidAsync("open", uri, target);
+        }
+        else
+        {
+            Navigation.NavigateTo(uri);
+        }
+    }
+
+    private void BeginSignOut()
+    {
+        if (AbpAspNetCoreComponentsWebOptions.Value.IsBlazorWebApp)
+        {
+            Navigation.NavigateTo(AuthenticationOptions.Value.LogoutUrl, forceLoad: true);
+        }
+        else
+        {
+            Navigation.NavigateToLogout(AuthenticationOptions.Value.LogoutUrl);
+        }
+    }
+}
