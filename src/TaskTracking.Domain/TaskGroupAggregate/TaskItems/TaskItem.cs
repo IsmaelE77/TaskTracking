@@ -230,7 +230,7 @@ public class TaskItem : FullAuditedEntity<Guid>, IHaveTaskGroup
             return 0;
 
         var count = 0;
-        var current = StartDate;
+        var current = from;
         var endDate = RecurrencePattern.EndDate ?? EndDate ?? to;
         endDate = endDate > to ? to : endDate;
 
