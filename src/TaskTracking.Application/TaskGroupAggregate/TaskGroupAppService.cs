@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using TaskTracking.Permissions;
@@ -52,7 +53,7 @@ public class TaskGroupAppService :
     {
         var taskGroupQuery = await _taskGroupRepository.WithDetailsAsync();
         var taskGroupsCount = await AsyncExecuter.CountAsync(taskGroupQuery);
-        var taskGroups = await AsyncExecuter.ToListAsync(taskGroupQuery);
+        var taskGroups = await AsyncExecuter.ToListAsync(taskGroupQuery.PageBy(input));
         var taskGroupsDtos = ObjectMapper.Map<List<TaskGroup>,List<TaskGroupDto>>(taskGroups);
 
         return new PagedResultDto<TaskGroupDto>(taskGroupsCount, taskGroupsDtos);
