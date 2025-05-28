@@ -18,6 +18,7 @@ public static class TaskTrackingDomainErrorCodes
     public const string InvalidRecurrenceOccurrences = "TrackingTask:00202";
     public const string WeeklyRecurrenceRequiresDaysOfWeek = "TrackingTask:00203";
     public const string RecurrenceEndDateExceedsTaskItemEndDate = "TrackingTask:00204";
+    public const string RecurrenceMustHaveEndDateOrOccurrences = "TrackingTask:00205";
 
     /* User Task Group Error Codes */
     public const string CannotRemoveOwner = "TrackingTask:00301";

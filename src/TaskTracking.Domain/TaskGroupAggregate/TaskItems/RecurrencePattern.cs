@@ -65,7 +65,7 @@ public class RecurrencePattern : ValueObject
 
         if (endDate == null && occurrences == null)
         {
-            throw new BusinessException("Recurrence must have an end date or a number of occurrences.");
+            throw new BusinessException(TaskTrackingDomainErrorCodes.RecurrenceMustHaveEndDateOrOccurrences);
         }
 
         RecurrenceType = recurrenceType;
