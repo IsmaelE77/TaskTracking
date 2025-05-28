@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AutoMapper;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
@@ -32,7 +33,9 @@ public class TaskTrackingApplicationAutoMapperProfile : Profile
         // TaskItem mappings
         CreateMap<TaskItem, TaskItemDto>()
             .ForMember(dest => dest.IsCompleted, opt => opt.MapFrom(src =>
-                src.UserProgresses.Any(up => up.ProgressPercentage == 100)));
+                src.UserProgresses.Any(up => up.ProgressPercentage == 100)))
+            .ForMember(dest => dest.IsDueToday, opt => opt.MapFrom(src =>
+                src.IsDue(DateTime.UtcNow)));
 
         // UserTaskGroup mappings
         CreateMap<UserTaskGroup, UserTaskGroupDto>();

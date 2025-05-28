@@ -53,4 +53,6 @@ public class TaskItemDto : AuditedEntityDto<Guid>
 
     public List<UserTaskProgressDto> UserTaskProgressDtos { get; set; } = new();
 
+    public bool IsDueToday { get; set; }
+
 }
