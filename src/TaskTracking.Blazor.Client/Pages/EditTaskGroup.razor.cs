@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using TaskTracking.TaskGroupAggregate;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
+using TaskTracking.TaskGroupAggregate.Validators;
 
 namespace TaskTracking.Blazor.Client.Pages;
 
@@ -13,6 +14,7 @@ public partial class EditTaskGroup
     [Inject] private ITaskGroupAppService TaskGroupAppService { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    [Inject] private UpdateTaskGroupDtoValidator UpdateTaskGroupDtoValidator { get; set; } = null!;
 
     private TaskGroupDto? TaskGroup { get; set; }
     private UpdateTaskGroupDto UpdateDto { get; set; } = new();
@@ -22,6 +24,8 @@ public partial class EditTaskGroup
     // Date picker properties
     private DateTime? StartDatePicker { get; set; }
     private DateTime? EndDatePicker { get; set; }
+    
+    private MudForm form;
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,7 +53,6 @@ public partial class EditTaskGroup
                 // Set date picker values
                 StartDatePicker = TaskGroup.StartDate;
                 EndDatePicker = TaskGroup.EndDate;
-
             }
         }
         catch (Exception ex)
@@ -65,37 +68,41 @@ public partial class EditTaskGroup
 
     private async Task HandleValidSubmit()
     {
-        try
+        // Update DTO with date picker values
+        if (StartDatePicker.HasValue)
         {
-            IsSubmitting = true;
-
-            // Update DTO with date picker values
-            if (StartDatePicker.HasValue)
-            {
-                UpdateDto.StartDate = StartDatePicker.Value;
-            }
-            UpdateDto.EndDate = EndDatePicker;
-
-            // Validate dates
-            if (UpdateDto.EndDate.HasValue && UpdateDto.EndDate.Value < UpdateDto.StartDate)
-            {
-                Snackbar.Add(L["EndDateMustBeAfterStartDate"], Severity.Warning);
-                return;
-            }
-
-            await TaskGroupAppService.UpdateAsync(Id, UpdateDto);
-            
-            Snackbar.Add(L["TaskGroupUpdatedSuccessfully"], Severity.Success);
-            NavigationManager.NavigateTo("/");
+            UpdateDto.StartDate = StartDatePicker.Value;
         }
-        catch (Exception ex)
+        UpdateDto.EndDate = EndDatePicker;
+
+        await form.Validate();
+        
+        var result = await UpdateTaskGroupDtoValidator.ValidateAsync(UpdateDto);
+        
+        result.Errors.ForEach(error =>
         {
-            Snackbar.Add(L["ErrorUpdatingTaskGroup"], Severity.Error);
-            Console.WriteLine($"Error updating task group: {ex.Message}");
-        }
-        finally
+            Snackbar.Add(error.ErrorMessage, Severity.Error);
+        });
+
+        if (form.IsValid && result.IsValid)
         {
-            IsSubmitting = false;
+            try
+            {
+                IsSubmitting = true;
+                await TaskGroupAppService.UpdateAsync(Id, UpdateDto);
+                
+                Snackbar.Add(L["TaskGroupUpdatedSuccessfully"], Severity.Success);
+                NavigationManager.NavigateTo("/");
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(L["ErrorUpdatingTaskGroup"], Severity.Error);
+                Console.WriteLine($"Error updating task group: {ex.Message}");
+            }
+            finally
+            {
+                IsSubmitting = false;
+            }
         }
     }
 }

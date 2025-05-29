@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using FluentValidation;
 using TaskTracking.Localization;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
@@ -36,6 +39,11 @@ public class UpdateTaskGroupDtoValidator : AbstractValidator<UpdateTaskGroupDto>
             .WithMessage(_localizer["The {PropertyName} field must not exceed {MaxLength} characters."]);
 
         RuleFor(x => x.StartDate)
+            .GreaterThanOrEqualTo(DateTime.Today)
+            .WithName(_localizer["StartDate"])
+            .WithMessage(_localizer["StartDateCannotBeInPast"]);
+
+        RuleFor(x => x.StartDate)
             .NotEmpty()
             .WithName(_localizer["StartDate"])
             .WithMessage(_localizer["The {PropertyName} field is required."]);
@@ -46,4 +54,16 @@ public class UpdateTaskGroupDtoValidator : AbstractValidator<UpdateTaskGroupDto>
             .WithName(_localizer["EndDate"])
             .WithMessage(_localizer["EndDateMustBeAfterStartDate"]);
     }
+
+
+    public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+    {
+        var result = await ValidateAsync(ValidationContext<UpdateTaskGroupDto>.CreateWithOptions((UpdateTaskGroupDto)model, x => x.IncludeProperties(propertyName)));
+        if (result.IsValid)
+        {
+            return [];
+        }
+
+        return result.Errors.Select(e => e.ErrorMessage);
+    };
 }
