@@ -65,7 +65,6 @@ public class TaskGroupAppService :
         return ObjectMapper.Map<TaskGroup, TaskGroupDto>(taskGroup);
     }
 
-    [Authorize(UserTaskGroupPermissions.Create)]
     public override async Task<TaskGroupDto> CreateAsync(CreateTaskGroupDto input)
     {
         var currentUserId = _currentUser.GetId();

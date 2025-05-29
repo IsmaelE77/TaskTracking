@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using FluentValidation;
 using TaskTracking.Localization;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
@@ -51,4 +54,15 @@ public class CreateTaskGroupDtoValidator : AbstractValidator<CreateTaskGroupDto>
             .WithName(_localizer["EndDate"])
             .WithMessage(_localizer["EndDateMustBeAfterStartDate"]);
     }
+
+    public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+    {
+        var result = await ValidateAsync(ValidationContext<CreateTaskGroupDto>.CreateWithOptions((CreateTaskGroupDto)model, x => x.IncludeProperties(propertyName)));
+        if (result.IsValid)
+        {
+            return [];
+        }
+
+        return result.Errors.Select(e => e.ErrorMessage);
+    };
 }

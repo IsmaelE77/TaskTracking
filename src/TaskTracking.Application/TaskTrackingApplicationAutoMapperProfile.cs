@@ -21,7 +21,7 @@ public class TaskTrackingApplicationAutoMapperProfile : Profile
                 src.Tasks.Count > 0 && src.Tasks.All(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100))))
             .ForMember(dest => dest.ProgressPercentageCompleted,
                 opt => opt.MapFrom(src =>
-                    src.Tasks.Count(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100)) * 100 / src.Tasks.Count
+                    src.Tasks.Count(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100)) * 100 / (src.Tasks.Count > 0 ? src.Tasks.Count : 1)
                 ));
 
         CreateMap<TaskGroup, TaskGroupDetailsDto>()
