@@ -1,5 +1,6 @@
 @page "/task-groups/create"
 @inherits TaskTrackingComponentBase
+@using Severity = MudBlazor.Severity
 
 <div class="islamic-pattern-bg">
     <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
@@ -63,9 +64,7 @@
         <!-- Create Form -->
         <MudCard Class="islamic-card" Elevation="3">
             <MudCardContent Class="pa-6">
-                <EditForm Model="@CreateDto" OnValidSubmit="@HandleValidSubmit">
-                    <DataAnnotationsValidator />
-                    
+                <MudForm Model="@CreateDto" @ref="@form" Validation="@(CreateTaskGroupDtoValidator.ValidateValue)" ValidationDelay="0">
                     <!-- Title Field -->
                     <MudTextField @bind-Value="CreateDto.Title"
                                   Label="@L["Title"]"
@@ -75,7 +74,8 @@
                                   MaxLength="200"
                                   Counter="200"
                                   HelperText="@L["EnterTaskGroupTitle"]"
-                                  For="@(() => CreateDto.Title)" />
+                                  For="@(() => CreateDto.Title)"
+                                  Immediate="true" />
 
                     <!-- Description Field -->
                     <MudGrid Class="mb-4" Spacing="10">
@@ -108,7 +108,8 @@
                                            Variant="Variant.Outlined"
                                            Required="true"
                                            DateFormat="dd/MM/yyyy"
-                                           HelperText="@L["SelectStartDate"]" />
+                                           HelperText="@L["SelectStartDate"]"
+                                           For="@(() => CreateDto.StartDate)" />
                         </MudItem>
                         <MudItem xs="12" md="6">
                             <MudDatePicker @bind-Date="EndDatePicker"
@@ -116,7 +117,8 @@
                                            Variant="Variant.Outlined"
                                            DateFormat="dd/MM/yyyy"
                                            Clearable="true"
-                                           HelperText="@L["OptionalEndDate"]" />
+                                           HelperText="@L["OptionalEndDate"]"
+                                           For="@(() => CreateDto.EndDate)" />
                         </MudItem>
                     </MudGrid>
 
@@ -137,10 +139,10 @@
                             @L["Cancel"]
                         </MudButton>
 
-                        <MudButton ButtonType="ButtonType.Submit"
-                                   Variant="Variant.Filled"
+                        <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"
                                    StartIcon="@Icons.Material.Filled.Save"
+                                   OnClick="@(async () => await Submit())"
                                    Disabled="@IsSubmitting">
                             @if (IsSubmitting)
                             {
@@ -152,10 +154,10 @@
 
                     <!-- Mobile Action Buttons -->
                     <MudStack Spacing="2" Class="d-block d-sm-none">
-                        <MudButton ButtonType="ButtonType.Submit"
-                                   Variant="Variant.Filled"
+                        <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"
                                    StartIcon="@Icons.Material.Filled.Save"
+                                   OnClick="@(async () => await Submit())"
                                    Disabled="@IsSubmitting"
                                    FullWidth="true">
                             @if (IsSubmitting)
@@ -172,7 +174,7 @@
                             @L["Cancel"]
                         </MudButton>
                     </MudStack>
-                </EditForm>
+                </MudForm>
             </MudCardContent>
         </MudCard>
 
