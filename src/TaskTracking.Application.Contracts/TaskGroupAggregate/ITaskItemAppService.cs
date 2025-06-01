@@ -11,6 +11,8 @@ namespace TaskTracking.TaskGroupAggregate;
 /// </summary>
 public interface ITaskItemAppService : IApplicationService
 {
+    Task<TaskItemDto> GetAsync(Guid id);
+    Task<PagedResultDto<TaskItemDto>> GetListAsync(PagedResultRequestDto input);
     /// <summary>
     ///     Gets all tasks for a specific task group.
     /// </summary>

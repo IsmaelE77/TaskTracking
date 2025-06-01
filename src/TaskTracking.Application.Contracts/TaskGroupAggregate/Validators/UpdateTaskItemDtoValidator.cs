@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using FluentValidation;
 using TaskTracking.Localization;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
@@ -67,4 +70,15 @@ public class UpdateTaskItemDtoValidator : AbstractValidator<UpdateTaskItemDto>
             .SetValidator(new CreateRecurrencePatternDtoValidator(_localizer))
             .When(x => x.RecurrencePattern != null);
     }
+
+    public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+    {
+        var result = await ValidateAsync(ValidationContext<UpdateTaskItemDto>.CreateWithOptions((UpdateTaskItemDto)model, x => x.IncludeProperties(propertyName)));
+        if (result.IsValid)
+        {
+            return [];
+        }
+
+        return result.Errors.Select(e => e.ErrorMessage);
+    };
 }

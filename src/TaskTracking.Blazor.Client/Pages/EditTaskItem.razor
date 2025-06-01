@@ -1,0 +1,337 @@
+@page "/task-groups/{taskGroupId:guid}/tasks/{taskItemId:guid}/edit"
+@inherits TaskTrackingComponentBase
+@using Severity = MudBlazor.Severity
+@using TaskTracking.TaskGroupAggregate.TaskItems
+
+<div class="islamic-pattern-bg">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
+        <!-- Header Section -->
+        <MudGrid Class="mb-4" AlignItems="Center">
+            <MudItem xs="12" sm="8" md="9">
+                <div class="d-flex align-items-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))"
+                                   Class="me-3" />
+                    <div>
+                        <MudText Typo="Typo.h4" Class="section-title mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="me-2" />
+                            @L["EditTask"]
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted d-none d-sm-block">
+                            @L["UpdateTaskDetails"]
+                        </MudText>
+                    </div>
+                </div>
+            </MudItem>
+            
+            <!-- Action Buttons -->
+            <MudItem xs="12" sm="4" md="3">
+                <MudStack Row="true" Spacing="2" Class="d-none d-sm-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Visibility"
+                               OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))">
+                        @L["ViewGroup"]
+                    </MudButton>
+                </MudStack>
+                
+                <!-- Mobile Buttons -->
+                <MudStack Spacing="2" Class="d-block d-sm-none">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Visibility"
+                               OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))"
+                               FullWidth="true">
+                        @L["ViewGroup"]
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+
+        @if (IsLoading)
+        {
+            <div class="text-center py-5">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                <MudText Typo="Typo.body1" Class="mt-3">@L["LoadingTask"]</MudText>
+            </div>
+        }
+        else if (TaskItem == null)
+        {
+            <MudCard Class="text-center py-5" Elevation="2">
+                <MudCardContent>
+                    <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Large" Color="Color.Error" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">@L["TaskNotFound"]</MudText>
+                    <MudText Typo="Typo.body2" Class="text-muted mb-4">
+                        @L["TaskNotFoundDescription"]
+                    </MudText>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.ArrowBack"
+                               OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))">
+                        @L["BackToGroup"]
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <!-- Edit Form -->
+            <MudCard Class="islamic-card" Elevation="3">
+                <MudCardContent Class="pa-6">
+                    <MudForm Model="@UpdateDto" @ref="@form" Validation="@(UpdateTaskItemDtoValidator.ValidateValue)" ValidationDelay="0">
+                        <!-- Title Field -->
+                        <MudTextField @bind-Value="UpdateDto.Title"
+                                      Label="@L["Title"]"
+                                      Variant="Variant.Outlined"
+                                      Class="mb-4"
+                                      Required="true"
+                                      MaxLength="256"
+                                      Counter="256"
+                                      HelperText="@L["EnterTaskTitle"]"
+                                      For="@(() => UpdateDto.Title)"
+                                      Immediate="true" />
+
+                        <!-- Description Field -->
+                        <MudGrid Class="mb-4" Spacing="10">
+                            <MudItem xs="12" md="6">
+                                <MudTextField @bind-Value="UpdateDto.Description"
+                                              Label="@L["Description"]"
+                                              Variant="Variant.Outlined"
+                                              Lines="8"
+                                              Class="mb-4"
+                                              Required="true"
+                                              MaxLength="2000"
+                                              Counter="2000"
+                                              HelperText="@L["EnterTaskDescription"]"
+                                              Immediate="true"
+                                              For="@(() => UpdateDto.Description)"/>
+                            </MudItem>
+
+                            <MudItem xs="12" md="6" Style="margin-top: 20px">
+                                <div class="markdown-content">
+                                    <MudMarkdown Value="@UpdateDto.Description"/>
+                                </div>
+                            </MudItem>
+                        </MudGrid>
+
+                        <!-- Date Fields -->
+                        <MudGrid Class="mb-4">
+                            <MudItem xs="12" md="6">
+                                <MudDatePicker @bind-Date="StartDatePicker"
+                                               Label="@L["StartDate"]"
+                                               Variant="Variant.Outlined"
+                                               Required="true"
+                                               DateFormat="dd/MM/yyyy"
+                                               HelperText="@L["SelectStartDate"]"
+                                               For="@(() => UpdateDto.StartDate)" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudDatePicker @bind-Date="EndDatePicker"
+                                               Label="@L["EndDate"]"
+                                               Variant="Variant.Outlined"
+                                               DateFormat="dd/MM/yyyy"
+                                               Clearable="true"
+                                               HelperText="@L["OptionalEndDate"]"
+                                               For="@(() => UpdateDto.EndDate)" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <!-- Task Type Selection -->
+                        <MudGrid Class="mb-4">
+                            <MudItem xs="12">
+                                <MudText Typo="Typo.subtitle1" Class="mb-2">@L["TaskType"]</MudText>
+                                <MudRadioGroup @bind-Value="UpdateDto.TaskType" T="TaskType" Class="mb-3">
+                                    <MudRadio Value="TaskType.OneTime" Color="Color.Primary">
+                                        <MudText>@L["OneTimeTask"]</MudText>
+                                        <MudText Typo="Typo.caption" Class="text-muted">@L["OneTimeTaskDescription"]</MudText>
+                                    </MudRadio>
+                                    <MudRadio Value="TaskType.Recurring" Color="Color.Primary">
+                                        <MudText>@L["RecurringTask"]</MudText>
+                                        <MudText Typo="Typo.caption" Class="text-muted">@L["RecurringTaskDescription"]</MudText>
+                                    </MudRadio>
+                                </MudRadioGroup>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <!-- Recurrence Pattern Section (shown only for recurring tasks) -->
+                        @if (UpdateDto.TaskType == TaskType.Recurring)
+                        {
+                            <MudCard Class="mb-4" Elevation="1">
+                                <MudCardHeader>
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.h6">
+                                            <MudIcon Icon="@Icons.Material.Filled.Repeat" Class="me-2" />
+                                            @L["RecurrencePattern"]
+                                        </MudText>
+                                    </CardHeaderContent>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <!-- Recurrence Type -->
+                                    <MudGrid Class="mb-3">
+                                        <MudItem xs="12" md="6">
+                                            <MudSelect @bind-Value="RecurrencePattern.RecurrenceType"
+                                                       Label="@L["RecurrenceType"]"
+                                                       Variant="Variant.Outlined"
+                                                       Required="true"
+                                                       HelperText="@L["SelectRecurrenceType"]">
+                                                <MudSelectItem Value="RecurrenceType.Daily">@L["Daily"]</MudSelectItem>
+                                                <MudSelectItem Value="RecurrenceType.Weekly">@L["Weekly"]</MudSelectItem>
+                                                <MudSelectItem Value="RecurrenceType.Monthly">@L["Monthly"]</MudSelectItem>
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem xs="12" md="6">
+                                            <MudNumericField @bind-Value="RecurrencePattern.Interval"
+                                                             Label="@L["Interval"]"
+                                                             Variant="Variant.Outlined"
+                                                             Required="true"
+                                                             Min="1"
+                                                             HelperText="@GetIntervalHelperText()" />
+                                        </MudItem>
+                                    </MudGrid>
+
+                                    <!-- Days of Week (for weekly recurrence) -->
+                                    @if (RecurrencePattern.RecurrenceType == RecurrenceType.Weekly)
+                                    {
+                                        <MudGrid Class="mb-3">
+                                            <MudItem xs="12">
+                                                <MudText Typo="Typo.subtitle2" Class="mb-2">@L["DaysOfWeek"]</MudText>
+                                                <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2">
+                                                    @foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
+                                                    {
+                                                        var currentDay = day; // Capture for closure
+                                                        <MudCheckBox Value="@GetDayOfWeekSelection(currentDay)"
+                                                                     ValueChanged="@((bool value) => SetDayOfWeekSelection(currentDay, value))"
+                                                                     Label="@L[day.ToString()]"
+                                                                     Color="Color.Primary"
+                                                                     Dense="true" />
+                                                    }
+                                                </MudStack>
+                                            </MudItem>
+                                        </MudGrid>
+                                    }
+
+                                    <!-- End Condition -->
+                                    <MudGrid Class="mb-3">
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.subtitle2" Class="mb-2">@L["EndCondition"]</MudText>
+                                            <MudRadioGroup @bind-Value="EndConditionType" T="string" Class="mb-3">
+                                                <MudRadio Value="@("EndDate")" Color="Color.Primary">
+                                                    @L["EndByDate"]
+                                                </MudRadio>
+                                                <MudRadio Value="@("Occurrences")" Color="Color.Primary">
+                                                    @L["EndAfterOccurrences"]
+                                                </MudRadio>
+                                            </MudRadioGroup>
+                                        </MudItem>
+                                    </MudGrid>
+
+                                    <!-- End Date or Occurrences -->
+                                    <MudGrid Class="mb-3">
+                                        @if (EndConditionType == "EndDate")
+                                        {
+                                            <MudItem xs="12" md="6">
+                                                <MudDatePicker @bind-Date="RecurrenceEndDatePicker"
+                                                               Label="@L["RecurrenceEndDate"]"
+                                                               Variant="Variant.Outlined"
+                                                               DateFormat="dd/MM/yyyy"
+                                                               HelperText="@L["SelectRecurrenceEndDate"]" />
+                                            </MudItem>
+                                        }
+                                        else
+                                        {
+                                            <MudItem xs="12" md="6">
+                                                <MudNumericField @bind-Value="RecurrencePattern.Occurrences"
+                                                                 Label="@L["NumberOfOccurrences"]"
+                                                                 Variant="Variant.Outlined"
+                                                                 Min="1"
+                                                                 HelperText="@L["EnterNumberOfOccurrences"]" />
+                                            </MudItem>
+                                        }
+                                    </MudGrid>
+                                </MudCardContent>
+                            </MudCard>
+                        }
+
+                        <!-- Information Card -->
+                        <MudAlert Severity="Severity.Info" Class="mb-4">
+                            <MudText Typo="Typo.body2">
+                                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="me-2" />
+                                @L["EditTaskInfo"]
+                            </MudText>
+                        </MudAlert>
+
+                        <!-- Action Buttons -->
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="d-none d-sm-flex">
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Default"
+                                       StartIcon="@Icons.Material.Filled.Cancel"
+                                       OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))">
+                                @L["Cancel"]
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       OnClick="@(async () => await Submit())"
+                                       Disabled="@IsSubmitting">
+                                @if (IsSubmitting)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                }
+                                @L["SaveChanges"]
+                            </MudButton>
+                        </MudStack>
+
+                        <!-- Mobile Action Buttons -->
+                        <MudStack Spacing="2" Class="d-block d-sm-none">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       OnClick="@(async () => await Submit())"
+                                       Disabled="@IsSubmitting"
+                                       FullWidth="true">
+                                @if (IsSubmitting)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                }
+                                @L["SaveChanges"]
+                            </MudButton>
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Default"
+                                       StartIcon="@Icons.Material.Filled.Cancel"
+                                       OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))"
+                                       FullWidth="true">
+                                @L["Cancel"]
+                            </MudButton>
+                        </MudStack>
+                    </MudForm>
+                </MudCardContent>
+            </MudCard>
+
+            <!-- Edit Tips -->
+            <MudCard Class="mt-4" Elevation="2">
+                <MudCardContent Class="pa-4">
+                    <MudText Typo="Typo.h6" Class="mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="me-2" Color="Color.Warning" />
+                        @L["TaskEditingTips"]
+                    </MudText>
+                    <MudList T="string" Dense="true">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                            <MudText Typo="Typo.body2">@L["TipChangingTaskType"]</MudText>
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                            <MudText Typo="Typo.body2">@L["TipRecurrencePatternChanges"]</MudText>
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                            <MudText Typo="Typo.body2">@L["TipDateChangesAffectProgress"]</MudText>
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                            <MudText Typo="Typo.body2">@L["TipSaveChangesRegularly"]</MudText>
+                        </MudListItem>
+                    </MudList>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudContainer>
+</div>

@@ -99,9 +99,10 @@ public partial class ViewTaskGroup
         };
     }
 
-    private async Task HandleErrorAsync(Exception ex)
+    protected override Task HandleErrorAsync(Exception ex)
     {
         Console.WriteLine($"Error: {ex.Message}");
         Snackbar.Add(L["AnErrorOccurred"], Severity.Error);
+        return Task.CompletedTask;
     }
 }

@@ -185,6 +185,22 @@
     "TipRecurringTasksHelp": "Use recurring tasks for regular activities like reviews, reports, or maintenance",
     "TaskCreatedSuccessfully": "Task created successfully!",
     "ErrorCreatingTask": "Error creating task. Please try again.",
+    "EditTask": "Edit Task",
+    "UpdateTaskDetails": "Update task details and settings",
+    "LoadingTask": "Loading task...",
+    "TaskNotFound": "Task Not Found",
+    "TaskNotFoundDescription": "The requested task could not be found or you don't have permission to access it.",
+    "BackToGroup": "Back to Group",
+    "EditingTaskInGroup": "Editing task in this group",
+    "EditTaskInfo": "Changes to this task will be visible to all group members. Be careful when modifying recurring tasks as it may affect future occurrences.",
+    "TaskEditingTips": "Task Editing Tips",
+    "TipChangingTaskType": "Changing task type from recurring to one-time will remove the recurrence pattern",
+    "TipRecurrencePatternChanges": "Modifying recurrence patterns affects future task instances, not completed ones",
+    "TipDateChangesAffectProgress": "Changing dates may affect progress tracking and due date calculations",
+    "TipSaveChangesRegularly": "Save changes regularly to avoid losing your work",
+    "TaskUpdatedSuccessfully": "Task updated successfully!",
+    "ErrorUpdatingTask": "Error updating task. Please try again.",
+    "ErrorLoadingTask": "Error loading task. Please try again.",
     "Sunday": "Sunday",
     "Monday": "Monday",
     "Tuesday": "Tuesday",
@@ -197,6 +213,7 @@
     "Days of week should only be specified for weekly recurrence.": "Days of week should only be specified for weekly recurrence.",
     "Recurrence must have an end date or a number of occurrences.": "Recurrence must have an end date or a number of occurrences.",
     "Recurrence cannot have both end date and number of occurrences.": "Recurrence cannot have both end date and number of occurrences.",
-    "Progress date cannot be in the future.": "Progress date cannot be in the future."
+    "Progress date cannot be in the future.": "Progress date cannot be in the future.",
+    "TrackingTask:00205": "Recurrence must have an end date or a number of occurrences."
   }
 }

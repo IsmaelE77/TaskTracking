@@ -7,6 +7,7 @@ using TaskTracking.TaskGroupAggregate.TaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Users;
 
@@ -33,7 +34,15 @@ public class TaskItemAppService : ApplicationService,ITaskItemAppService
 
     public async Task<TaskItemDto> GetAsync(Guid id)
     {
-        var taskItem = await _taskItemReadOnlyRepository.GetAsync(id);
+        var queryable = await _taskItemReadOnlyRepository.WithDetailsAsync(x => x.UserProgresses);
+        
+        var taskItem = await AsyncExecuter.FirstOrDefaultAsync(queryable.Where(x => x.Id == id));
+
+        if (taskItem is null)
+        {
+            throw new EntityNotFoundException(typeof(TaskItem), id);
+        }
+        
         return ObjectMapper.Map<TaskItem, TaskItemDto>(taskItem);
     }
 

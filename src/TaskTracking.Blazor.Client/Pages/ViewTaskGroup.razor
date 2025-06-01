@@ -1,7 +1,6 @@
 @page "/task-groups/{id:guid}"
 @inherits TaskTrackingComponentBase
 
-
 <div class="islamic-pattern-bg">
     <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
         <!-- Header Section -->
@@ -199,7 +198,7 @@
                             @foreach (var task in Tasks)
                             {
                                 <MudItem xs="12" sm="6" md="4" lg="3">
-                                    <TaskItemCard TaskItem="@task" />
+                                    <TaskItemCard TaskItem="@task" TaskGroupId="@Id" />
                                 </MudItem>
                             }
                         </MudGrid>

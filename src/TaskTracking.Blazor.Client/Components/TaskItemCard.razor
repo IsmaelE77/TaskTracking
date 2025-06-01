@@ -1,6 +1,7 @@
 @using TaskTracking.TaskGroupAggregate.Dtos.TaskItems
 @using TaskTracking.TaskGroupAggregate.TaskItems
 @inherits TaskTrackingComponentBase
+@inject NavigationManager NavigationManager;
 
 <MudCard Class="task-item-card h-100" Elevation="2">
     <MudCardHeader>
@@ -106,13 +107,13 @@
         </MudButton>
         
         <div>
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
-                           Color="Color.Primary" 
+            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                           Color="Color.Primary"
                            Size="Size.Small"
-                           Disabled="true"
+                           OnClick="@(() => EditTask())"
                            title="@L["Edit"]" />
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                           Color="Color.Error" 
+            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                           Color="Color.Error"
                            Size="Size.Small"
                            Disabled="true"
                            title="@L["Delete"]" />
@@ -122,6 +123,7 @@
 
 @code {
     [Parameter] public TaskItemDto TaskItem { get; set; } = null!;
+    [Parameter] public Guid TaskGroupId { get; set; }
 
     private string GetTaskTypeIcon()
     {
@@ -177,5 +179,10 @@
             >= 50 => Color.Warning,
             _ => Color.Primary
         };
+    }
+
+    private void EditTask()
+    {
+        NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItem.Id}/edit");
     }
 }
