@@ -158,6 +158,13 @@
                                 <MudIcon Icon="@Icons.Material.Filled.Assignment" Class="me-2" />
                                 @L["Tasks"] (@Tasks.Count)
                             </MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{Id}/tasks/create"))"
+                                       Size="Size.Small">
+                                @L["CreateTask"]
+                            </MudButton>
                         </div>
                     </CardHeaderContent>
                 </MudCardHeader>
@@ -178,6 +185,12 @@
                             <MudText Typo="Typo.body2" Class="text-muted mb-4">
                                 @L["NoTasksFoundDescription"]
                             </MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{Id}/tasks/create"))">
+                                @L["CreateFirstTask"]
+                            </MudButton>
                         </div>
                     }
                     else

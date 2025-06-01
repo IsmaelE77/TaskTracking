@@ -64,6 +64,7 @@ public class TaskTrackingApplicationAutoMapperProfile : Profile
                     default:
                         return null;
                 }
-            });
+            })
+            .ForAllMembers(opt => opt.Ignore()); // Ignore all member mappings since we're using ConstructUsing
     }
 }
