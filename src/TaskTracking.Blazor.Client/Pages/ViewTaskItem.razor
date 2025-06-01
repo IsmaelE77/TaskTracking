@@ -1,0 +1,316 @@
+@page "/task-groups/{taskGroupId:guid}/tasks/{taskItemId:guid}"
+@inherits TaskTrackingComponentBase
+@using Severity = MudBlazor.Severity
+@using TaskTracking.TaskGroupAggregate.TaskItems
+
+<div class="islamic-pattern-bg">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
+        <!-- Header Section -->
+        <MudGrid Class="mb-4" AlignItems="Center">
+            <MudItem xs="12" sm="8" md="9">
+                <div class="d-flex align-items-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))"
+                                   Class="me-3" />
+                    <div>
+                        <MudText Typo="Typo.h4" Class="section-title mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.Visibility" Class="me-2" />
+                            @(TaskItem?.Title ?? L["TaskDetails"])
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted d-none d-sm-block">
+                            @L["ViewTaskDetailsAndInformation"]
+                        </MudText>
+                    </div>
+                </div>
+            </MudItem>
+            
+            <!-- Action Buttons -->
+            <MudItem xs="12" sm="4" md="3">
+                <MudStack Row="true" Spacing="2" Class="d-none d-sm-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))">
+                        @L["Edit"]
+                    </MudButton>
+                </MudStack>
+                
+                <!-- Mobile Buttons -->
+                <MudStack Spacing="2" Class="d-block d-sm-none">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))"
+                               FullWidth="true">
+                        @L["Edit"]
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+
+        @if (IsLoading)
+        {
+            <div class="text-center py-5">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                <MudText Typo="Typo.body1" Class="mt-3">@L["LoadingTask"]</MudText>
+            </div>
+        }
+        else if (TaskItem == null)
+        {
+            <MudCard Class="text-center py-5" Elevation="2">
+                <MudCardContent>
+                    <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Large" Color="Color.Error" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">@L["TaskNotFound"]</MudText>
+                    <MudText Typo="Typo.body2" Class="text-muted mb-4">
+                        @L["TaskNotFoundDescription"]
+                    </MudText>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.ArrowBack"
+                               OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))">
+                        @L["BackToGroup"]
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <!-- Task Details Card -->
+            <MudCard Class="islamic-card mb-4" Elevation="3">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <MudText Typo="Typo.h5" Class="task-item-title mb-2">
+                                    @TaskItem.Title
+                                </MudText>
+                                <MudText Typo="Typo.caption" Class="text-muted">
+                                    <MudIcon Icon="@GetTaskTypeIcon()" Size="Size.Small" Class="me-1" />
+                                    @L[TaskItem.TaskType.ToString()]
+                                </MudText>
+                            </div>
+                            <div class="task-item-status">
+                                @if (TaskItem.IsCompleted)
+                                {
+                                    <MudChip T="string" Color="Color.Success" Size="Size.Medium" Icon="@Icons.Material.Filled.CheckCircle">
+                                        @L["Completed"]
+                                    </MudChip>
+                                }
+                                else if (IsOverdue())
+                                {
+                                    <MudChip T="string" Color="Color.Error" Size="Size.Medium" Icon="@Icons.Material.Filled.Warning">
+                                        @L["Overdue"]
+                                    </MudChip>
+                                }
+                                else if (IsDueToday())
+                                {
+                                    <MudChip T="string" Color="Color.Warning" Size="Size.Medium" Icon="@Icons.Material.Filled.Today">
+                                        @L["DueToday"]
+                                    </MudChip>
+                                }
+                                else
+                                {
+                                    <MudChip T="string" Color="Color.Primary" Size="Size.Medium" Icon="@Icons.Material.Filled.Schedule">
+                                        @L["InProgress"]
+                                    </MudChip>
+                                }
+                            </div>
+                        </div>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                
+                <MudCardContent>
+                    <!-- Description Section -->
+                    <MudText Typo="Typo.h6" Class="mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Description" Class="me-2" />
+                        @L["Description"]
+                    </MudText>
+                    
+                    @if (!string.IsNullOrWhiteSpace(TaskItem.Description))
+                    {
+                        <div class="markdown-content mb-4">
+                            <MudMarkdown Value="@TaskItem.Description" />
+                        </div>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Class="text-muted fst-italic mb-4">
+                            @L["NoDescriptionProvided"]
+                        </MudText>
+                    }
+
+                    <!-- Date Information -->
+                    <MudGrid Class="mb-4">
+                        <MudItem xs="12" md="6">
+                            <MudText Typo="Typo.h6" Class="mb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Class="me-2" />
+                                @L["StartDate"]
+                            </MudText>
+                            <MudText Typo="Typo.body1" Class="ms-4">
+                                @TaskItem.StartDate.ToString("dd/MM/yyyy")
+                            </MudText>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudText Typo="Typo.h6" Class="mb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Event" Class="me-2" />
+                                @L["EndDate"]
+                            </MudText>
+                            <MudText Typo="Typo.body1" Class="ms-4">
+                                @(TaskItem.EndDate?.ToString("dd/MM/yyyy") ?? L["NoEndDate"])
+                            </MudText>
+                        </MudItem>
+                    </MudGrid>
+
+                    <!-- Task Type Information -->
+                    <MudGrid Class="mb-4">
+                        <MudItem xs="12">
+                            <MudText Typo="Typo.h6" Class="mb-2">
+                                <MudIcon Icon="@GetTaskTypeIcon()" Class="me-2" />
+                                @L["TaskType"]
+                            </MudText>
+                            <MudText Typo="Typo.body1" Class="ms-4">
+                                @L[TaskItem.TaskType.ToString()]
+                                <MudText Typo="Typo.caption" Class="text-muted d-block">
+                                    @GetTaskTypeDescription()
+                                </MudText>
+                            </MudText>
+                        </MudItem>
+                    </MudGrid>
+
+                    <!-- Recurrence Pattern Section (shown only for recurring tasks) -->
+                    @if (TaskItem.TaskType == TaskType.Recurring && TaskItem.RecurrencePattern != null)
+                    {
+                        <MudCard Class="mb-4" Elevation="1">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">
+                                        <MudIcon Icon="@Icons.Material.Filled.Repeat" Class="me-2" />
+                                        @L["RecurrencePattern"]
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudGrid>
+                                    <MudItem xs="12" md="6">
+                                        <MudText Typo="Typo.subtitle1" Class="mb-1">@L["RecurrenceType"]</MudText>
+                                        <MudText Typo="Typo.body1" Class="ms-3">
+                                            @L[TaskItem.RecurrencePattern.RecurrenceType.ToString()]
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudText Typo="Typo.subtitle1" Class="mb-1">@L["Interval"]</MudText>
+                                        <MudText Typo="Typo.body1" Class="ms-3">
+                                            @GetIntervalText()
+                                        </MudText>
+                                    </MudItem>
+                                </MudGrid>
+
+                                @if (TaskItem.RecurrencePattern.RecurrenceType == RecurrenceType.Weekly && TaskItem.RecurrencePattern.DaysOfWeek.Any())
+                                {
+                                    <MudGrid Class="mt-3">
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.subtitle1" Class="mb-2">@L["DaysOfWeek"]</MudText>
+                                            <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="ms-3">
+                                                @foreach (var day in TaskItem.RecurrencePattern.DaysOfWeek)
+                                                {
+                                                    <MudChip T="string" Color="Color.Primary" Size="Size.Small">
+                                                        @L[day.ToString()]
+                                                    </MudChip>
+                                                }
+                                            </MudStack>
+                                        </MudItem>
+                                    </MudGrid>
+                                }
+
+                                <MudGrid Class="mt-3">
+                                    <MudItem xs="12">
+                                        <MudText Typo="Typo.subtitle1" Class="mb-1">@L["EndCondition"]</MudText>
+                                        <MudText Typo="Typo.body1" Class="ms-3">
+                                            @if (TaskItem.RecurrencePattern.EndDate.HasValue)
+                                            {
+                                                <span>@L["EndByDate"]: @TaskItem.RecurrencePattern.EndDate.Value.ToString("dd/MM/yyyy")</span>
+                                            }
+                                            else if (TaskItem.RecurrencePattern.Occurrences.HasValue)
+                                            {
+                                                <span>@L["EndAfterOccurrences"]: @TaskItem.RecurrencePattern.Occurrences.Value</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@L["NoEndCondition"]</span>
+                                            }
+                                        </MudText>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+
+                    <!-- Progress Information -->
+                    @if (TaskItem.UserTaskProgressDtos.Any())
+                    {
+                        <MudCard Class="mb-4" Elevation="1">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">
+                                        <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Class="me-2" />
+                                        @L["Progress"]
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <MudText Typo="Typo.subtitle1">@L["OverallProgress"]</MudText>
+                                    <MudText Typo="Typo.h6" Class="progress-text">
+                                        @GetProgressPercentage()%
+                                    </MudText>
+                                </div>
+                                <MudProgressLinear Color="@GetProgressColor()" 
+                                                   Value="@GetProgressPercentage()"
+                                                   Class="progress-bar mb-3" />
+                                <MudText Typo="Typo.caption" Class="text-muted">
+                                    @GetProgressDescription()
+                                </MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+
+                    <!-- Action Buttons -->
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="d-none d-sm-flex">
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Default"
+                                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))">
+                            @L["BackToGroup"]
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))">
+                            @L["EditTask"]
+                        </MudButton>
+                    </MudStack>
+
+                    <!-- Mobile Action Buttons -->
+                    <MudStack Spacing="2" Class="d-block d-sm-none">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))"
+                                   FullWidth="true">
+                            @L["EditTask"]
+                        </MudButton>
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Default"
+                                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))"
+                                   FullWidth="true">
+                            @L["BackToGroup"]
+                        </MudButton>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudContainer>
+</div>

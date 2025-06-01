@@ -183,6 +183,13 @@
     "TipSaveChangesRegularly": "احفظ التغييرات بانتظام لتجنب فقدان عملك",
     "TaskUpdatedSuccessfully": "تم تحديث المهمة بنجاح!",
     "ErrorUpdatingTask": "خطأ في تحديث المهمة. يرجى المحاولة مرة أخرى.",
+    "TaskDetails": "تفاصيل المهمة",
+    "ViewTaskDetailsAndInformation": "عرض تفاصيل ومعلومات المهمة",
+    "NoEndDate": "لا يوجد تاريخ انتهاء",
+    "NoEndCondition": "لا يوجد شرط انتهاء",
+    "NoProgressRecorded": "لم يتم تسجيل أي تقدم بعد",
+    "ProgressDescription": "تم إكمال {0} من {1} أيام",
+    "ViewTask": "عرض المهمة",
     "ErrorLoadingTask": "خطأ في تحميل المهمة. يرجى المحاولة مرة أخرى.",
     "Sunday": "الأحد",
     "Monday": "الاثنين",
@@ -214,6 +221,10 @@
     "TrackingTask:00405": "التقدم غير موجود.",
     "TrackingTask:00406": "لا يمكن تغيير دور المالك.",
     "TrackingTask:00407": "لا يمكن التغيير إلى دور المالك.",
-    "TrackingTask:00205": "يجب أن تحتوي التكرارات على تاريخ انتهاء أو عدد من التكرارات."
+    "TrackingTask:00205": "يجب أن تحتوي التكرارات على تاريخ انتهاء أو عدد من التكرارات.",
+    "TaskRecurrence_EveryNDays": "كل {0} يوم",
+    "TaskRecurrence_EveryNWeeks": "كل {0} أسبوع",
+    "TaskRecurrence_EveryNMonths": "كل {0} شهر",
+    "TaskRecurrence_NoRecurrence": "لا تكرار"
   }
 }

@@ -98,14 +98,14 @@
     </MudCardContent>
     
     <MudCardActions Class="d-flex justify-content-between">
-        <MudButton Variant="Variant.Text" 
-                   Color="Color.Primary" 
-                   StartIcon="@Icons.Material.Filled.PlayArrow"
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Visibility"
                    Size="Size.Small"
-                   Disabled="true">
-            @(TaskItem.IsCompleted ? L["MarkIncomplete"] : L["MarkComplete"])
+                   OnClick="@(() => ViewTask())">
+            @L["View"]
         </MudButton>
-        
+
         <div>
             <MudIconButton Icon="@Icons.Material.Filled.Edit"
                            Color="Color.Primary"
@@ -179,6 +179,11 @@
             >= 50 => Color.Warning,
             _ => Color.Primary
         };
+    }
+
+    private void ViewTask()
+    {
+        NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItem.Id}");
     }
 
     private void EditTask()

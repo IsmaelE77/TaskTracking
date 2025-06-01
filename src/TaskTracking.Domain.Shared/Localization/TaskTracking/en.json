@@ -200,6 +200,13 @@
     "TipSaveChangesRegularly": "Save changes regularly to avoid losing your work",
     "TaskUpdatedSuccessfully": "Task updated successfully!",
     "ErrorUpdatingTask": "Error updating task. Please try again.",
+    "TaskDetails": "Task Details",
+    "ViewTaskDetailsAndInformation": "View task details and information",
+    "NoEndDate": "No end date",
+    "NoEndCondition": "No end condition",
+    "NoProgressRecorded": "No progress recorded yet",
+    "ProgressDescription": "{0} of {1} days completed",
+    "ViewTask": "View Task",
     "ErrorLoadingTask": "Error loading task. Please try again.",
     "Sunday": "Sunday",
     "Monday": "Monday",
@@ -214,6 +221,10 @@
     "Recurrence must have an end date or a number of occurrences.": "Recurrence must have an end date or a number of occurrences.",
     "Recurrence cannot have both end date and number of occurrences.": "Recurrence cannot have both end date and number of occurrences.",
     "Progress date cannot be in the future.": "Progress date cannot be in the future.",
-    "TrackingTask:00205": "Recurrence must have an end date or a number of occurrences."
+    "TrackingTask:00205": "Recurrence must have an end date or a number of occurrences.",
+    "TaskRecurrence_EveryNDays": "Every {0} days",
+    "TaskRecurrence_EveryNWeeks": "Every {0} weeks",
+    "TaskRecurrence_EveryNMonths": "Every {0} months",
+    "TaskRecurrence_NoRecurrence": "No recurrence"
   }
 }
