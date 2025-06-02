@@ -99,6 +99,13 @@ public partial class ViewTaskGroup
         };
     }
 
+    private async Task OnTaskDeleted()
+    {
+        await LoadTasksAsync();
+        await LoadTaskGroupAsync(); // Reload to update progress
+        Snackbar.Add(L["TaskDeletedSuccessfully"], Severity.Success);
+    }
+
     protected override Task HandleErrorAsync(Exception ex)
     {
         Console.WriteLine($"Error: {ex.Message}");

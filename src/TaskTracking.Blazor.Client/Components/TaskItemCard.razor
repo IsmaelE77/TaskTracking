@@ -132,7 +132,7 @@
             <MudIconButton Icon="@Icons.Material.Filled.Delete"
                            Color="Color.Error"
                            Size="Size.Small"
-                           Disabled="true"
+                           OnClick="@(() => DeleteTask())"
                            title="@L["Delete"]" />
         </div>
     </MudCardActions>
@@ -141,6 +141,7 @@
 @code {
     [Parameter] public TaskItemDto TaskItem { get; set; } = null!;
     [Parameter] public Guid TaskGroupId { get; set; }
+    [Parameter] public EventCallback OnTaskDeleted { get; set; }
 
     private string GetTaskTypeIcon()
     {
@@ -236,6 +237,35 @@
         {
             Console.WriteLine($"Error getting task progress detail: {ex.Message}");
             return null;
+        }
+    }
+
+    private async Task DeleteTask()
+    {
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.ContentText, string.Format(L["DeleteTaskConfirmation"], TaskItem.Title) },
+            { x => x.ButtonText, L["Delete"] },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var result = await DialogService.ShowAsync<ConfirmationDialog>(L["DeleteTask"], parameters, options);
+        var dialogResult = await result.Result;
+
+        if (!dialogResult.Canceled && dialogResult.Data is true)
+        {
+            try
+            {
+                await TaskGroupAppService.DeleteTaskItemAsync(TaskGroupId, TaskItem.Id);
+                await OnTaskDeleted.InvokeAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting task: {ex.Message}");
+                // You might want to show an error message to the user here
+            }
         }
     }
 }

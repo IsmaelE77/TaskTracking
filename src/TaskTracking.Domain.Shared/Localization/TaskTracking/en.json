@@ -242,5 +242,9 @@
     "ErrorLoadingProgressDetail": "Error loading progress details. Please try again.",
     "Close": "Close",
     "TaskTracking:00104": "Progress date cannot be in the future.",
+    "Delete": "Delete",
+    "DeleteTask": "Delete Task",
+    "DeleteTaskConfirmation": "Are you sure you want to delete the task '{0}'? This action cannot be undone.",
+    "TaskDeletedSuccessfully": "Task deleted successfully!"
   }
 }
