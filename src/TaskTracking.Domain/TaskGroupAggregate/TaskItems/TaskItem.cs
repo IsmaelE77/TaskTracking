@@ -233,14 +233,20 @@ public class TaskItem : FullAuditedEntity<Guid>, IHaveTaskGroup
         throw new BusinessException("Invalid recurrence pattern: must have EndDate or Occurrences.");
     }
 
-    public bool IsDue(DateTime date)
+    public bool IsDue(DateTime date, Guid userId)
     {
         if (UserProgresses.All(x => x.ProgressPercentage == 100))
         {
             return false;
         }
 
-        if (TaskType == TaskType.OneTime )
+        if (UserProgresses.Any(x =>
+                x.UserId == userId && x.ProgressEntries.Any(pe => pe.Date == DateOnly.FromDateTime(date))))
+        {
+            return false;
+        }
+        
+        if (TaskType == TaskType.OneTime)
         {
             return true;
         }

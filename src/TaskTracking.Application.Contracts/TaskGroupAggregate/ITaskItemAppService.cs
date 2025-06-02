@@ -19,8 +19,8 @@ public interface ITaskItemAppService : IApplicationService
     Task<PagedResultDto<TaskItemDto>> GetTasksForGroupAsync(Guid taskGroupId, PagedResultRequestDto input);
 
     /// <summary>
-    ///     Gets all tasks due today for the current user.
+    ///     Gets all tasks due today for the current user with filtering support.
     /// </summary>
-    Task<PagedResultDto<TaskItemDto>> GetMyTasksDueTodayAsync(PagedResultRequestDto input);
+    Task<PagedResultDto<TaskItemDto>> GetMyTasksDueTodayAsync(GetMyTasksDueTodayInput input);
 
 }

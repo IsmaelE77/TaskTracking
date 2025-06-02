@@ -24,6 +24,7 @@ public partial class ProgressRecordingDialog
     private bool IsRecording { get; set; }
     private DateTime? SelectedDate { get; set; }
 
+    private bool IsDataChanged  { get; set; } = false;
     protected override void OnInitialized()
     {
         // Set default selected date to today for one-time tasks
@@ -87,6 +88,7 @@ public partial class ProgressRecordingDialog
                 TaskProgressDetail = await TaskGroupAppService.GetTaskProgressDetailAsync(
                     TaskGroupId, TaskProgressDetail.TaskItem.Id);
 
+                IsDataChanged = true;
                 StateHasChanged();
             }
         }
@@ -131,6 +133,7 @@ public partial class ProgressRecordingDialog
                 TaskProgressDetail = await TaskGroupAppService.GetTaskProgressDetailAsync(
                     TaskGroupId, TaskProgressDetail.TaskItem.Id);
 
+                IsDataChanged = true;
                 StateHasChanged();
             }
         }
@@ -189,6 +192,13 @@ public partial class ProgressRecordingDialog
 
     private void Cancel()
     {
-        MudDialog.Cancel();
+        if (IsDataChanged)
+        {
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            MudDialog.Cancel();
+        }
     }
 }

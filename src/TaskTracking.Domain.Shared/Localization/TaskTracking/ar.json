@@ -247,6 +247,26 @@
     "DeleteTaskConfirmation": "هل أنت متأكد من أنك تريد حذف المهمة '{0}'؟ لا يمكن التراجع عن هذا الإجراء.",
     "TaskDeletedSuccessfully": "تم حذف المهمة بنجاح!",
     "ProgressRemovedSuccessfully": "تمت إزالة التقدم بنجاح!",
-    "ErrorRemovingProgress": "حدث خطأ أثناء إزالة التقدم. الرجاء المحاولة مرة أخرى."
+    "ErrorRemovingProgress": "حدث خطأ أثناء إزالة التقدم. الرجاء المحاولة مرة أخرى.",
+    "ViewTasksDueToday": "عرض جميع المهام المستحقة اليوم",
+    "TasksDueToday": "المهام المستحقة اليوم",
+    "SearchTasks": "البحث في المهام...",
+    "AllTasks": "جميع المهام",
+    "AllTypes": "جميع الأنواع",
+    "Refresh": "تحديث",
+    "TasksRefreshed": "تم تحديث المهام بنجاح!",
+    "LoadingMoreTasks": "جاري تحميل المزيد من المهام...",
+    "NoTasksDueToday": "لا توجد مهام مستحقة اليوم",
+    "NoTasksDueTodayDescription": "ليس لديك أي مهام مستحقة اليوم. عمل رائع في مواكبة عملك!",
+    "NoCompletedTasks": "لا توجد مهام مكتملة",
+    "NoCompletedTasksDescription": "لم يتم العثور على مهام مكتملة مع المرشحات الحالية.",
+    "NoPendingTasks": "لا توجد مهام معلقة",
+    "NoPendingTasksDescription": "لم يتم العثور على مهام معلقة مع المرشحات الحالية.",
+    "NoOverdueTasks": "لا توجد مهام متأخرة",
+    "NoOverdueTasksDescription": "لم يتم العثور على مهام متأخرة مع المرشحات الحالية.",
+    "NoTasksMatchSearch": "لا توجد مهام تطابق معايير البحث الخاصة بك. جرب تعديل مصطلحات البحث أو المرشحات.",
+    "ClearFilters": "مسح المرشحات",
+    "ErrorLoadingTasks": "خطأ في تحميل المهام. يرجى المحاولة مرة أخرى.",
+    "Status": "الحالة"
   }
 }

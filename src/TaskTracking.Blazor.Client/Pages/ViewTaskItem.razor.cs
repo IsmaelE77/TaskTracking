@@ -154,8 +154,9 @@ public partial class ViewTaskItem
 
             var result = await DialogService.ShowAsync<ProgressRecordingDialog>(L["RecordProgress"], parameters, options);
 
-            // Refresh the task item after recording progress
-            if (!result.Result.IsCanceled)
+            var dialogResult = await result.Result;
+
+            if (dialogResult is { Canceled: false })
             {
                 await LoadTaskItemAsync();
             }

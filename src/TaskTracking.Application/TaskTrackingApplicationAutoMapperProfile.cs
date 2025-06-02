@@ -33,9 +33,7 @@ public class TaskTrackingApplicationAutoMapperProfile : Profile
         // TaskItem mappings
         CreateMap<TaskItem, TaskItemDto>()
             .ForMember(dest => dest.IsCompleted, opt => opt.MapFrom(src =>
-                src.UserProgresses.Any(up => up.ProgressPercentage == 100)))
-            .ForMember(dest => dest.IsDueToday, opt => opt.MapFrom(src =>
-                src.IsDue(DateTime.UtcNow)));
+                src.UserProgresses.Any(up => up.ProgressPercentage == 100)));
 
         // UserTaskGroup mappings
         CreateMap<UserTaskGroup, UserTaskGroupDto>();

@@ -1,12 +1,10 @@
 @using TaskTracking.TaskGroupAggregate.Dtos.TaskItems
 @using TaskTracking.TaskGroupAggregate.TaskItems
-@using TaskTracking.Blazor.Client.Components
 @using TaskTracking.TaskGroupAggregate
 @inherits TaskTrackingComponentBase
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 @inject ITaskGroupAppService TaskGroupAppService
-
 <MudCard Class="task-item-card h-100" Elevation="2">
     <MudCardHeader>
         <CardHeaderContent>
@@ -142,6 +140,7 @@
     [Parameter] public TaskItemDto TaskItem { get; set; } = null!;
     [Parameter] public Guid TaskGroupId { get; set; }
     [Parameter] public EventCallback OnTaskDeleted { get; set; }
+    [Parameter] public EventCallback OnTaskUpdated { get; set; }
 
     private string GetTaskTypeIcon()
     {
@@ -157,7 +156,7 @@
     {
         return !TaskItem.IsCompleted && 
                TaskItem.EndDate.HasValue && 
-               TaskItem.EndDate.Value.Date < DateTime.Today;
+               TaskItem.EndDate.Value.Date < Clock.Now.Date;
     }
 
     private bool IsDueToday()
@@ -224,7 +223,14 @@
             CloseButton = true,
         };
 
-        await DialogService.ShowAsync<ProgressRecordingDialog>(L["RecordProgress"], parameters, options);
+        var result = await DialogService.ShowAsync<ProgressRecordingDialog>(L["RecordProgress"], parameters, options);
+        var dialogResult = await result.Result;
+
+        if (dialogResult is { Canceled: false, Data: true })
+        {
+            await OnTaskUpdated.InvokeAsync();
+        }
+
     }
 
     private async Task<TaskProgressDetailDto?> GetTaskProgressDetail()

@@ -52,7 +52,26 @@ public class TaskItemAppService : ApplicationService,ITaskItemAppService
         var totalCount = await AsyncExecuter.CountAsync(query);
         var taskItems = await AsyncExecuter.ToListAsync(query.PageBy(input.SkipCount, input.MaxResultCount));
 
-        var taskDtos = ObjectMapper.Map<List<TaskItem>, List<TaskItemDto>>(taskItems);
+        List<TaskItemDto> taskDtos = [];
+
+        foreach (var taskItem in taskItems)
+        {
+            taskDtos.Add(new TaskItemDto()
+            {
+                Id = taskItem.Id,
+                Title = taskItem.Title,
+                Description = taskItem.Description,
+                StartDate = taskItem.StartDate,
+                EndDate = taskItem.EndDate,
+                TaskType = taskItem.TaskType,
+                RecurrencePattern = taskItem.RecurrencePattern != null
+                    ? ObjectMapper.Map<RecurrencePattern, RecurrencePatternDto>(taskItem.RecurrencePattern)
+                    : null,
+                TaskGroupId = taskItem.TaskGroupId,
+                IsDueToday = taskItem.IsDue(Clock.Now.Date, CurrentUser.GetId()),
+                IsCompleted = taskItem.UserProgresses.Any(up => up.ProgressPercentage == 100)
+            });
+        }
 
         return new PagedResultDto<TaskItemDto>(totalCount, taskDtos);
     }
@@ -67,19 +86,61 @@ public class TaskItemAppService : ApplicationService,ITaskItemAppService
             .Take(input.MaxResultCount)
             .ToList();
 
-        var taskDtos = ObjectMapper.Map<List<TaskItem>, List<TaskItemDto>>(tasks);
+        List<TaskItemDto> taskDtos = [];
+
+        foreach (var taskItem in tasks)
+        {
+            taskDtos.Add(new TaskItemDto()
+            {
+                Id = taskItem.Id,
+                Title = taskItem.Title,
+                Description = taskItem.Description,
+                StartDate = taskItem.StartDate,
+                EndDate = taskItem.EndDate,
+                TaskType = taskItem.TaskType,
+                RecurrencePattern = taskItem.RecurrencePattern != null
+                    ? ObjectMapper.Map<RecurrencePattern, RecurrencePatternDto>(taskItem.RecurrencePattern)
+                    : null,
+                TaskGroupId = taskItem.TaskGroupId,
+                IsDueToday = taskItem.IsDue(Clock.Now.Date, CurrentUser.GetId()),
+                IsCompleted = taskItem.UserProgresses.Any(up => up.ProgressPercentage == 100)
+            });
+        }
 
         return new PagedResultDto<TaskItemDto>(totalCount, taskDtos);
     }
 
-    public async Task<PagedResultDto<TaskItemDto>> GetMyTasksDueTodayAsync(PagedResultRequestDto input)
+    public async Task<PagedResultDto<TaskItemDto>> GetMyTasksDueTodayAsync(GetMyTasksDueTodayInput input)
     {
         var currentUserId = _currentUser.GetId();
 
-        var tasks = await _taskItemManager.GetTasksForTodayPagedAsync(currentUserId, input.SkipCount,
-            input.MaxResultCount);
+        var tasks = await _taskItemManager.GetTasksForTodayPagedAsync(
+            currentUserId,
+            input.SkipCount,
+            input.MaxResultCount,
+            input.SearchText,
+            input.TaskTypeFilter);
 
-        var taskDtos = ObjectMapper.Map<List<TaskItem>, List<TaskItemDto>>(tasks.Items);
+        List<TaskItemDto> taskDtos = [];
+
+        foreach (var taskItem in tasks.Items)
+        {
+            taskDtos.Add(new TaskItemDto()
+            {
+                Id = taskItem.Id,
+                Title = taskItem.Title,
+                Description = taskItem.Description,
+                StartDate = taskItem.StartDate,
+                EndDate = taskItem.EndDate,
+                TaskType = taskItem.TaskType,
+                RecurrencePattern = taskItem.RecurrencePattern != null
+                    ? ObjectMapper.Map<RecurrencePattern, RecurrencePatternDto>(taskItem.RecurrencePattern)
+                    : null,
+                TaskGroupId = taskItem.TaskGroupId,
+                IsDueToday = taskItem.IsDue(Clock.Now.Date, CurrentUser.GetId()),
+                IsCompleted = taskItem.UserProgresses.Any(up => up.ProgressPercentage == 100)
+            });
+        }
 
         return new PagedResultDto<TaskItemDto>(tasks.TotalCount, taskDtos);
     }
@@ -90,7 +151,26 @@ public class TaskItemAppService : ApplicationService,ITaskItemAppService
         var tasks = await _taskItemManager.GetTasksForNextNDaysPagedAsync(currentUserId, days, input.SkipCount,
             input.MaxResultCount);
 
-        var taskDtos = ObjectMapper.Map<List<TaskItem>, List<TaskItemDto>>(tasks.Items);
+        List<TaskItemDto> taskDtos = [];
+
+        foreach (var taskItem in tasks.Items)
+        {
+            taskDtos.Add(new TaskItemDto()
+            {
+                Id = taskItem.Id,
+                Title = taskItem.Title,
+                Description = taskItem.Description,
+                StartDate = taskItem.StartDate,
+                EndDate = taskItem.EndDate,
+                TaskType = taskItem.TaskType,
+                RecurrencePattern = taskItem.RecurrencePattern != null
+                    ? ObjectMapper.Map<RecurrencePattern, RecurrencePatternDto>(taskItem.RecurrencePattern)
+                    : null,
+                TaskGroupId = taskItem.TaskGroupId,
+                IsDueToday = taskItem.IsDue(Clock.Now.Date, CurrentUser.GetId()),
+                IsCompleted = taskItem.UserProgresses.Any(up => up.ProgressPercentage == 100)
+            });
+        }
 
         return new PagedResultDto<TaskItemDto>(tasks.TotalCount, taskDtos);
     }

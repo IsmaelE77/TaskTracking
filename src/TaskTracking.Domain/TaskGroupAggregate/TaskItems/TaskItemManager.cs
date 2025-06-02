@@ -13,20 +13,14 @@ namespace TaskTracking.TaskGroupAggregate.TaskItems;
 public class TaskItemManager : DomainService
 {
     private readonly IReadOnlyRepository<TaskItem, Guid> _taskItemRepository;
-    private readonly IReadOnlyRepository<TaskGroup, Guid> _taskGroupRepository;
     private readonly IReadOnlyRepository<UserTaskGroup, Guid> _userTaskGroupRepository;
-    private readonly IReadOnlyRepository<UserTaskProgress, Guid> _userTaskProgressRepository;
 
     public TaskItemManager(
         IReadOnlyRepository<TaskItem, Guid> taskItemRepository,
-        IReadOnlyRepository<TaskGroup, Guid> taskGroupRepository,
-        IReadOnlyRepository<UserTaskGroup, Guid> userTaskGroupRepository,
-        IReadOnlyRepository<UserTaskProgress, Guid> userTaskProgressRepository)
+        IReadOnlyRepository<UserTaskGroup, Guid> userTaskGroupRepository)
     {
         _taskItemRepository = taskItemRepository;
-        _taskGroupRepository = taskGroupRepository;
         _userTaskGroupRepository = userTaskGroupRepository;
-        _userTaskProgressRepository = userTaskProgressRepository;
     }
 
     public async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForTodayPagedAsync(
@@ -36,6 +30,17 @@ public class TaskItemManager : DomainService
     {
         var today = Clock.Now.Date;
         return await GetTasksForDateRangePagedAsync(userId, skipCount, maxResultCount, today, today);
+    }
+
+    public async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForTodayPagedAsync(
+        Guid userId,
+        int skipCount,
+        int maxResultCount,
+        string? searchText,
+        TaskTypeFilter taskTypeFilter)
+    {
+        var today = Clock.Now.Date;
+        return await GetTasksForDateRangePagedAsync(userId, skipCount, maxResultCount, today, today, searchText, taskTypeFilter);
     }
 
     public async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForNextNDaysPagedAsync(
@@ -56,7 +61,19 @@ public class TaskItemManager : DomainService
         DateTime startDate,
         DateTime endDate)
     {
-        var query = await _taskItemRepository.GetQueryableAsync();
+        return await GetTasksForDateRangePagedAsync(userId, skipCount, maxResultCount, startDate, endDate, null, TaskTypeFilter.All);
+    }
+
+    private async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForDateRangePagedAsync(
+        Guid userId,
+        int skipCount,
+        int maxResultCount,
+        DateTime startDate,
+        DateTime endDate,
+        string? searchText,
+        TaskTypeFilter taskTypeFilter)
+    {
+        var query = await _taskItemRepository.WithDetailsAsync(x => x.UserProgresses);
         var userTaskGroups = await _userTaskGroupRepository.GetQueryableAsync();
 
         // Calculate bitmask for days of week in the range
@@ -101,13 +118,28 @@ public class TaskItemManager : DomainService
                   )
             select task;
 
-        // Get total count
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            baseQuery = baseQuery.Where(t =>
+                t.Title.Contains(searchText) ||
+                t.Description.Contains(searchText));
+        }
+
+        // Apply task type filter
+        if (taskTypeFilter != TaskTypeFilter.All)
+        {
+            var targetTaskType = taskTypeFilter == TaskTypeFilter.OneTime ? TaskType.OneTime : TaskType.Recurring;
+            baseQuery = baseQuery.Where(t => t.TaskType == targetTaskType);
+        }
+
+        // Get total count after filtering
         var totalCount = await AsyncExecuter.CountAsync(baseQuery);
 
         // Apply paging
         var pagedQuery = baseQuery.OrderBy(t => t.StartDate)
-                                 .Skip(skipCount)
-                                 .Take(maxResultCount);
+                                     .Skip(skipCount)
+                                     .Take(maxResultCount);
 
         var items = await AsyncExecuter.ToListAsync(pagedQuery);
 

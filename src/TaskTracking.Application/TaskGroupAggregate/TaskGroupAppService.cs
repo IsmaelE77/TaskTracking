@@ -198,7 +198,7 @@ public class TaskGroupAppService :
             TotalDueCount = taskItem.GetDueCount(),
             CompletedCount = userProgress?.ProgressEntries.Count ?? 0,
             IsFullyCompleted = userProgress?.ProgressPercentage == 100,
-            IsDueToday = taskItem.IsDue(DateTime.Today),
+            IsDueToday = taskItem.IsDue(DateTime.Today, CurrentUser.GetId()),
             CanRecordToday = userProgress != null && !userProgress.ProgressEntries.Any(pe => pe.Date == DateOnly.FromDateTime(DateTime.Today))
         };
 
