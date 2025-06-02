@@ -1,0 +1,160 @@
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskItems
+@using TaskTracking.TaskGroupAggregate.TaskItems
+@inherits TaskTrackingComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <div class="d-flex flex-column">
+            <!-- Task Information Header -->
+            <div class="mb-4">
+                <MudText Typo="Typo.h6" Class="mb-2">
+                    <MudIcon Icon="@GetTaskTypeIcon()" Class="me-2" />
+                    @TaskProgressDetail?.TaskItem.Title
+                </MudText>
+                <MudText Typo="Typo.body2" Class="text-muted">
+                    @TaskProgressDetail?.TaskItem.Description
+                </MudText>
+            </div>
+
+            <!-- Progress Summary -->
+            @if (TaskProgressDetail != null)
+            {
+                <MudCard Class="mb-4" Elevation="1">
+                    <MudCardContent>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <MudText Typo="Typo.subtitle1">@L["CurrentProgress"]</MudText>
+                            <MudText Typo="Typo.h6" Class="progress-text">
+                                @TaskProgressDetail.CompletedCount / @TaskProgressDetail.TotalDueCount
+                            </MudText>
+                        </div>
+                        <MudProgressLinear Color="@GetProgressColor()" 
+                                           Value="@GetProgressPercentage()"
+                                           Class="progress-bar mb-2" />
+                        <MudText Typo="Typo.caption" Class="text-muted">
+                            @GetProgressDescription()
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            }
+
+            <!-- Quick Actions for Today -->
+            @if (TaskProgressDetail?.IsDueToday == true && TaskProgressDetail?.CanRecordToday == true)
+            {
+                <MudCard Class="mb-4" Elevation="1">
+                    <MudCardContent>
+                        <MudText Typo="Typo.subtitle2" Class="mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.Today" Class="me-2" />
+                            @L["QuickActions"]
+                        </MudText>
+                        <MudAlert Severity="Severity.Info" Class="mb-3">
+                            <MudText Typo="Typo.body2">
+                                This task is due today! You can quickly mark it as completed.
+                            </MudText>
+                        </MudAlert>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CheckCircle"
+                                   OnClick="@RecordTodayProgress"
+                                   Disabled="@IsRecording"
+                                   FullWidth="true">
+                            @if (IsRecording)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                            }
+                            @L["MarkCompletedToday"]
+                        </MudButton>
+                    </MudCardContent>
+                </MudCard>
+            }
+            else if (TaskProgressDetail?.CanRecordToday == true)
+            {
+                <MudCard Class="mb-4" Elevation="1">
+                    <MudCardContent>
+                        <MudText Typo="Typo.subtitle2" Class="mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.Today" Class="me-2" />
+                            @L["QuickActions"]
+                        </MudText>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CheckCircle"
+                                   OnClick="@RecordTodayProgress"
+                                   Disabled="@IsRecording"
+                                   FullWidth="true">
+                            @if (IsRecording)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                            }
+                            @L["MarkCompletedToday"]
+                        </MudButton>
+                    </MudCardContent>
+                </MudCard>
+            }
+
+            <!-- Calendar View for Recurring Tasks -->
+            @if (TaskProgressDetail?.TaskItem.TaskType == TaskType.Recurring)
+            {
+                <MudCard Elevation="1">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.subtitle1">
+                                <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Class="me-2" />
+                                @L["ProgressCalendar"]
+                            </MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <ProgressCalendar TaskProgressDetail="@TaskProgressDetail"
+                                          OnDateSelected="@OnDateSelected"
+                                          IsRecording="@IsRecording" />
+                    </MudCardContent>
+                </MudCard>
+            }
+
+            <!-- Custom Date Selection for One-Time Tasks -->
+            @if (TaskProgressDetail?.TaskItem.TaskType == TaskType.OneTime && !TaskProgressDetail.IsFullyCompleted)
+            {
+                <MudCard Elevation="1">
+                    <MudCardContent>
+                        <MudText Typo="Typo.subtitle2" Class="mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.Event" Class="me-2" />
+                            @L["SelectCompletionDate"]
+                        </MudText>
+                        <MudDatePicker @bind-Date="SelectedDate"
+                                       Label="@L["CompletionDate"]"
+                                       Variant="Variant.Outlined"
+                                       DateFormat="dd/MM/yyyy"
+                                       MaxDate="DateTime.Today"
+                                       MinDate="TaskProgressDetail.TaskItem.StartDate"
+                                       Class="mb-3" />
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Save"
+                                   OnClick="@RecordSelectedDateProgress"
+                                   Disabled="@(IsRecording || SelectedDate == null)"
+                                   FullWidth="true">
+                            @if (IsRecording)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                            }
+                            @L["RecordProgress"]
+                        </MudButton>
+                    </MudCardContent>
+                </MudCard>
+            }
+
+            <!-- Completed Task Message -->
+            @if (TaskProgressDetail?.IsFullyCompleted == true)
+            {
+                <MudAlert Severity="Severity.Success" Class="mt-3">
+                    <MudText Typo="Typo.body1">
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="me-2" />
+                        @L["TaskFullyCompleted"]
+                    </MudText>
+                </MudAlert>
+            }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@L["Close"]</MudButton>
+    </DialogActions>
+</MudDialog>

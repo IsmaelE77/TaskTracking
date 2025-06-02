@@ -1,0 +1,186 @@
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskItems
+@inherits TaskTrackingComponentBase
+
+<div class="progress-calendar">
+    <!-- Month Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                       OnClick="@PreviousMonth"
+                       Size="Size.Small" />
+        <MudText Typo="Typo.h6">
+            @CurrentMonth.ToString("MMMM yyyy")
+        </MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                       OnClick="@NextMonth"
+                       Size="Size.Small" />
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="calendar-grid">
+        <!-- Day Headers -->
+        <div class="calendar-header">
+            @foreach (var dayName in GetDayNames())
+            {
+                <div class="calendar-day-header">
+                    <MudText Typo="Typo.caption" Class="text-muted">@dayName</MudText>
+                </div>
+            }
+        </div>
+
+        <!-- Calendar Days -->
+        <div class="calendar-body">
+            @foreach (var week in GetCalendarWeeks())
+            {
+                <div class="calendar-week">
+                    @foreach (var day in week)
+                    {
+                        <div class="calendar-day @GetDayClass(day)" @onclick="@(() => OnDayClick(day))">
+                            <div class="day-content">
+                                <MudText Typo="Typo.body2" 
+                                         Class="@GetDayTextClass(day)">
+                                    @day.Day
+                                </MudText>
+                                @if (GetDayStatus(day) != DayStatus.NotDue)
+                                {
+                                    <div class="day-indicator">
+                                        @if (GetDayStatus(day) == DayStatus.Completed)
+                                        {
+                                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" 
+                                                     Size="Size.Small" 
+                                                     Color="Color.Success" />
+                                        }
+                                        else if (GetDayStatus(day) == DayStatus.Due)
+                                        {
+                                            <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" 
+                                                     Size="Size.Small" 
+                                                     Color="Color.Primary" />
+                                        }
+                                        else if (GetDayStatus(day) == DayStatus.Overdue)
+                                        {
+                                            <MudIcon Icon="@Icons.Material.Filled.Warning" 
+                                                     Size="Size.Small" 
+                                                     Color="Color.Error" />
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="calendar-legend mt-3">
+        <div class="d-flex flex-wrap gap-3">
+            <div class="legend-item">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" 
+                         Size="Size.Small" 
+                         Color="Color.Success" 
+                         Class="me-1" />
+                <MudText Typo="Typo.caption">@L["Completed"]</MudText>
+            </div>
+            <div class="legend-item">
+                <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" 
+                         Size="Size.Small" 
+                         Color="Color.Primary" 
+                         Class="me-1" />
+                <MudText Typo="Typo.caption">@L["Due"]</MudText>
+            </div>
+            <div class="legend-item">
+                <MudIcon Icon="@Icons.Material.Filled.Warning" 
+                         Size="Size.Small" 
+                         Color="Color.Error" 
+                         Class="me-1" />
+                <MudText Typo="Typo.caption">@L["Overdue"]</MudText>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress-calendar {
+        width: 100%;
+    }
+
+    .calendar-grid {
+        border: 1px solid var(--mud-palette-lines-default);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background-color: var(--mud-palette-background-grey);
+    }
+
+    .calendar-day-header {
+        padding: 8px;
+        text-align: center;
+        border-right: 1px solid var(--mud-palette-lines-default);
+    }
+
+    .calendar-day-header:last-child {
+        border-right: none;
+    }
+
+    .calendar-body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .calendar-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .calendar-day {
+        min-height: 60px;
+        border-right: 1px solid var(--mud-palette-lines-default);
+        border-bottom: 1px solid var(--mud-palette-lines-default);
+        cursor: pointer;
+        transition: background-color 0.2s;
+        position: relative;
+    }
+
+    .calendar-day:last-child {
+        border-right: none;
+    }
+
+    .calendar-day:hover {
+        background-color: var(--mud-palette-action-hover);
+    }
+
+    .calendar-day.clickable:hover {
+        background-color: var(--mud-palette-primary-hover);
+    }
+
+    .calendar-day.other-month {
+        background-color: var(--mud-palette-background-grey);
+        opacity: 0.5;
+    }
+
+    .calendar-day.today {
+        background-color: var(--mud-palette-primary-lighten);
+    }
+
+    .day-content {
+        padding: 8px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .day-indicator {
+        margin-top: auto;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+    }
+</style>

@@ -51,6 +51,11 @@ public interface ITaskGroupAppService :
     Task RecordTaskProgressAsync(Guid id, RecordTaskProgressDto input);
 
     /// <summary>
+    ///     Gets detailed progress information for a specific task.
+    /// </summary>
+    Task<TaskProgressDetailDto> GetTaskProgressDetailAsync(Guid taskGroupId, Guid taskItemId);
+
+    /// <summary>
     ///     Creates a new task item in the specified task group.
     /// </summary>
     Task<TaskItemDto> CreateTaskItemAsync(

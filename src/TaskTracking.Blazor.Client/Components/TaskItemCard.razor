@@ -1,7 +1,11 @@
 @using TaskTracking.TaskGroupAggregate.Dtos.TaskItems
 @using TaskTracking.TaskGroupAggregate.TaskItems
+@using TaskTracking.Blazor.Client.Components
+@using TaskTracking.TaskGroupAggregate
 @inherits TaskTrackingComponentBase
-@inject NavigationManager NavigationManager;
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ITaskGroupAppService TaskGroupAppService
 
 <MudCard Class="task-item-card h-100" Elevation="2">
     <MudCardHeader>
@@ -98,13 +102,26 @@
     </MudCardContent>
     
     <MudCardActions Class="d-flex justify-content-between">
-        <MudButton Variant="Variant.Text"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Visibility"
-                   Size="Size.Small"
-                   OnClick="@(() => ViewTask())">
-            @L["View"]
-        </MudButton>
+        <div class="d-flex gap-2">
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Visibility"
+                       Size="Size.Small"
+                       OnClick="@(() => ViewTask())">
+                @L["View"]
+            </MudButton>
+
+            @if (!TaskItem.IsCompleted)
+            {
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Success"
+                           StartIcon="@Icons.Material.Filled.CheckCircle"
+                           Size="Size.Small"
+                           OnClick="@(() => RecordProgress())">
+                    @L["RecordProgress"]
+                </MudButton>
+            }
+        </div>
 
         <div>
             <MudIconButton Icon="@Icons.Material.Filled.Edit"
@@ -189,5 +206,36 @@
     private void EditTask()
     {
         NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItem.Id}/edit");
+    }
+
+    private async Task RecordProgress()
+    {
+        var parameters = new DialogParameters
+        {
+            ["TaskGroupId"] = TaskGroupId,
+            ["TaskProgressDetail"] = await GetTaskProgressDetail()
+        };
+
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
+            CloseButton = true,
+        };
+
+        await DialogService.ShowAsync<ProgressRecordingDialog>(L["RecordProgress"], parameters, options);
+    }
+
+    private async Task<TaskProgressDetailDto?> GetTaskProgressDetail()
+    {
+        try
+        {
+            return await TaskGroupAppService.GetTaskProgressDetailAsync(TaskGroupId, TaskItem.Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting task progress detail: {ex.Message}");
+            return null;
+        }
     }
 }

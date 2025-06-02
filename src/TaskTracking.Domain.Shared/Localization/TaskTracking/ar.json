@@ -225,6 +225,22 @@
     "TaskRecurrence_EveryNDays": "كل {0} يوم",
     "TaskRecurrence_EveryNWeeks": "كل {0} أسبوع",
     "TaskRecurrence_EveryNMonths": "كل {0} شهر",
-    "TaskRecurrence_NoRecurrence": "لا تكرار"
+    "TaskRecurrence_NoRecurrence": "لا تكرار",
+    "RecordProgress": "تسجيل التقدم",
+    "CurrentProgress": "التقدم الحالي",
+    "QuickActions": "إجراءات سريعة",
+    "MarkCompletedToday": "تحديد كمكتمل اليوم",
+    "ProgressCalendar": "تقويم التقدم",
+    "SelectCompletionDate": "اختر تاريخ الإكمال",
+    "CompletionDate": "تاريخ الإكمال",
+    "TaskFullyCompleted": "تم إكمال هذه المهمة بالكامل!",
+    "ProgressRecordedSuccessfully": "تم تسجيل التقدم بنجاح!",
+    "ErrorRecordingProgress": "حدث خطأ أثناء تسجيل التقدم. الرجاء المحاولة مرة أخرى.",
+    "TaskCompleted": "اكتملت المهمة",
+    "ProgressRemaining": "المتبقي {0}",
+    "Due": "مستحق",
+    "ErrorLoadingProgressDetail": "حدث خطأ أثناء تحميل تفاصيل التقدم. الرجاء المحاولة مرة أخرى.",
+    "Close": "إغلاق",
+    "TaskTracking:00104": "تاريخ التقدم لا يمكن أن يكون في المستقبل."
   }
 }

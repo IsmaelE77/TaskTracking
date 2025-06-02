@@ -10,8 +10,10 @@ using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
+using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Identity;
 using Volo.Abp.Users;
@@ -164,6 +166,42 @@ public class TaskGroupAppService :
             input.Date);
     }
 
+    public async Task<TaskProgressDetailDto> GetTaskProgressDetailAsync(Guid taskGroupId, Guid taskItemId)
+    {
+        var userId = _currentUser.GetId();
+        var taskGroup = await _taskGroupManager.GetWithDetailsAsync(taskGroupId);
+
+        var taskItem = taskGroup.Tasks.FirstOrDefault(t => t.Id == taskItemId);
+        if (taskItem == null)
+        {
+            throw new EntityNotFoundException(typeof(TaskItem), taskItemId);
+        }
+
+        var userProgress = taskItem.UserProgresses.FirstOrDefault(up => up.UserId == userId);
+
+        var result = new TaskProgressDetailDto
+        {
+            TaskItem = ObjectMapper.Map<TaskItem, TaskItemDto>(taskItem),
+            UserProgress = userProgress != null ? ObjectMapper.Map<UserTaskProgress, UserTaskProgressDto>(userProgress) : null,
+            TotalDueCount = taskItem.GetDueCount(),
+            CompletedCount = userProgress?.ProgressEntries.Count ?? 0,
+            IsFullyCompleted = userProgress?.ProgressPercentage == 100,
+            IsDueToday = taskItem.IsDue(DateTime.Today),
+            CanRecordToday = userProgress != null && !userProgress.ProgressEntries.Any(pe => pe.Date == DateOnly.FromDateTime(DateTime.Today))
+        };
+
+        // Calculate due dates for the task
+        result.DueDates = CalculateDueDates(taskItem);
+
+        // Get completed dates
+        if (userProgress != null)
+        {
+            result.CompletedDates = userProgress.ProgressEntries.Select(pe => pe.Date).ToList();
+        }
+
+        return result;
+    }
+
     [Authorize(UserTaskGroupPermissions.CreateTaskItems)]
     public async Task<TaskItemDto> CreateTaskItemAsync(
         Guid id,
@@ -225,5 +263,77 @@ public class TaskGroupAppService :
             taskItemId);
 
         return ObjectMapper.Map<TaskItem, TaskItemDto>(taskItem);
+    }
+
+    private List<DateOnly> CalculateDueDates(TaskItem taskItem)
+    {
+        var dueDates = new List<DateOnly>();
+
+        if (taskItem.TaskType == TaskType.OneTime)
+        {
+            dueDates.Add(DateOnly.FromDateTime(taskItem.StartDate));
+            return dueDates;
+        }
+
+        if (taskItem.RecurrencePattern == null)
+            return dueDates;
+
+        var startDate = taskItem.StartDate;
+        var endDate = taskItem.RecurrencePattern.EndDate ?? taskItem.EndDate ?? DateTime.Today.AddYears(1);
+        var current = startDate;
+
+        switch (taskItem.RecurrencePattern.RecurrenceType)
+        {
+            case RecurrenceType.Daily:
+                while (current <= endDate)
+                {
+                    dueDates.Add(DateOnly.FromDateTime(current));
+
+                    if (taskItem.RecurrencePattern.Occurrences.HasValue &&
+                        dueDates.Count >= taskItem.RecurrencePattern.Occurrences.Value)
+                        break;
+
+                    current = current.AddDays(taskItem.RecurrencePattern.Interval);
+                }
+                break;
+
+            case RecurrenceType.Weekly:
+                var weeks = 0;
+                while (current <= endDate)
+                {
+                    foreach (var day in taskItem.RecurrencePattern.DaysOfWeek)
+                    {
+                        var candidate = startDate.AddDays((weeks * 7 * taskItem.RecurrencePattern.Interval) +
+                                                         (int)day - (int)startDate.DayOfWeek);
+
+                        if (candidate < startDate || candidate > endDate)
+                            continue;
+
+                        dueDates.Add(DateOnly.FromDateTime(candidate));
+
+                        if (taskItem.RecurrencePattern.Occurrences.HasValue &&
+                            dueDates.Count >= taskItem.RecurrencePattern.Occurrences.Value)
+                            return dueDates;
+                    }
+                    weeks++;
+                    current = startDate.AddDays(weeks * 7 * taskItem.RecurrencePattern.Interval);
+                }
+                break;
+
+            case RecurrenceType.Monthly:
+                while (current <= endDate)
+                {
+                    dueDates.Add(DateOnly.FromDateTime(current));
+
+                    if (taskItem.RecurrencePattern.Occurrences.HasValue &&
+                        dueDates.Count >= taskItem.RecurrencePattern.Occurrences.Value)
+                        break;
+
+                    current = current.AddMonths(taskItem.RecurrencePattern.Interval);
+                }
+                break;
+        }
+
+        return dueDates.OrderBy(d => d).ToList();
     }
 }

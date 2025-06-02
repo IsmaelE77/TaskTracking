@@ -28,6 +28,6 @@ public class RecordTaskProgressDtoValidator : AbstractValidator<RecordTaskProgre
         RuleFor(x => x.Date)
             .LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today))
             .WithName(_localizer["Date"])
-            .WithMessage(_localizer["Progress date cannot be in the future."]);
+            .WithMessage(_localizer[TaskTrackingDomainErrorCodes.ProgressDateInFuture]);
     }
 }

@@ -177,7 +177,7 @@ public class TaskItem : FullAuditedEntity<Guid>, IHaveTaskGroup
     }
 
 
-    private int GetDueCount()
+    public int GetDueCount()
     {
         if (RecurrencePattern == null)
         {

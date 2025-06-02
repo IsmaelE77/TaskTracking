@@ -284,16 +284,39 @@
                             @L["BackToGroup"]
                         </MudButton>
 
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.Edit"
-                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))">
-                            @L["EditTask"]
-                        </MudButton>
+                        <div class="d-flex gap-2">
+                            @if (TaskItem != null && !TaskItem.IsCompleted)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Success"
+                                           StartIcon="@Icons.Material.Filled.CheckCircle"
+                                           OnClick="@RecordProgress">
+                                    @L["RecordProgress"]
+                                </MudButton>
+                            }
+
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Edit"
+                                       OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))">
+                                @L["EditTask"]
+                            </MudButton>
+                        </div>
                     </MudStack>
 
                     <!-- Mobile Action Buttons -->
                     <MudStack Spacing="2" Class="d-block d-sm-none">
+                        @if (TaskItem != null && !TaskItem.IsCompleted)
+                        {
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Success"
+                                       StartIcon="@Icons.Material.Filled.CheckCircle"
+                                       OnClick="@RecordProgress"
+                                       FullWidth="true">
+                                @L["RecordProgress"]
+                            </MudButton>
+                        }
+
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"
                                    StartIcon="@Icons.Material.Filled.Edit"

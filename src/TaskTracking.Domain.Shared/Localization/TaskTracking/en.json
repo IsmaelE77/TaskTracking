@@ -225,6 +225,22 @@
     "TaskRecurrence_EveryNDays": "Every {0} days",
     "TaskRecurrence_EveryNWeeks": "Every {0} weeks",
     "TaskRecurrence_EveryNMonths": "Every {0} months",
-    "TaskRecurrence_NoRecurrence": "No recurrence"
+    "TaskRecurrence_NoRecurrence": "No recurrence",
+    "RecordProgress": "Record Progress",
+    "CurrentProgress": "Current Progress",
+    "QuickActions": "Quick Actions",
+    "MarkCompletedToday": "Mark Completed Today",
+    "ProgressCalendar": "Progress Calendar",
+    "SelectCompletionDate": "Select Completion Date",
+    "CompletionDate": "Completion Date",
+    "TaskFullyCompleted": "This task has been fully completed!",
+    "ProgressRecordedSuccessfully": "Progress recorded successfully!",
+    "ErrorRecordingProgress": "Error recording progress. Please try again.",
+    "TaskCompleted": "Task completed",
+    "ProgressRemaining": "{0} remaining",
+    "Due": "Due",
+    "ErrorLoadingProgressDetail": "Error loading progress details. Please try again.",
+    "Close": "Close",
+    "TaskTracking:00104": "Progress date cannot be in the future.",
   }
 }

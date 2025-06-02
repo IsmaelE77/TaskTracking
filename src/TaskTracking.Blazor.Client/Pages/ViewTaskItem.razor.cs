@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using TaskTracking.Blazor.Client.Components;
 using TaskTracking.TaskGroupAggregate;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.TaskItems;
@@ -15,8 +16,10 @@ public partial class ViewTaskItem
     [Parameter] public Guid TaskGroupId { get; set; }
     [Parameter] public Guid TaskItemId { get; set; }
     [Inject] private ITaskItemAppService ItemAppService { get; set; } = null!;
+    [Inject] private ITaskGroupAppService TaskGroupAppService { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    [Inject] private IDialogService DialogService { get; set; } = null!;
 
     private TaskItemDto? TaskItem { get; set; }
     private bool IsLoading { get; set; } = true;
@@ -121,10 +124,46 @@ public partial class ViewTaskItem
     {
         if (TaskItem?.UserTaskProgressDtos == null || !TaskItem.UserTaskProgressDtos.Any())
             return L["NoProgressRecorded"];
-        
+
         var completedDays = TaskItem.UserTaskProgressDtos.Count(p => p.ProgressPercentage == 100);
         var totalDays = TaskItem.UserTaskProgressDtos.Count;
-        
+
         return string.Format(L["ProgressDescription"], completedDays, totalDays);
+    }
+
+    private async Task RecordProgress()
+    {
+        if (TaskItem == null) return;
+
+        try
+        {
+            var taskProgressDetail = await TaskGroupAppService.GetTaskProgressDetailAsync(TaskGroupId, TaskItemId);
+
+            var parameters = new DialogParameters
+            {
+                ["TaskGroupId"] = TaskGroupId,
+                ["TaskProgressDetail"] = taskProgressDetail
+            };
+
+            var options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true,
+                CloseButton = true,
+            };
+
+            var result = await DialogService.ShowAsync<ProgressRecordingDialog>(L["RecordProgress"], parameters, options);
+
+            // Refresh the task item after recording progress
+            if (!result.Result.IsCanceled)
+            {
+                await LoadTaskItemAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(L["ErrorLoadingProgressDetail"], Severity.Error);
+            Console.WriteLine($"Error loading progress detail: {ex.Message}");
+        }
     }
 }

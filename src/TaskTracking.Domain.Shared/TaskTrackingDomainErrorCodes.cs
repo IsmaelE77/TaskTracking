@@ -12,6 +12,7 @@ public static class TaskTrackingDomainErrorCodes
     public const string CannotSetRecurrencePatternForOneTimeTask = "TrackingTask:00101";
     public const string RecurrencePatternRequired = "TrackingTask:00102";
     public const string AlreadyRecorded = "TrackingTask:00103";
+    public const string ProgressDateInFuture = "TaskTracking:00104"; 
 
     /* Recurrence Pattern Error Codes */
     public const string InvalidRecurrenceInterval = "TrackingTask:00201";
