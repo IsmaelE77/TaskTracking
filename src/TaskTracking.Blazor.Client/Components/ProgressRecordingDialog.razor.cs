@@ -5,6 +5,7 @@ using MudBlazor;
 using TaskTracking.TaskGroupAggregate;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.Validators;
 
 namespace TaskTracking.Blazor.Client.Components;
 
@@ -17,7 +18,8 @@ public partial class ProgressRecordingDialog
     
     [Inject] private ITaskGroupAppService TaskGroupAppService { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
-    
+    [Inject] private RecordTaskProgressDtoValidator RecordTaskProgressDtoValidator { get; set; } = null!;
+
     private bool IsRecording { get; set; }
     private DateTime? SelectedDate { get; set; }
 
@@ -62,20 +64,29 @@ public partial class ProgressRecordingDialog
                 Date = date
             };
 
-            await TaskGroupAppService.RecordTaskProgressAsync(TaskGroupId, recordDto);
+            var result = await RecordTaskProgressDtoValidator.ValidateAsync(recordDto);
 
-            Snackbar.Add(L["ProgressRecordedSuccessfully"], Severity.Success);
+            result.Errors.ForEach(error =>
+            {
+                Snackbar.Add(error.ErrorMessage, Severity.Error);
+            });
 
-            // Refresh the task progress detail
-            TaskProgressDetail = await TaskGroupAppService.GetTaskProgressDetailAsync(
-                TaskGroupId, TaskProgressDetail.TaskItem.Id);
+            if (result.IsValid)
+            {
+                await TaskGroupAppService.RecordTaskProgressAsync(TaskGroupId, recordDto);
 
-            StateHasChanged();
+                Snackbar.Add(L["ProgressRecordedSuccessfully"], Severity.Success);
+
+                // Refresh the task progress detail
+                TaskProgressDetail = await TaskGroupAppService.GetTaskProgressDetailAsync(
+                    TaskGroupId, TaskProgressDetail.TaskItem.Id);
+
+                StateHasChanged();
+            }
         }
         catch (Exception ex)
         {
             Snackbar.Add(L["ErrorRecordingProgress"], Severity.Error);
-            Console.WriteLine($"Error recording progress: {ex.Message}");
         }
         finally
         {
