@@ -176,6 +176,24 @@ public class TaskItem : FullAuditedEntity<Guid>, IHaveTaskGroup
         progress.SetProgressPercentage(progress.ProgressEntries.Count * 100 / dueCount);
     }
 
+    internal void RemoveTaskProgress(
+        Guid userId,
+        DateOnly date)
+    {
+        var progress = UserProgresses
+            .FirstOrDefault(up => up.UserId == userId);
+
+        if (progress == null)
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.ProgressNotFound);
+        }
+
+        progress.RemoveProgress(date);
+
+        var dueCount = GetDueCount();
+        progress.SetProgressPercentage(progress.ProgressEntries.Count * 100 / dueCount);
+    }
+
 
     public int GetDueCount()
     {

@@ -12,6 +12,7 @@ public partial class ProgressCalendar
 {
     [Parameter] public TaskProgressDetailDto? TaskProgressDetail { get; set; }
     [Parameter] public EventCallback<DateOnly> OnDateSelected { get; set; }
+    [Parameter] public EventCallback<DateOnly> OnProgressRemoved { get; set; }
     [Parameter] public bool IsRecording { get; set; }
 
     private DateTime CurrentMonth { get; set; } = DateTime.Today;
@@ -107,7 +108,7 @@ public partial class ProgressCalendar
         }
         
         var dayStatus = GetDayStatus(day);
-        if (dayStatus == DayStatus.Due || dayStatus == DayStatus.Overdue && !IsRecording)
+        if ((dayStatus == DayStatus.Due || dayStatus == DayStatus.Overdue || dayStatus == DayStatus.Completed) && !IsRecording)
         {
             classes.Add("clickable");
         }
@@ -156,11 +157,18 @@ public partial class ProgressCalendar
     private async Task OnDayClick(DateTime day)
     {
         if (IsRecording) return;
-        
+
         var dayStatus = GetDayStatus(day);
-        if (dayStatus is DayStatus.Due or DayStatus.Overdue)
+        var dateOnly = DateOnly.FromDateTime(day);
+
+        if (dayStatus == DayStatus.Completed)
         {
-            var dateOnly = DateOnly.FromDateTime(day);
+            // Remove progress for completed dates
+            await OnProgressRemoved.InvokeAsync(dateOnly);
+        }
+        else if (dayStatus is DayStatus.Due or DayStatus.Overdue)
+        {
+            // Add progress for due/overdue dates
             await OnDateSelected.InvokeAsync(dateOnly);
         }
     }

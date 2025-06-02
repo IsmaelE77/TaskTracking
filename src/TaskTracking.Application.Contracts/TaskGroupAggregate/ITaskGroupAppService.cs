@@ -51,6 +51,11 @@ public interface ITaskGroupAppService :
     Task RecordTaskProgressAsync(Guid id, RecordTaskProgressDto input);
 
     /// <summary>
+    ///     Removes progress for a task on a specific date.
+    /// </summary>
+    Task RemoveTaskProgressAsync(Guid id, RemoveTaskProgressDto input);
+
+    /// <summary>
     ///     Gets detailed progress information for a specific task.
     /// </summary>
     Task<TaskProgressDetailDto> GetTaskProgressDetailAsync(Guid taskGroupId, Guid taskItemId);

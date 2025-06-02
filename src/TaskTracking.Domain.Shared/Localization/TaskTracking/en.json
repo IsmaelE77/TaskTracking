@@ -245,6 +245,8 @@
     "Delete": "Delete",
     "DeleteTask": "Delete Task",
     "DeleteTaskConfirmation": "Are you sure you want to delete the task '{0}'? This action cannot be undone.",
-    "TaskDeletedSuccessfully": "Task deleted successfully!"
+    "TaskDeletedSuccessfully": "Task deleted successfully!",
+    "ProgressRemovedSuccessfully": "Progress removed successfully!",
+    "ErrorRemovingProgress": "Error removing progress. Please try again."
   }
 }

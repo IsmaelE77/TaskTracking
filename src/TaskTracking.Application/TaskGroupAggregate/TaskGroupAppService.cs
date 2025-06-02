@@ -166,6 +166,18 @@ public class TaskGroupAppService :
             input.Date);
     }
 
+    [Authorize(UserTaskGroupPermissions.RecordProgress)]
+    public async Task RemoveTaskProgressAsync(Guid id, RemoveTaskProgressDto input)
+    {
+        var userId = _currentUser.GetId();
+
+        await _taskGroupManager.RemoveTaskProgressAsync(
+            id,
+            input.TaskItemId,
+            userId,
+            input.Date);
+    }
+
     public async Task<TaskProgressDetailDto> GetTaskProgressDetailAsync(Guid taskGroupId, Guid taskItemId)
     {
         var userId = _currentUser.GetId();

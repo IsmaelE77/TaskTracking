@@ -234,6 +234,17 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         await _taskGroupRepository.UpdateAsync(taskGroup);
     }
 
+    public async Task RemoveTaskProgressAsync(
+        Guid taskGroupId,
+        Guid taskItemId,
+        Guid userId,
+        DateOnly date)
+    {
+        var taskGroup = await GetWithDetailsAsync(taskGroupId);
+        taskGroup.RemoveTaskProgress(taskItemId, userId, date);
+        await _taskGroupRepository.UpdateAsync(taskGroup);
+    }
+
     public async Task<TaskGroup> GetWithDetailsAsync(Guid taskGroupId)
     {
         var query = await _taskGroupRepository.WithDetailsAsync();

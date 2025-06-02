@@ -245,6 +245,8 @@
     "Delete": "حذف",
     "DeleteTask": "حذف المهمة",
     "DeleteTaskConfirmation": "هل أنت متأكد من أنك تريد حذف المهمة '{0}'؟ لا يمكن التراجع عن هذا الإجراء.",
-    "TaskDeletedSuccessfully": "تم حذف المهمة بنجاح!"
+    "TaskDeletedSuccessfully": "تم حذف المهمة بنجاح!",
+    "ProgressRemovedSuccessfully": "تمت إزالة التقدم بنجاح!",
+    "ErrorRemovingProgress": "حدث خطأ أثناء إزالة التقدم. الرجاء المحاولة مرة أخرى."
   }
 }

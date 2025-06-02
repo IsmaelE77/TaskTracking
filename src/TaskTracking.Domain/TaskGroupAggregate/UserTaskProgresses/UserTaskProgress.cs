@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
@@ -45,6 +46,16 @@ public class UserTaskProgress : FullAuditedEntity<Guid>
         var entry = new ProgressEntry(date);
         _progressEntries.Add(entry);
         LastUpdatedDate = DateTime.Now;
+    }
+
+    public void RemoveProgress(DateOnly date)
+    {
+        var entry = _progressEntries.FirstOrDefault(pe => pe.Date == date);
+        if (entry != null)
+        {
+            _progressEntries.Remove(entry);
+            LastUpdatedDate = DateTime.Now;
+        }
     }
 
 

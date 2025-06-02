@@ -19,6 +19,7 @@ public partial class ProgressRecordingDialog
     [Inject] private ITaskGroupAppService TaskGroupAppService { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     [Inject] private RecordTaskProgressDtoValidator RecordTaskProgressDtoValidator { get; set; } = null!;
+    [Inject] private RemoveTaskProgressDtoValidator RemoveTaskProgressDtoValidator { get; set; } = null!;
 
     private bool IsRecording { get; set; }
     private DateTime? SelectedDate { get; set; }
@@ -48,6 +49,11 @@ public partial class ProgressRecordingDialog
     private async Task OnDateSelected(DateOnly date)
     {
         await RecordProgress(date);
+    }
+
+    private async Task OnProgressRemoved(DateOnly date)
+    {
+        await RemoveProgress(date);
     }
 
     private async Task RecordProgress(DateOnly date)
@@ -87,6 +93,50 @@ public partial class ProgressRecordingDialog
         catch (Exception ex)
         {
             Snackbar.Add(L["ErrorRecordingProgress"], Severity.Error);
+        }
+        finally
+        {
+            IsRecording = false;
+        }
+    }
+
+    private async Task RemoveProgress(DateOnly date)
+    {
+        if (TaskProgressDetail == null) return;
+
+        try
+        {
+            IsRecording = true;
+
+            var removeDto = new RemoveTaskProgressDto
+            {
+                TaskItemId = TaskProgressDetail.TaskItem.Id,
+                Date = date
+            };
+
+            var result = await RemoveTaskProgressDtoValidator.ValidateAsync(removeDto);
+
+            result.Errors.ForEach(error =>
+            {
+                Snackbar.Add(error.ErrorMessage, Severity.Error);
+            });
+
+            if (result.IsValid)
+            {
+                await TaskGroupAppService.RemoveTaskProgressAsync(TaskGroupId, removeDto);
+
+                Snackbar.Add(L["ProgressRemovedSuccessfully"], Severity.Success);
+
+                // Refresh the task progress detail
+                TaskProgressDetail = await TaskGroupAppService.GetTaskProgressDetailAsync(
+                    TaskGroupId, TaskProgressDetail.TaskItem.Id);
+
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(L["ErrorRemovingProgress"], Severity.Error);
         }
         finally
         {

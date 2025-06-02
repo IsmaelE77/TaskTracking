@@ -75,11 +75,11 @@
     <div class="calendar-legend mt-3">
         <div class="d-flex flex-wrap gap-3">
             <div class="legend-item">
-                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" 
-                         Size="Size.Small" 
-                         Color="Color.Success" 
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                         Size="Size.Small"
+                         Color="Color.Success"
                          Class="me-1" />
-                <MudText Typo="Typo.caption">@L["Completed"]</MudText>
+                <MudText Typo="Typo.caption">@L["Completed"] (click to remove)</MudText>
             </div>
             <div class="legend-item">
                 <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" 
@@ -182,5 +182,15 @@
     .legend-item {
         display: flex;
         align-items: center;
+    }
+
+    .clickable {
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .clickable:hover {
+        background-color: var(--mud-palette-action-hover);
+        transform: scale(1.05);
     }
 </style>

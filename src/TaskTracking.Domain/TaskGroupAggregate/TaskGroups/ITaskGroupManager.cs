@@ -65,6 +65,12 @@ public interface ITaskGroupManager : IDomainService
         Guid userId,
         DateOnly date);
 
+    Task RemoveTaskProgressAsync(
+        Guid taskGroupId,
+        Guid taskItemId,
+        Guid userId,
+        DateOnly date);
+
     Task<TaskGroup> GetWithDetailsAsync(Guid taskGroupId);
 
     Task<(List<TaskGroup> Items, int TotalCount)> GetUserTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount);

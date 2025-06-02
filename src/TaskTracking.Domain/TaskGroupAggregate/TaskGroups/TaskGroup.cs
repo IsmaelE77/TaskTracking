@@ -196,7 +196,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         {
             throw new BusinessException(TaskTrackingDomainErrorCodes.ProgressDateInFuture);
         }
-        
+
         var taskItem = _tasks.FirstOrDefault(t => t.Id == taskItemId);
         if (taskItem == null)
         {
@@ -210,6 +210,23 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
         }
 
         taskItem.RecordTaskProgress(userId, date);
+    }
+
+    internal void RemoveTaskProgress(Guid taskItemId, Guid userId, DateOnly date)
+    {
+        var taskItem = _tasks.FirstOrDefault(t => t.Id == taskItemId);
+        if (taskItem == null)
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.TaskNotInGroup);
+        }
+
+        var userTaskGroup = _userTaskGroups.FirstOrDefault(utg => utg.UserId == userId);
+        if (userTaskGroup == null)
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.UserNotInGroup);
+        }
+
+        taskItem.RemoveTaskProgress(userId, date);
     }
 
     private UserTaskProgress GetUserTaskProgress(Guid taskItemId, Guid userId)
