@@ -1,0 +1,206 @@
+@page "/tasks/upcoming"
+@using TaskTracking.TaskGroupAggregate.TaskItems
+@using TaskTracking.Blazor.Client.Components
+@inherits TaskTrackingComponentBase
+
+<PageTitle>@L["UpcomingTasks"] - @L["TaskManagementSystem"]</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <!-- Page Header -->
+    <div class="d-flex align-center justify-space-between mb-6">
+        <div>
+            <MudText Typo="Typo.h4" Class="mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.Schedule" Class="me-3" />
+                @L["UpcomingTasks"]
+            </MudText>
+            <MudText Typo="Typo.body1" Class="text-muted">
+                @L["ViewUpcomingTasks"]
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Refresh"
+                   OnClick="@RefreshTasks"
+                   Class="islamic-button">
+            @L["Refresh"]
+        </MudButton>
+    </div>
+
+    <!-- Filters Section -->
+    <MudPaper Class="pa-4 mb-4" Elevation="2">
+        <MudGrid AlignItems="Center.Center" Spacing="3">
+            <!-- Search -->
+            <MudItem xs="12" sm="6" md="4">
+                <MudTextField @bind-Value="SearchText"
+                              Label="@L["SearchTasks"]"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              @onkeypress="@OnSearchKeyPress"
+                              Immediate="false"
+                              DebounceInterval="500"
+                              OnDebounceIntervalElapsed="@OnSearchChanged" />
+            </MudItem>
+
+            <!-- Task Type Filter -->
+            <MudItem xs="12" sm="6" md="3">
+                <MudSelect Value="TaskTypeFilter"
+                           Label="@L["TaskType"]"
+                           Variant="Variant.Outlined"
+                           ValueChanged="@(new Func<TaskTypeFilter, Task>(OnTaskTypeFilterChanged))">
+                    <MudSelectItem Value="TaskTypeFilter.All">@L["AllTypes"]</MudSelectItem>
+                    <MudSelectItem Value="TaskTypeFilter.OneTime">@L["OneTime"]</MudSelectItem>
+                    <MudSelectItem Value="TaskTypeFilter.Recurring">@L["Recurring"]</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <!-- Days Ahead Filter -->
+            <MudItem xs="12" sm="6" md="3">
+                <MudSelect Value="DaysAhead"
+                           Label="@L["DaysAhead"]"
+                           Variant="Variant.Outlined"
+                           ValueChanged="@(new Func<int, Task>(OnDaysAheadChanged))">
+                    <MudSelectItem Value="7">@L["Next7Days"]</MudSelectItem>
+                    <MudSelectItem Value="14">@L["Next14Days"]</MudSelectItem>
+                    <MudSelectItem Value="30">@L["Next30Days"]</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <!-- Clear Filters -->
+            <MudItem xs="12" sm="6" md="2">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Secondary"
+                           StartIcon="@Icons.Material.Filled.Clear"
+                           OnClick="@ClearFilters"
+                           FullWidth="true">
+                    @L["ClearFilters"]
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- Statistics Cards -->
+    <MudGrid Class="mb-4" Spacing="3">
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <div class="d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Large" Class="me-3 islamic-primary-text" />
+                    <div>
+                        <MudText Typo="Typo.h6">
+                            @L["TasksUpcoming"] (@Tasks.Count)
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted">
+                            @L["InNext"] @DaysAhead @L["Days"]
+                        </MudText>
+                    </div>
+                </div>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <div class="d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Large" Class="me-3 text-success" />
+                    <div>
+                        <MudText Typo="Typo.h6">@CompletedTasksCount</MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted">@L["Completed"]</MudText>
+                    </div>
+                </div>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <div class="d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Large" Class="me-3 text-warning" />
+                    <div>
+                        <MudText Typo="Typo.h6">@PendingTasksCount</MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted">@L["Pending"]</MudText>
+                    </div>
+                </div>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <div class="d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Large" Class="me-3 islamic-secondary-text" />
+                    <div>
+                        <MudText Typo="Typo.h6">@TotalTasksCount</MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted">@L["AllTasks"]</MudText>
+                    </div>
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Tasks Content -->
+    <MudPaper Class="pa-4" Elevation="2">
+        @if (IsLoading)
+        {
+            <div class="text-center py-5">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                <MudText Typo="Typo.body1" Class="mt-3">@L["LoadingTasks"]</MudText>
+            </div>
+        }
+        else if (!Tasks.Any())
+        {
+            <div class="text-center py-5">
+                <MudIcon Icon="@GetEmptyStateIcon()" Size="Size.Large" Color="Color.Default" Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="mb-2">@GetEmptyStateTitle()</MudText>
+                <MudText Typo="Typo.body2" Class="text-muted mb-4">
+                    @GetEmptyStateDescription()
+                </MudText>
+                @if (TotalTasksCount == 0 && TaskTypeFilter == TaskTypeFilter.All && string.IsNullOrWhiteSpace(SearchText))
+                {
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="@(() => NavigationManager.NavigateTo("/task-groups/my"))">
+                        @L["ViewMyGroups"]
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Clear"
+                               OnClick="@ClearFilters">
+                        @L["ClearFilters"]
+                    </MudButton>
+                }
+            </div>
+        }
+        else
+        {
+            <MudGrid AlignItems="Center.Center">
+                @foreach (var task in Tasks)
+                {
+                    <MudItem xs="12" sm="6" md="4" lg="3">
+                        <TaskItemCard TaskItem="@task" TaskGroupId="@task.TaskGroupId" OnTaskDeleted="@OnTaskDeleted" />
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <!-- Load More Button -->
+            @if (HasMoreData)
+            {
+                <div class="text-center mt-4">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.ExpandMore"
+                               OnClick="@LoadMoreTasks"
+                               Disabled="@IsLoadingMore"
+                               Class="islamic-button-outlined">
+                        @if (IsLoadingMore)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                            @L["LoadingMoreTasks"]
+                        }
+                        else
+                        {
+                            @L["LoadMore"]
+                        }
+                    </MudButton>
+                </div>
+            }
+        }
+    </MudPaper>
+</MudContainer>

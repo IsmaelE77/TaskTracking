@@ -54,6 +54,19 @@ public class TaskItemManager : DomainService
         return await GetTasksForDateRangePagedAsync(userId, skipCount, maxResultCount, today, endDate);
     }
 
+    public async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForNextNDaysPagedAsync(
+        Guid userId,
+        int days,
+        int skipCount,
+        int maxResultCount,
+        string? searchText,
+        TaskTypeFilter taskTypeFilter)
+    {
+        var today = Clock.Now.Date;
+        var endDate = today.AddDays(days);
+        return await GetTasksForDateRangePagedAsync(userId, skipCount, maxResultCount, today, endDate, searchText, taskTypeFilter);
+    }
+
     private async Task<(List<TaskItem> Items, int TotalCount)> GetTasksForDateRangePagedAsync(
         Guid userId,
         int skipCount,

@@ -23,4 +23,9 @@ public interface ITaskItemAppService : IApplicationService
     /// </summary>
     Task<PagedResultDto<TaskItemDto>> GetMyTasksDueTodayAsync(GetMyTasksDueTodayInput input);
 
+    /// <summary>
+    ///     Gets upcoming tasks for the current user with filtering support.
+    /// </summary>
+    Task<PagedResultDto<TaskItemDto>> GetMyUpcomingTasksAsync(GetMyUpcomingTasksInput input);
+
 }

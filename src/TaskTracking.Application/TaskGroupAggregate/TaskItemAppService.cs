@@ -145,6 +145,42 @@ public class TaskItemAppService : ApplicationService,ITaskItemAppService
         return new PagedResultDto<TaskItemDto>(tasks.TotalCount, taskDtos);
     }
 
+    public async Task<PagedResultDto<TaskItemDto>> GetMyUpcomingTasksAsync(GetMyUpcomingTasksInput input)
+    {
+        var currentUserId = _currentUser.GetId();
+
+        var tasks = await _taskItemManager.GetTasksForNextNDaysPagedAsync(
+            currentUserId,
+            input.DaysAhead,
+            input.SkipCount,
+            input.MaxResultCount,
+            input.SearchText,
+            input.TaskTypeFilter);
+
+        List<TaskItemDto> taskDtos = [];
+
+        foreach (var taskItem in tasks.Items)
+        {
+            taskDtos.Add(new TaskItemDto()
+            {
+                Id = taskItem.Id,
+                Title = taskItem.Title,
+                Description = taskItem.Description,
+                StartDate = taskItem.StartDate,
+                EndDate = taskItem.EndDate,
+                TaskType = taskItem.TaskType,
+                RecurrencePattern = taskItem.RecurrencePattern != null
+                    ? ObjectMapper.Map<RecurrencePattern, RecurrencePatternDto>(taskItem.RecurrencePattern)
+                    : null,
+                TaskGroupId = taskItem.TaskGroupId,
+                IsDueToday = taskItem.IsDue(Clock.Now.Date, CurrentUser.GetId()),
+                IsCompleted = taskItem.UserProgresses.Any(up => up.ProgressPercentage == 100)
+            });
+        }
+
+        return new PagedResultDto<TaskItemDto>(tasks.TotalCount, taskDtos);
+    }
+
     public async Task<PagedResultDto<TaskItemDto>> GetMyTasksDueInNextNDaysAsync(int days, PagedResultRequestDto input)
     {
         var currentUserId = _currentUser.GetId();

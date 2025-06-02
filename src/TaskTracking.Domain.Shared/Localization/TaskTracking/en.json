@@ -267,6 +267,20 @@
     "NoTasksMatchSearch": "No tasks match your search criteria. Try adjusting your search terms or filters.",
     "ClearFilters": "Clear Filters",
     "ErrorLoadingTasks": "Error loading tasks. Please try again.",
-    "Status": "Status"
+    "Status": "Status",
+    "ViewUpcomingTasks": "View all upcoming tasks in the next few days",
+    "TasksUpcoming": "Upcoming Tasks",
+    "DaysAhead": "Days Ahead",
+    "Next7Days": "Next 7 Days",
+    "Next14Days": "Next 14 Days",
+    "Next30Days": "Next 30 Days",
+    "CustomDays": "Custom Days",
+    "NoUpcomingTasks": "No Upcoming Tasks",
+    "NoUpcomingTasksDescription": "You don't have any upcoming tasks in the selected time period. Great job staying organized!",
+    "ErrorLoadingUpcomingTasks": "Error loading upcoming tasks. Please try again.",
+    "UpcomingTasksRefreshed": "Upcoming tasks refreshed successfully!",
+    "TasksDue": "Tasks Due",
+    "InNext": "In Next",
+    "Days": "Days"
   }
 }
