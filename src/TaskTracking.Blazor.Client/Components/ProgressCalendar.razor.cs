@@ -107,7 +107,7 @@ public partial class ProgressCalendar
         }
         
         var dayStatus = GetDayStatus(day);
-        if (dayStatus == DayStatus.Due && !IsRecording)
+        if (dayStatus == DayStatus.Due || dayStatus == DayStatus.Overdue && !IsRecording)
         {
             classes.Add("clickable");
         }
@@ -158,7 +158,7 @@ public partial class ProgressCalendar
         if (IsRecording) return;
         
         var dayStatus = GetDayStatus(day);
-        if (dayStatus == DayStatus.Due)
+        if (dayStatus is DayStatus.Due or DayStatus.Overdue)
         {
             var dateOnly = DateOnly.FromDateTime(day);
             await OnDateSelected.InvokeAsync(dateOnly);
