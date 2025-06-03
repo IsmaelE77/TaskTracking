@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 using Volo.Abp;
@@ -23,6 +24,9 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
 
     public IReadOnlyCollection<UserTaskGroup> UserTaskGroups => _userTaskGroups.AsReadOnly();
     private readonly List<UserTaskGroup> _userTaskGroups = new();
+
+    public IReadOnlyCollection<TaskGroupInvitation> Invitations => _invitations.AsReadOnly();
+    private readonly List<TaskGroupInvitation> _invitations = new();
 
     #endregion
 

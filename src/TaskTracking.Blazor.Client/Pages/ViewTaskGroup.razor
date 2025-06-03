@@ -148,6 +148,12 @@
                 </MudCardContent>
             </MudCard>
 
+            <!-- Invitation Management Section (Only for owners) -->
+            @if (CanManageInvitations)
+            {
+                <TaskGroupInvitationManagement TaskGroupId="@Id" OnInvitationCreated="@OnInvitationCreated" />
+            }
+
             <!-- Tasks Section -->
             <MudCard Class="islamic-card" Elevation="3">
                 <MudCardHeader>

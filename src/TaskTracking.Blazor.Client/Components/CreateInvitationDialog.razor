@@ -1,0 +1,63 @@
+@using TaskTracking.TaskGroupAggregate
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations
+@inherits TaskTrackingComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <MudContainer Style="max-width: 500px;">
+            <MudForm @ref="Form" @bind-IsValid="@IsFormValid">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.body2" Class="mb-3">
+                            Create an invitation link to allow others to join this task group.
+                            The link will expire after the specified time period.
+                        </MudText>
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudNumericField @bind-Value="ExpirationHours"
+                                         Label="@L["InvitationExpirationHours"]"
+                                         HelperText="@L["DefaultExpiration"]"
+                                         Min="1"
+                                         Max="8760"
+                                         Clearable="true"
+                                         Placeholder="168"
+                                         Variant="Variant.Outlined"
+                                         Adornment="Adornment.End"
+                                         AdornmentText="hours" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Info" Class="mt-2">
+                            <MudText Typo="Typo.body2">
+                                <strong>Note:</strong> The invitation link can only be used once and will expire automatically.
+                                You can revoke unused invitations at any time.
+                            </MudText>
+                        </MudAlert>
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel"
+                   Variant="Variant.Text">
+            @L["Cancel"]
+        </MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   OnClick="CreateInvitation"
+                   Disabled="@IsCreating"
+                   StartIcon="@Icons.Material.Filled.Link">
+            @if (IsCreating)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">@L["Creating"]</MudText>
+            }
+            else
+            {
+                <MudText>@L["Create"]</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>

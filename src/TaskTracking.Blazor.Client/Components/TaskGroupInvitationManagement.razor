@@ -1,0 +1,122 @@
+@inherits TaskTrackingComponentBase
+
+<MudCard Class="islamic-card mb-4" Elevation="3">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <div class="d-flex justify-content-between align-items-center">
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.Link" Class="me-2" />
+                    @L["InvitationManagement"]
+                </MudText>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@OpenCreateInvitationDialog"
+                           Size="Size.Small">
+                    @L["GenerateInvitation"]
+                </MudButton>
+            </div>
+        </CardHeaderContent>
+    </MudCardHeader>
+    
+    <MudCardContent>
+        @if (IsLoading)
+        {
+            <div class="text-center py-4">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+                <MudText Typo="Typo.body2" Class="mt-2">@L["LoadingInvitations"]</MudText>
+            </div>
+        }
+        else if (!Invitations.Any())
+        {
+            <div class="text-center py-4">
+                <MudIcon Icon="@Icons.Material.Filled.LinkOff" Size="Size.Large" Color="Color.Default" Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="mb-2">@L["NoActiveInvitations"]</MudText>
+                <MudText Typo="Typo.body2" Class="text-muted mb-4">
+                    Create invitation links to allow others to join this task group.
+                </MudText>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@OpenCreateInvitationDialog">
+                    @L["CreateInvitationLink"]
+                </MudButton>
+            </div>
+        }
+        else
+        {
+            <MudTable Items="@Invitations" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@IsLoading">
+                <HeaderContent>
+                    <MudTh>@L["InvitationCode"]</MudTh>
+                    <MudTh>@L["ExpirationDate"]</MudTh>
+                    <MudTh>@L["Status"]</MudTh>
+                    <MudTh>@L["UsedBy"]</MudTh>
+                    <MudTh>@L["Actions"]</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="@L["InvitationCode"]">
+                        <div class="d-flex align-items-center">
+                            <MudText Typo="Typo.body2" Class="font-monospace me-2">
+                                @context.InvitationCode.Substring(0, 8)...
+                            </MudText>
+                            <MudTooltip Text="@L["CopyInvitationLink"]">
+                                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                               Size="Size.Small"
+                                               OnClick="@(() => CopyInvitationLink(context))" />
+                            </MudTooltip>
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="@L["ExpirationDate"]">
+                        <MudText Typo="Typo.body2">
+                            @context.ExpirationDate.ToString("dd/MM/yyyy HH:mm")
+                        </MudText>
+                    </MudTd>
+                    <MudTd DataLabel="@L["Status"]">
+                        @if (context.IsUsed)
+                        {
+                            <MudChip T="string" Color="Color.Success" Size="Size.Small" Icon="@Icons.Material.Filled.CheckCircle">
+                                @L["InvitationUsed"]
+                            </MudChip>
+                        }
+                        else if (context.IsExpired)
+                        {
+                            <MudChip T="string" Color="Color.Error" Size="Size.Small" Icon="@Icons.Material.Filled.AccessTime">
+                                @L["InvitationExpired"]
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Color="Color.Primary" Size="Size.Small" Icon="@Icons.Material.Filled.Link">
+                                @L["InvitationValid"]
+                            </MudChip>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="@L["UsedBy"]">
+                        @if (!string.IsNullOrEmpty(context.UsedByUserName))
+                        {
+                            <MudText Typo="Typo.body2">@context.UsedByUserName</MudText>
+                            <MudText Typo="Typo.caption" Class="text-muted">
+                                @context.UsedAt?.ToString("dd/MM/yyyy HH:mm")
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Class="text-muted">-</MudText>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="@L["Actions"]">
+                        @if (context.IsValid)
+                        {
+                            <MudTooltip Text="@L["RevokeInvitation"]">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Error"
+                                               OnClick="@(() => RevokeInvitation(context))" />
+                            </MudTooltip>
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudCardContent>
+</MudCard>

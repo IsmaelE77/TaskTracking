@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
@@ -81,4 +82,34 @@ public interface ITaskGroupAppService :
     Task<TaskItemDto> DeleteTaskItemAsync(
         Guid id,
         Guid taskItemId);
+
+    /// <summary>
+    ///     Generates a new invitation link for the specified task group.
+    /// </summary>
+    Task<TaskGroupInvitationDto> GenerateInvitationAsync(Guid id, CreateTaskGroupInvitationDto input);
+
+    /// <summary>
+    ///     Gets all invitations for the specified task group.
+    /// </summary>
+    Task<PagedResultDto<TaskGroupInvitationDto>> GetInvitationsAsync(Guid id, PagedResultRequestDto input);
+
+    /// <summary>
+    ///     Gets information about an invitation by its code (public endpoint).
+    /// </summary>
+    Task<TaskGroupInvitationInfoDto> GetInvitationInfoAsync(string invitationCode);
+
+    /// <summary>
+    ///     Joins a task group using an invitation code.
+    /// </summary>
+    Task<UserTaskGroupDto> JoinByInvitationAsync(JoinTaskGroupByInvitationDto input);
+
+    /// <summary>
+    ///     Revokes an invitation.
+    /// </summary>
+    Task RevokeInvitationAsync(Guid id, Guid invitationId);
+
+    /// <summary>
+    ///     Gets the current user's role in the specified task group.
+    /// </summary>
+    Task<UserTaskGroupRole?> GetCurrentUserRoleAsync(Guid id);
 }
