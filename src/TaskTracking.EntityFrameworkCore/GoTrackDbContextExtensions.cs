@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.Notifications;
@@ -28,7 +29,10 @@ public static class GoTrackDbContextExtensions
             b.HasMany(x => x.UserTaskGroups)
                 .WithOne(x => x.TaskGroup)
                 .HasForeignKey(x => x.TaskGroupId);
-            ;
+
+            b.HasMany(x => x.Invitations)
+                .WithOne(x => x.TaskGroup)
+                .HasForeignKey(x => x.TaskGroupId);
         });
 
         builder.Entity<TaskItem>(b =>
@@ -46,6 +50,21 @@ public static class GoTrackDbContextExtensions
 
             b.OwnsOne(x => x.RecurrencePattern);
 
+        });
+
+        builder.Entity<TaskGroupInvitation>(b =>
+        {
+            b.ToTaskTrackingTable();
+            b.ConfigureByConvention();
+
+            b.Property(x => x.InvitationCode).IsRequired().HasMaxLength(TaskGroupInvitationConsts.InvitationCodeLength);
+            b.HasIndex(x => x.InvitationCode).IsUnique();
+            b.HasIndex(x => new { x.TaskGroupId, x.IsUsed, x.ExpirationDate });
+
+            b.HasOne(x => x.UsedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.UsedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         builder.Entity<UserTaskGroup>(b =>

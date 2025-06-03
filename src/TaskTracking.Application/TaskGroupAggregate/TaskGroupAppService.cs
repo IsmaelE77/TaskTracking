@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using TaskTracking.Permissions;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
@@ -31,22 +32,28 @@ public class TaskGroupAppService :
     ITaskGroupAppService
 {
     private readonly ITaskGroupManager _taskGroupManager;
+    private readonly TaskGroupInvitationManager _invitationManager;
     private readonly IIdentityUserRepository _userRepository;
     private readonly IRepository<UserTaskGroup, Guid> _userTaskGroupRepository;
+    private readonly IRepository<TaskGroupInvitation, Guid> _invitationRepository;
     private readonly ICurrentUser _currentUser;
     private readonly IReadOnlyRepository<TaskGroup, Guid> _taskGroupRepository;
 
     public TaskGroupAppService(
         IRepository<TaskGroup, Guid> repository,
         ITaskGroupManager taskGroupManager,
+        TaskGroupInvitationManager invitationManager,
         IIdentityUserRepository userRepository,
         IRepository<UserTaskGroup, Guid> userTaskGroupRepository,
+        IRepository<TaskGroupInvitation, Guid> invitationRepository,
         ICurrentUser currentUser, IReadOnlyRepository<TaskGroup, Guid> taskGroupRepository)
         : base(repository)
     {
         _taskGroupManager = taskGroupManager;
+        _invitationManager = invitationManager;
         _userRepository = userRepository;
         _userTaskGroupRepository = userTaskGroupRepository;
+        _invitationRepository = invitationRepository;
         _currentUser = currentUser;
         _taskGroupRepository = taskGroupRepository;
     }
@@ -347,5 +354,104 @@ public class TaskGroupAppService :
         }
 
         return dueDates.OrderBy(d => d).ToList();
+    }
+    
+    [Authorize(UserTaskGroupPermissions.ManageUsers)]
+    public async Task<TaskGroupInvitationDto> GenerateInvitationAsync(Guid id, CreateTaskGroupInvitationDto input)
+    {
+        var currentUserId = _currentUser.GetId();
+        var invitation = await _invitationManager.CreateInvitationAsync(id, currentUserId, input.ExpirationHours);
+
+        var dto = ObjectMapper.Map<TaskGroupInvitation, TaskGroupInvitationDto>(invitation);
+        dto.IsValid = invitation.IsValid();
+        dto.IsExpired = invitation.IsExpired();
+
+        return dto;
+    }
+
+    [Authorize(UserTaskGroupPermissions.ManageUsers)]
+    public async Task<PagedResultDto<TaskGroupInvitationDto>> GetInvitationsAsync(Guid id, PagedResultRequestDto input)
+    {
+        var query = await _invitationRepository.WithDetailsAsync(i => i.UsedByUser);
+        var filteredQuery = query.Where(i => i.TaskGroupId == id);
+
+        var totalCount = await AsyncExecuter.CountAsync(filteredQuery);
+        var invitations = await AsyncExecuter.ToListAsync(filteredQuery
+            .OrderByDescending(i => i.CreationTime)
+            .PageBy(input));
+
+        var dtos = new List<TaskGroupInvitationDto>();
+        foreach (var invitation in invitations)
+        {
+            var dto = ObjectMapper.Map<TaskGroupInvitation, TaskGroupInvitationDto>(invitation);
+            dto.IsValid = invitation.IsValid();
+            dto.IsExpired = invitation.IsExpired();
+            dto.UsedByUserName = invitation.UsedByUser?.UserName;
+            dtos.Add(dto);
+        }
+
+        return new PagedResultDto<TaskGroupInvitationDto>(totalCount, dtos);
+    }
+
+    public async Task<TaskGroupInvitationInfoDto> GetInvitationInfoAsync(string invitationCode)
+    {
+        var invitation = await _invitationRepository.FirstOrDefaultAsync(
+            i => i.InvitationCode == invitationCode);
+
+        if (invitation == null)
+        {
+            throw new EntityNotFoundException(typeof(TaskGroupInvitation), invitationCode);
+        }
+
+        var taskGroup = await _taskGroupRepository.GetAsync(invitation.TaskGroupId);
+        var creator = await _userRepository.GetAsync(invitation.CreatorId.Value);
+
+        return new TaskGroupInvitationInfoDto
+        {
+            InvitationCode = invitation.InvitationCode,
+            TaskGroupTitle = taskGroup.Title,
+            TaskGroupDescription = taskGroup.Description,
+            InvitedByUserName = creator.UserName,
+            ExpirationDate = invitation.ExpirationDate,
+            IsValid = invitation.IsValid(),
+            IsExpired = invitation.IsExpired(),
+            IsUsed = invitation.IsUsed
+        };
+    }
+
+    public async Task<UserTaskGroupDto> JoinByInvitationAsync(JoinTaskGroupByInvitationDto input)
+    {
+        var currentUserId = _currentUser.GetId();
+        var userTaskGroup = await _invitationManager.UseInvitationAsync(
+            input.InvitationCode,
+            currentUserId,
+            UserTaskGroupRole.Subscriber);
+
+        var dto = ObjectMapper.Map<UserTaskGroup, UserTaskGroupDto>(userTaskGroup);
+        var user = await _userRepository.GetAsync(currentUserId);
+        dto.UserName = user.UserName;
+
+        return dto;
+    }
+
+    [Authorize(UserTaskGroupPermissions.ManageUsers)]
+    public async Task RevokeInvitationAsync(Guid id, Guid invitationId)
+    {
+        var currentUserId = _currentUser.GetId();
+        await _invitationManager.RevokeInvitationAsync(invitationId, currentUserId);
+    }
+
+    public async Task<UserTaskGroupRole?> GetCurrentUserRoleAsync(Guid id)
+    {
+        if (!_currentUser.IsAuthenticated)
+        {
+            return null;
+        }
+
+        var currentUserId = _currentUser.GetId();
+        var userTaskGroup = await _userTaskGroupRepository.FirstOrDefaultAsync(
+            utg => utg.TaskGroupId == id && utg.UserId == currentUserId);
+
+        return userTaskGroup?.Role;
     }
 }

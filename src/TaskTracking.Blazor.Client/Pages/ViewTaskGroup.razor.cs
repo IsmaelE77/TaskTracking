@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using TaskTracking.TaskGroupAggregate;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
+using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using Volo.Abp.Application.Dtos;
 
 namespace TaskTracking.Blazor.Client.Pages;
@@ -24,6 +26,7 @@ public partial class ViewTaskGroup
     private List<TaskItemDto> Tasks { get; set; } = new();
     private bool IsLoading { get; set; } = true;
     private bool IsLoadingTasks { get; set; } = true;
+    private bool CanManageInvitations { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,6 +51,7 @@ public partial class ViewTaskGroup
             StateHasChanged();
 
             TaskGroup = await TaskGroupAppService.GetAsync(Id);
+            await CheckPermissionsAsync();
         }
         catch (Exception ex)
         {
@@ -104,6 +108,32 @@ public partial class ViewTaskGroup
         await LoadTasksAsync();
         await LoadTaskGroupAsync(); // Reload to update progress
         Snackbar.Add(L["TaskDeletedSuccessfully"], Severity.Success);
+    }
+
+    private async Task CheckPermissionsAsync()
+    {
+        if (TaskGroup == null || !CurrentUser.IsAuthenticated)
+        {
+            CanManageInvitations = false;
+            return;
+        }
+
+        try
+        {
+            var userRole = await TaskGroupAppService.GetCurrentUserRoleAsync(Id);
+            CanManageInvitations = userRole == UserTaskGroupRole.Owner;
+        }
+        catch
+        {
+            CanManageInvitations = false;
+        }
+    }
+
+    private Task OnInvitationCreated()
+    {
+        // No need to refresh anything here since the invitation management component
+        // handles its own data refresh
+        return Task.CompletedTask;
     }
 
     protected override Task HandleErrorAsync(Exception ex)

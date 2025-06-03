@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
@@ -32,6 +33,7 @@ public class TaskTrackingDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<TaskGroup> TaskGroups { get; set; }
+    public DbSet<TaskGroupInvitation> TaskGroupInvitations { get; set; }
     public DbSet<TaskItem> TaskItems { get; set; }
     public DbSet<UserTaskGroup> UserTaskGroups { get; set; }
     public DbSet<UserTaskProgress> UserTaskProgresses { get; set; }

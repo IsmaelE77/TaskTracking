@@ -1,0 +1,146 @@
+@page "/join/{invitationCode}"
+@inherits TaskTrackingComponentBase
+
+<div class="islamic-pattern-bg">
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="py-4">
+        @if (IsLoading)
+        {
+            <div class="text-center py-5">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                <MudText Typo="Typo.body1" Class="mt-3">@L["LoadingInvitationDetails"]</MudText>
+            </div>
+        }
+        else if (InvitationInfo == null)
+        {
+            <MudCard Class="text-center py-5" Elevation="2">
+                <MudCardContent>
+                    <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Large" Color="Color.Error" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">@L["InvitationNotFound"]</MudText>
+                    <MudText Typo="Typo.body2" Class="text-muted mb-4">
+                        @L["InvitationNotValid"]
+                    </MudText>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Home"
+                               OnClick="@(() => NavigationManager.NavigateTo("/"))">
+                        @L["BackToHome"]
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        }
+        else if (!InvitationInfo.IsValid)
+        {
+            <MudCard Class="text-center py-5" Elevation="2">
+                <MudCardContent>
+                    <MudIcon Icon="@Icons.Material.Filled.AccessTime" Size="Size.Large" Color="Color.Warning" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        @(InvitationInfo.IsExpired ? L["InvitationExpired"] : L["InvitationUsed"])
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="text-muted mb-4">
+                        @L["InvitationNotValid"]
+                    </MudText>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Home"
+                               OnClick="@(() => NavigationManager.NavigateTo("/"))">
+                        @L["BackToHome"]
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <!-- Valid Invitation -->
+            <MudCard Class="islamic-card" Elevation="3">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <div class="text-center">
+                            <MudIcon Icon="@Icons.Material.Filled.GroupAdd" Size="Size.Large" Color="Color.Primary" Class="mb-3" />
+                            <MudText Typo="Typo.h4" Class="section-title mb-2">
+                                @L["YouAreInvitedToJoin"]
+                            </MudText>
+                            <MudText Typo="Typo.h5" Class="task-group-title mb-3">
+                                @InvitationInfo.TaskGroupTitle
+                            </MudText>
+                        </div>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                
+                <MudCardContent>
+                    <!-- Task Group Description -->
+                    @if (!string.IsNullOrWhiteSpace(InvitationInfo.TaskGroupDescription))
+                    {
+                        <div class="mb-4">
+                            <MudText Typo="Typo.h6" Class="mb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Description" Class="me-2" />
+                                @L["Description"]
+                            </MudText>
+                            <div class="markdown-content">
+                                <MudMarkdown Value="@InvitationInfo.TaskGroupDescription" />
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Invitation Details -->
+                    <MudGrid Class="mb-4">
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.subtitle2" Class="text-muted">@L["InvitedBy"]</MudText>
+                            <MudText Typo="Typo.body1">@InvitationInfo.InvitedByUserName</MudText>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.subtitle2" Class="text-muted">@L["ExpirationDate"]</MudText>
+                            <MudText Typo="Typo.body1">@InvitationInfo.ExpirationDate.ToString("dd/MM/yyyy HH:mm")</MudText>
+                        </MudItem>
+                    </MudGrid>
+
+                    <!-- Authentication Check -->
+                    @if (!CurrentUser.IsAuthenticated)
+                    {
+                        <MudAlert Severity="Severity.Info" Class="mb-4">
+                            <MudText>You need to sign in to join this task group.</MudText>
+                        </MudAlert>
+                        
+                        <div class="text-center">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Login"
+                                       OnClick="@(() => NavigationManager.NavigateTo($"/authentication/login?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}"))"
+                                       Class="me-3">
+                                @L["SignIn"]
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                                       OnClick="@(() => NavigationManager.NavigateTo($"/authentication/register?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}"))">
+                                @L["SignUp"]
+                            </MudButton>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Join Button -->
+                        <div class="text-center">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Success"
+                                       Size="Size.Large"
+                                       StartIcon="@Icons.Material.Filled.GroupAdd"
+                                       OnClick="@JoinTaskGroup"
+                                       Disabled="@IsJoining"
+                                       Class="px-5">
+                                @if (IsJoining)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">@L["Joining"]</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>@L["JoinTaskGroup"]</MudText>
+                                }
+                            </MudButton>
+                        </div>
+                    }
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudContainer>
+</div>

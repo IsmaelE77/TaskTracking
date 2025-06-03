@@ -1,10 +1,11 @@
-﻿﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AutoMapper;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
@@ -37,6 +38,9 @@ public class TaskTrackingApplicationAutoMapperProfile : Profile
 
         // UserTaskGroup mappings
         CreateMap<UserTaskGroup, UserTaskGroupDto>();
+
+        // TaskGroupInvitation mappings
+        CreateMap<TaskGroupInvitation, TaskGroupInvitationDto>();
 
         // UserTaskProgress mappings
         CreateMap<UserTaskProgress, UserTaskProgressDto>();
