@@ -27,15 +27,28 @@
             <MudItem xs="12" sm="4" md="3">
                 <MudStack Row="true" Spacing="2" Class="d-none d-sm-flex justify-end">
                     <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.People"
+                               Href="@($"/task-groups/{Id}/users")">
+                        @L["ManageUsers"]
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
                                Color="Color.Primary"
                                StartIcon="@Icons.Material.Filled.Edit"
                                OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{Id}/edit"))">
                         @L["Edit"]
                     </MudButton>
                 </MudStack>
-                
+
                 <!-- Mobile Buttons -->
                 <MudStack Spacing="2" Class="d-block d-sm-none">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.People"
+                               Href="@($"/task-groups/{Id}/users")"
+                               FullWidth="true">
+                        @L["ManageUsers"]
+                    </MudButton>
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Primary"
                                StartIcon="@Icons.Material.Filled.Edit"

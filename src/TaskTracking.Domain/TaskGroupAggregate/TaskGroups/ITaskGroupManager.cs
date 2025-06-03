@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 using Volo.Abp.Domain.Services;
@@ -78,4 +79,20 @@ public interface ITaskGroupManager : IDomainService
     Task<(List<TaskGroup> Items, int TotalCount)> GetUserActiveTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount);
 
     Task<(List<TaskGroup> Items, int TotalCount)> GetUserOwnedTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount);
+
+    // Invitation methods
+    Task<TaskGroupInvitation> CreateInvitationAsync(
+        Guid taskGroupId,
+        Guid createdByUserId,
+        int expirationHours,
+        int maxUses,
+        UserTaskGroupRole defaultRole);
+
+    Task<TaskGroupInvitation> GetInvitationByTokenAsync(string invitationToken);
+
+    Task<UserTaskGroup> JoinTaskGroupByInvitationAsync(
+        string invitationToken,
+        Guid userId);
+
+    Task<List<TaskGroupInvitation>> GetTaskGroupInvitationsAsync(Guid taskGroupId);
 }

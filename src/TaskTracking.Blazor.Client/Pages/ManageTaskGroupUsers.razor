@@ -1,0 +1,242 @@
+@page "/task-groups/{Id:guid}/users"
+@using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups
+@using TaskTracking.TaskGroupAggregate.UserTaskGroups
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups
+@inherits TaskTrackingComponentBase
+@attribute [Authorize]
+
+<PageTitle>@L["ManageUsers"] - @TaskGroup?.Title</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <!-- Header -->
+    <MudPaper Class="pa-4 mb-4" Elevation="2">
+        <div class="d-flex align-center justify-space-between">
+            <div>
+                <MudBreadcrumbs Items="_breadcrumbItems" Class="pa-0 mb-2" />
+                <MudText Typo="Typo.h4" Class="mb-2">
+                    <MudIcon Icon="@Icons.Material.Filled.People" Class="me-2" />
+                    @L["ManageUsers"]
+                </MudText>
+                <MudText Typo="Typo.body1" Class="text-muted">
+                    @L["ManageUsersDescription"]
+                </MudText>
+                @if (TaskGroup != null)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text" Class="mt-2">
+                        @TaskGroup.Title
+                    </MudChip>
+                }
+            </div>
+            <div>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Default"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Href="@($"/task-groups/{Id}")">
+                    @L["BackToTaskGroup"]
+                </MudButton>
+            </div>
+        </div>
+    </MudPaper>
+
+    <!-- Tabs -->
+    <MudTabs @bind-ActivePanelIndex="ActiveTabIndex" Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+        <!-- Current Users Tab -->
+        <MudTabPanel Text="@L["CurrentUsers"]" Icon="@Icons.Material.Filled.Group">
+            <div class="d-flex flex-column" style="min-height: 400px;">
+                @if (IsLoadingUsers)
+                {
+                    <div class="d-flex justify-center align-center" style="height: 300px;">
+                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+                    </div>
+                }
+                else if (!CurrentUsers.Any())
+                {
+                    <div class="text-center py-8">
+                        <MudIcon Icon="@Icons.Material.Filled.PersonOff" Size="Size.Large" Color="Color.Default" Class="mb-4" />
+                        <MudText Typo="Typo.h5" Class="mb-3">@L["NoUsersInGroup"]</MudText>
+                        <MudText Typo="Typo.body1" Class="text-muted mb-4">
+                            @L["NoUsersInGroupDescription"]
+                        </MudText>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.PersonAdd"
+                                   OnClick="@(() => ActiveTabIndex = 1)">
+                            @L["AddFirstUser"]
+                        </MudButton>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-4 d-flex justify-space-between align-center">
+                        <MudText Typo="Typo.h6">
+                            @string.Format(L["UsersInGroup"], CurrentUsers.Count)
+                        </MudText>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.PersonAdd"
+                                   OnClick="@(() => ActiveTabIndex = 1)">
+                            @L["AddUser"]
+                        </MudButton>
+                    </div>
+
+                    <MudGrid>
+                        @foreach (var user in CurrentUsers)
+                        {
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudCard Elevation="1" Class="pa-4">
+                                    <div class="d-flex align-center mb-3">
+                                        <MudAvatar Color="Color.Primary" Size="Size.Large" Class="me-3">
+                                            @user.UserName.Substring(0, 1).ToUpper()
+                                        </MudAvatar>
+                                        <div class="flex-grow-1">
+                                            <MudText Typo="Typo.h6">@user.UserName</MudText>
+                                            <MudChip T="string" Size="Size.Small" Color="@GetRoleColor(user.Role)" Variant="Variant.Filled">
+                                                @L[$"Role:{user.Role}"]
+                                            </MudChip>
+                                        </div>
+                                        @if (user.Role != UserTaskGroupRole.Owner)
+                                        {
+                                            <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small">
+                                                <MudMenuItem OnClick="@(() => ChangeUserRole(user))" Icon="@Icons.Material.Filled.Security">
+                                                    @L["ChangeRole"]
+                                                </MudMenuItem>
+                                                <MudMenuItem OnClick="@(() => RemoveUser(user))" Icon="@Icons.Material.Filled.PersonRemove">
+                                                    @L["RemoveUser"]
+                                                </MudMenuItem>
+                                            </MudMenu>
+                                        }
+                                        else
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">
+                                                @L["Owner"]
+                                            </MudChip>
+                                        }
+                                    </div>
+                                    <MudText Typo="Typo.body2" Class="text-muted">
+                                        @GetRoleDescription(user.Role)
+                                    </MudText>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                }
+            </div>
+        </MudTabPanel>
+
+        <!-- Add Users Tab -->
+        <MudTabPanel Text="@L["AddUsers"]" Icon="@Icons.Material.Filled.PersonAdd">
+            <div class="d-flex flex-column" style="min-height: 400px;">
+                <!-- Search -->
+                <div class="mb-4">
+                    <MudGrid AlignItems="Center">
+                        <MudItem xs="12" md="8">
+                            <MudTextField @bind-Value="SearchKeyword"
+                                          Label="@L["SearchUsers"]"
+                                          Placeholder="@L["SearchUsersPlaceholder"]"
+                                          Adornment="Adornment.End"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          OnAdornmentClick="SearchUsers"
+                                          @onkeypress="@(async (e) => { if (e.Key == "Enter") await SearchUsers(); })"
+                                          Immediate="false"
+                                          FullWidth="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Search"
+                                       OnClick="SearchUsers"
+                                       FullWidth="true"
+                                       Disabled="IsSearchingUsers">
+                                @if (IsSearchingUsers)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    @L["Searching"]
+                                }
+                                else
+                                {
+                                    @L["Search"]
+                                }
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </div>
+
+                @if (IsSearchingUsers)
+                {
+                    <div class="d-flex justify-center align-center" style="height: 300px;">
+                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+                    </div>
+                }
+                else if (SearchResults.Any())
+                {
+                    <div class="mb-4">
+                        <MudText Typo="Typo.h6">
+                            @string.Format(L["SearchResultsCount"], SearchResults.Count)
+                        </MudText>
+                    </div>
+
+                    <MudGrid>
+                        @foreach (var user in SearchResults)
+                        {
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudCard Elevation="1" Class="pa-4">
+                                    <div class="d-flex align-center mb-3">
+                                        <MudAvatar Color="Color.Secondary" Size="Size.Large" Class="me-3">
+                                            @user.UserName.Substring(0, 1).ToUpper()
+                                        </MudAvatar>
+                                        <div class="flex-grow-1">
+                                            <MudText Typo="Typo.h6">@user.UserName</MudText>
+                                            <MudText Typo="Typo.body2" Class="text-muted">@user.Email</MudText>
+                                            @if (!string.IsNullOrEmpty(user.Name))
+                                            {
+                                                <MudText Typo="Typo.body2" Class="text-muted">@user.Name</MudText>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-end">
+                                        @if (user.IsAlreadyInGroup)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">
+                                                @L["AlreadyInGroup"]
+                                            </MudChip>
+                                        }
+                                        else
+                                        {
+                                            <MudButton Variant="Variant.Filled"
+                                                       Color="Color.Primary"
+                                                       Size="Size.Small"
+                                                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                                                       OnClick="@(() => AddUser(user))">
+                                                @L["Add"]
+                                            </MudButton>
+                                        }
+                                    </div>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                }
+                else if (!string.IsNullOrWhiteSpace(SearchKeyword))
+                {
+                    <div class="text-center py-8">
+                        <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Default" Class="mb-4" />
+                        <MudText Typo="Typo.h5" Class="mb-3">@L["NoUsersFound"]</MudText>
+                        <MudText Typo="Typo.body1" Class="text-muted">
+                            @L["NoUsersFoundDescription"]
+                        </MudText>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-8">
+                        <MudIcon Icon="@Icons.Material.Filled.Search" Size="Size.Large" Color="Color.Default" Class="mb-4" />
+                        <MudText Typo="Typo.h5" Class="mb-3">@L["SearchForUsers"]</MudText>
+                        <MudText Typo="Typo.body1" Class="text-muted">
+                            @L["SearchForUsersDescription"]
+                        </MudText>
+                    </div>
+                }
+            </div>
+        </MudTabPanel>
+    </MudTabs>
+</MudContainer>

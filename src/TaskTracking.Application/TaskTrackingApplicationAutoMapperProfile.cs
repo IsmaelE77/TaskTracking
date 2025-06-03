@@ -1,11 +1,12 @@
-﻿﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AutoMapper;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 
@@ -64,5 +65,14 @@ public class TaskTrackingApplicationAutoMapperProfile : Profile
                 }
             })
             .ForAllMembers(opt => opt.Ignore()); // Ignore all member mappings since we're using ConstructUsing
+
+        // TaskGroupInvitation mappings
+        CreateMap<TaskGroupInvitation, TaskGroupInvitationDto>()
+            .ForMember(dest => dest.TaskGroupTitle, opt => opt.Ignore()) // Set manually in service
+            .ForMember(dest => dest.CreatedByUserName, opt => opt.Ignore()) // Set manually in service
+            .ForMember(dest => dest.IsValid, opt => opt.Ignore()) // Set manually in service
+            .ForMember(dest => dest.IsExpired, opt => opt.Ignore()) // Set manually in service
+            .ForMember(dest => dest.IsMaxUsesReached, opt => opt.Ignore()) // Set manually in service
+            .ForMember(dest => dest.InvitationUrl, opt => opt.Ignore()); // Set manually in service
     }
 }

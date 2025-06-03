@@ -13,5 +13,6 @@ public static class UserTaskGroupPermissions
     public const string CreateTaskItems = GroupName + ".CreateTaskItems";
     public const string UpdateTaskItems = GroupName + ".UpdateTaskItems";
     public const string DeleteTaskItems = GroupName + ".DeleteTaskItems";
+    public const string GenerateInvitations = GroupName + ".GenerateInvitations";
 
 }

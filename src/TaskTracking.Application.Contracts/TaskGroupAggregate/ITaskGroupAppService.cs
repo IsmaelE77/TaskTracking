@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using Volo.Abp.Application.Dtos;
@@ -46,6 +48,16 @@ public interface ITaskGroupAppService :
     Task<UserTaskGroupDto> UpdateUserRoleAsync(Guid id, Guid userId, UserTaskGroupRole newRole);
 
     /// <summary>
+    ///     Gets all users in a task group.
+    /// </summary>
+    Task<List<UserTaskGroupDto>> GetTaskGroupUsersAsync(Guid id);
+
+    /// <summary>
+    ///     Searches for users that can be added to a task group.
+    /// </summary>
+    Task<PagedResultDto<UserSearchResultDto>> SearchUsersAsync(SearchUsersInput input);
+
+    /// <summary>
     ///     Records progress for a task on a specific date.
     /// </summary>
     Task RecordTaskProgressAsync(Guid id, RecordTaskProgressDto input);
@@ -81,4 +93,26 @@ public interface ITaskGroupAppService :
     Task<TaskItemDto> DeleteTaskItemAsync(
         Guid id,
         Guid taskItemId);
+
+    /// <summary>
+    ///     Generates a new invitation link for the specified task group.
+    /// </summary>
+    Task<TaskGroupInvitationDto> GenerateInvitationLinkAsync(
+        Guid id,
+        CreateTaskGroupInvitationDto input);
+
+    /// <summary>
+    ///     Gets invitation details by token without requiring authentication.
+    /// </summary>
+    Task<TaskGroupInvitationDetailsDto> GetInvitationDetailsAsync(string invitationToken);
+
+    /// <summary>
+    ///     Allows a user to join a task group using an invitation token.
+    /// </summary>
+    Task<UserTaskGroupDto> JoinTaskGroupByInvitationAsync(JoinTaskGroupByInvitationDto input);
+
+    /// <summary>
+    ///     Gets all invitations for a specific task group.
+    /// </summary>
+    Task<List<TaskGroupInvitationDto>> GetTaskGroupInvitationsAsync(Guid id);
 }

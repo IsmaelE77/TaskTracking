@@ -106,6 +106,8 @@ public partial class ViewTaskGroup
         Snackbar.Add(L["TaskDeletedSuccessfully"], Severity.Success);
     }
 
+
+
     protected override Task HandleErrorAsync(Exception ex)
     {
         Console.WriteLine($"Error: {ex.Message}");

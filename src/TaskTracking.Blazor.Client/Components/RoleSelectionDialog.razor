@@ -1,0 +1,51 @@
+@using TaskTracking.TaskGroupAggregate.UserTaskGroups
+@inherits TaskTrackingComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <div class="d-flex flex-column">
+            <MudText Typo="Typo.body1" Class="mb-4">
+                @if (IsChangingRole)
+                {
+                    @string.Format(L["ChangeRoleForUser"], UserName)
+                }
+                else
+                {
+                    @string.Format(L["SelectRoleForUser"], UserName)
+                }
+            </MudText>
+
+            <MudRadioGroup @bind-Value="@SelectedRole" T="UserTaskGroupRole">
+                <MudRadio T="UserTaskGroupRole" Value="UserTaskGroupRole.Subscriber" Color="Color.Success">
+                    <div class="d-flex flex-column">
+                        <MudText Typo="Typo.body1" Class="fw-bold">@L["Role:Subscriber"]</MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted">@L["SubscriberRoleDescription"]</MudText>
+                    </div>
+                </MudRadio>
+                <MudRadio T="UserTaskGroupRole" Value="UserTaskGroupRole.CoOwner" Color="Color.Info" Class="mt-3">
+                    <div class="d-flex flex-column">
+                        <MudText Typo="Typo.body1" Class="fw-bold">@L["Role:CoOwner"]</MudText>
+                        <MudText Typo="Typo.body2" Class="text-muted">@L["CoOwnerRoleDescription"]</MudText>
+                    </div>
+                </MudRadio>
+            </MudRadioGroup>
+
+            <MudAlert Severity="Severity.Info" Class="mt-4">
+                @L["RoleSelectionNote"]
+            </MudAlert>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@L["Cancel"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">
+            @if (IsChangingRole)
+            {
+                @L["ChangeRole"]
+            }
+            else
+            {
+                @L["AddUser"]
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>

@@ -24,6 +24,7 @@ public class TaskGroupPermissionEvaluator : ITransientDependency
                     UserTaskGroupPermissions.CreateTaskItems,
                     UserTaskGroupPermissions.UpdateTaskItems,
                     UserTaskGroupPermissions.DeleteTaskItems,
+                    UserTaskGroupPermissions.GenerateInvitations,
                 }
             },
             {

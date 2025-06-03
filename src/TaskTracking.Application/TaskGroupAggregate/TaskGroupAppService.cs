@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using TaskTracking.Permissions;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 using Volo.Abp.Application.Dtos;
@@ -137,6 +139,66 @@ public class TaskGroupAppService :
     public async Task RemoveUserAsync(Guid id, Guid userId)
     {
         await _taskGroupManager.RemoveUserFromGroupAsync(id, userId);
+    }
+
+    [Authorize(UserTaskGroupPermissions.ManageUsers)]
+    public async Task<List<UserTaskGroupDto>> GetTaskGroupUsersAsync(Guid id)
+    {
+        var taskGroup = await _taskGroupManager.GetWithDetailsAsync(id);
+        var userTaskGroups = taskGroup.UserTaskGroups.ToList();
+        var dtos = new List<UserTaskGroupDto>();
+
+        foreach (var userTaskGroup in userTaskGroups)
+        {
+            var dto = ObjectMapper.Map<UserTaskGroup, UserTaskGroupDto>(userTaskGroup);
+            var user = await _userRepository.GetAsync(userTaskGroup.UserId);
+            dto.UserName = user.UserName;
+            dtos.Add(dto);
+        }
+
+        return dtos;
+    }
+
+    public async Task<PagedResultDto<UserSearchResultDto>> SearchUsersAsync(SearchUsersInput input)
+    {
+        // Get users already in the task group first
+        var userTaskGroupQueryable = await _userTaskGroupRepository.GetQueryableAsync();
+        var existingUserIds = await AsyncExecuter.ToListAsync(
+            userTaskGroupQueryable
+                .Where(utg => utg.TaskGroupId == input.TaskGroupId)
+                .Select(utg => utg.UserId));
+
+        // Get all users and filter
+        var allUsers = await _userRepository.GetListAsync();
+        var filteredUsers = allUsers.AsQueryable();
+
+        // Filter by keyword if provided
+        if (!string.IsNullOrWhiteSpace(input.Keyword))
+        {
+            var keyword = input.Keyword.Trim().ToLower();
+            filteredUsers = filteredUsers.Where(u =>
+                u.UserName.ToLower().Contains(keyword) ||
+                u.Email.ToLower().Contains(keyword) ||
+                (u.Name != null && u.Name.ToLower().Contains(keyword)));
+        }
+
+        var totalCount = filteredUsers.Count();
+        var users = filteredUsers
+            .OrderBy(u => u.UserName)
+            .Skip(input.SkipCount)
+            .Take(input.MaxResultCount)
+            .ToList();
+
+        var dtos = users.Select(user => new UserSearchResultDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            Name = user.Name ?? string.Empty,
+            IsAlreadyInGroup = existingUserIds.Contains(user.Id)
+        }).ToList();
+
+        return new PagedResultDto<UserSearchResultDto>(totalCount, dtos);
     }
 
     [Authorize(UserTaskGroupPermissions.ManageUsers)]
@@ -347,5 +409,107 @@ public class TaskGroupAppService :
         }
 
         return dueDates.OrderBy(d => d).ToList();
+    }
+    
+    [Authorize(UserTaskGroupPermissions.GenerateInvitations)]
+    public async Task<TaskGroupInvitationDto> GenerateInvitationLinkAsync(
+        Guid id,
+        CreateTaskGroupInvitationDto input)
+    {
+        var currentUserId = _currentUser.GetId();
+
+        var invitation = await _taskGroupManager.CreateInvitationAsync(
+            id,
+            currentUserId,
+            input.ExpirationHours,
+            input.MaxUses,
+            input.DefaultRole);
+
+        var dto = ObjectMapper.Map<TaskGroupInvitation, TaskGroupInvitationDto>(invitation);
+
+        // Set additional properties
+        var taskGroup = await _taskGroupManager.GetWithDetailsAsync(id);
+        dto.TaskGroupTitle = taskGroup.Title;
+
+        var createdByUser = await _userRepository.GetAsync(invitation.CreatedByUserId);
+        dto.CreatedByUserName = createdByUser.UserName;
+
+        dto.IsValid = invitation.IsValid();
+        dto.IsExpired = invitation.IsExpired();
+        dto.IsMaxUsesReached = invitation.IsMaxUsesReached();
+
+        // Generate invitation URL (this would typically include your domain)
+        dto.InvitationUrl = $"/join-task-group?token={invitation.InvitationToken}";
+
+        return dto;
+    }
+
+    [AllowAnonymous]
+    public async Task<TaskGroupInvitationDetailsDto> GetInvitationDetailsAsync(string invitationToken)
+    {
+        var invitation = await _taskGroupManager.GetInvitationByTokenAsync(invitationToken);
+        var taskGroup = await _taskGroupManager.GetWithDetailsAsync(invitation.TaskGroupId);
+        var createdByUser = await _userRepository.GetAsync(invitation.CreatedByUserId);
+
+        var dto = new TaskGroupInvitationDetailsDto
+        {
+            TaskGroupId = invitation.TaskGroupId,
+            TaskGroupTitle = taskGroup.Title,
+            TaskGroupDescription = taskGroup.Description,
+            InvitationToken = invitation.InvitationToken,
+            ExpirationDate = invitation.ExpirationDate,
+            CreatedByUserName = createdByUser.UserName,
+            DefaultRole = invitation.DefaultRole,
+            IsValid = invitation.IsValid(),
+            IsExpired = invitation.IsExpired(),
+            IsMaxUsesReached = invitation.IsMaxUsesReached(),
+            MaxUses = invitation.MaxUses,
+            CurrentUses = invitation.CurrentUses,
+            CreationTime = invitation.CreationTime
+        };
+
+        return dto;
+    }
+
+    public async Task<UserTaskGroupDto> JoinTaskGroupByInvitationAsync(JoinTaskGroupByInvitationDto input)
+    {
+        var currentUserId = _currentUser.GetId();
+
+        var userTaskGroup = await _taskGroupManager.JoinTaskGroupByInvitationAsync(
+            input.InvitationToken,
+            currentUserId);
+
+        var dto = ObjectMapper.Map<UserTaskGroup, UserTaskGroupDto>(userTaskGroup);
+        var user = await _userRepository.GetAsync(currentUserId);
+        dto.UserName = user.UserName;
+
+        return dto;
+    }
+
+    [Authorize(UserTaskGroupPermissions.GenerateInvitations)]
+    public async Task<List<TaskGroupInvitationDto>> GetTaskGroupInvitationsAsync(Guid id)
+    {
+        var invitations = await _taskGroupManager.GetTaskGroupInvitationsAsync(id);
+        var dtos = new List<TaskGroupInvitationDto>();
+
+        foreach (var invitation in invitations)
+        {
+            var dto = ObjectMapper.Map<TaskGroupInvitation, TaskGroupInvitationDto>(invitation);
+
+            var taskGroup = await _taskGroupManager.GetWithDetailsAsync(invitation.TaskGroupId);
+            dto.TaskGroupTitle = taskGroup.Title;
+
+            var createdByUser = await _userRepository.GetAsync(invitation.CreatedByUserId);
+            dto.CreatedByUserName = createdByUser.UserName;
+
+            dto.IsValid = invitation.IsValid();
+            dto.IsExpired = invitation.IsExpired();
+            dto.IsMaxUsesReached = invitation.IsMaxUsesReached();
+            dto.InvitationUrl = $"/join-task-group?token={invitation.InvitationToken}";
+
+            dtos.Add(dto);
+        }
+
+        return dtos;
     }
 }

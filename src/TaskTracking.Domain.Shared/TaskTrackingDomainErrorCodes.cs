@@ -33,4 +33,12 @@ public static class TaskTrackingDomainErrorCodes
     public const string ProgressNotFound = "TrackingTask:00405";
     public const string CannotChangeOwnerRole = "TrackingTask:00406";
     public const string CannotChangeToOwnerRole = "TrackingTask:00407";
+
+    /* Task Group Invitation Error Codes */
+    public const string InvitationNotFound = "TrackingTask:00501";
+    public const string InvitationExpired = "TrackingTask:00502";
+    public const string InvitationAlreadyUsed = "TrackingTask:00503";
+    public const string InvitationMaxUsesReached = "TrackingTask:00504";
+    public const string InvalidInvitationToken = "TrackingTask:00505";
+    public const string CannotGenerateInvitationForInactiveGroup = "TrackingTask:00506";
 }

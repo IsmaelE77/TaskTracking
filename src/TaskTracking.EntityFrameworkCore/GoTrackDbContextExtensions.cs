@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.Notifications;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
@@ -70,6 +71,27 @@ public static class GoTrackDbContextExtensions
                 .OnDelete(DeleteBehavior.Cascade);
 
             b.OwnsMany(x => x.ProgressEntries);
+        });
+
+        builder.Entity<TaskGroupInvitation>(b =>
+        {
+            b.ToTaskTrackingTable();
+            b.ConfigureByConvention();
+
+            b.Property(x => x.InvitationToken).IsRequired().HasMaxLength(TaskGroupInvitationConsts.TokenLength);
+            b.Property(x => x.DefaultRole).IsRequired();
+
+            b.HasOne(x => x.TaskGroup)
+                .WithMany()
+                .HasForeignKey(x => x.TaskGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(x => x.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasIndex(x => x.InvitationToken).IsUnique();
         });
     }
 

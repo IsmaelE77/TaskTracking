@@ -48,6 +48,10 @@ public class TaskTrackingPermissionDefinitionProvider : PermissionDefinitionProv
         taskGroupsPermission.AddPermission(
             UserTaskGroupPermissions.DeleteTaskItems,
             L("Permission:TaskGroups.DeleteTaskItems"));
+
+        taskGroupsPermission.AddPermission(
+            UserTaskGroupPermissions.GenerateInvitations,
+            L("Permission:TaskGroups.GenerateInvitations"));
     }
 
     private static LocalizableString L(string name)

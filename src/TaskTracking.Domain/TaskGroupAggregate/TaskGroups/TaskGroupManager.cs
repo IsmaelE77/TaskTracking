@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 using Volo.Abp;
@@ -18,15 +19,21 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
     private readonly IRepository<TaskGroup, Guid> _taskGroupRepository;
     private readonly IIdentityUserRepository _userRepository;
     private readonly IReadOnlyRepository<UserTaskGroup, Guid> _userTaskGroupReadOnlyRepository;
+    private readonly IRepository<TaskGroupInvitation, Guid> _invitationRepository;
+    private readonly ITaskGroupInvitationTokenGenerator _tokenGenerator;
 
     public TaskGroupManager(
         IRepository<TaskGroup, Guid> taskGroupRepository,
         IIdentityUserRepository userRepository,
-        IReadOnlyRepository<UserTaskGroup, Guid> userTaskGroupReadOnlyRepository)
+        IReadOnlyRepository<UserTaskGroup, Guid> userTaskGroupReadOnlyRepository,
+        IRepository<TaskGroupInvitation, Guid> invitationRepository,
+        ITaskGroupInvitationTokenGenerator tokenGenerator)
     {
         _taskGroupRepository = taskGroupRepository;
         _userRepository = userRepository;
         _userTaskGroupReadOnlyRepository = userTaskGroupReadOnlyRepository;
+        _invitationRepository = invitationRepository;
+        _tokenGenerator = tokenGenerator;
     }
 
     public async Task<TaskGroup> CreateAsync(
@@ -339,4 +346,88 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
 
         return (items, totalCount);
     }
+
+
+    public async Task<TaskGroupInvitation> CreateInvitationAsync(
+        Guid taskGroupId,
+        Guid createdByUserId,
+        int expirationHours,
+        int maxUses,
+        UserTaskGroupRole defaultRole)
+    {
+        var taskGroup = await GetWithDetailsAsync(taskGroupId);
+
+        // Validate that the task group is active
+        var now = Clock.Now;
+        if (taskGroup.EndDate.HasValue && taskGroup.EndDate.Value < now.Date)
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.CannotGenerateInvitationForInactiveGroup);
+        }
+
+        // Validate that the user is the owner of the task group
+        var userTaskGroup = taskGroup.UserTaskGroups.FirstOrDefault(utg => utg.UserId == createdByUserId);
+        if (userTaskGroup == null || userTaskGroup.Role != UserTaskGroupRole.Owner)
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.UserNotInGroup);
+        }
+
+        var token = _tokenGenerator.GenerateToken();
+        var expirationDate = Clock.Now.AddHours(expirationHours);
+
+        var invitation = new TaskGroupInvitation(
+            GuidGenerator.Create(),
+            taskGroupId,
+            token,
+            expirationDate,
+            createdByUserId,
+            maxUses,
+            defaultRole);
+
+        return await _invitationRepository.InsertAsync(invitation);
+    }
+
+    public async Task<TaskGroupInvitation> GetInvitationByTokenAsync(string invitationToken)
+    {
+        var invitation = await _invitationRepository.FirstOrDefaultAsync(i => i.InvitationToken == invitationToken);
+
+        if (invitation == null)
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.InvitationNotFound);
+        }
+
+        return invitation;
+    }
+
+    public async Task<UserTaskGroup> JoinTaskGroupByInvitationAsync(
+        string invitationToken,
+        Guid userId)
+    {
+        var invitation = await GetInvitationByTokenAsync(invitationToken);
+
+        // Validate the invitation
+        invitation.ValidateForUse();
+
+        // Check if user is already in the group
+        var taskGroup = await GetWithDetailsAsync(invitation.TaskGroupId);
+        if (taskGroup.UserTaskGroups.Any(utg => utg.UserId == userId))
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.UserAlreadyInGroup);
+        }
+
+        // Add user to the group
+        var userTaskGroup = await AddUserToGroupAsync(invitation.TaskGroupId, userId, invitation.DefaultRole);
+
+        // Increment invitation usage
+        invitation.IncrementUses();
+        await _invitationRepository.UpdateAsync(invitation);
+
+        return userTaskGroup;
+    }
+
+    public async Task<List<TaskGroupInvitation>> GetTaskGroupInvitationsAsync(Guid taskGroupId)
+    {
+        var invitations = await _invitationRepository.GetListAsync(i => i.TaskGroupId == taskGroupId);
+        return invitations.OrderByDescending(i => i.CreationTime).ToList();
+    }
+
 }
