@@ -430,4 +430,19 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         return invitations.OrderByDescending(i => i.CreationTime).ToList();
     }
 
+    public async Task DeleteInvitationAsync(Guid invitationId, Guid requestingUserId)
+    {
+        var invitation = await _invitationRepository.GetAsync(invitationId);
+
+        // Validate that the requesting user is the owner of the task group
+        var taskGroup = await GetWithDetailsAsync(invitation.TaskGroupId);
+        var userTaskGroup = taskGroup.UserTaskGroups.FirstOrDefault(utg => utg.UserId == requestingUserId);
+        if (userTaskGroup == null || userTaskGroup.Role != UserTaskGroupRole.Owner)
+        {
+            throw new BusinessException(TaskTrackingDomainErrorCodes.UserNotInGroup);
+        }
+
+        await _invitationRepository.DeleteAsync(invitation);
+    }
+
 }

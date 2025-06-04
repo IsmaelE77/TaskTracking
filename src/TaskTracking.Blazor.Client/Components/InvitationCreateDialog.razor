@@ -1,0 +1,90 @@
+@using TaskTracking.TaskGroupAggregate.UserTaskGroups
+@using TaskTracking.TaskGroupAggregate.TaskGroupInvitations
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations
+@inherits TaskTrackingComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <div class="d-flex flex-column">
+            <MudText Typo="Typo.h6" Class="mb-4">
+                @L["CreateInvitationLink"]
+            </MudText>
+
+            <MudAlert Severity="Severity.Info" Class="mb-4">
+                @L["InvitationCreateDescription"]
+            </MudAlert>
+
+            <MudForm @ref="Form" @bind-IsValid="@IsFormValid" @bind-Errors="@Errors">
+                <!-- Expiration Hours -->
+                <MudNumericField @bind-Value="@Model.ExpirationHours"
+                                 Label="@L["ExpirationHours"]"
+                                 HelperText="@L["ExpirationHoursHelp"]"
+                                 Min="1"
+                                 Max="@TaskGroupInvitationConsts.MaxExpirationHours"
+                                 Required="true"
+                                 Immediate="true"
+                                 Class="mb-4" />
+
+                <!-- Max Uses -->
+                <MudNumericField @bind-Value="@Model.MaxUses"
+                                 Label="@L["MaxUses"]"
+                                 HelperText="@L["MaxUsesHelp"]"
+                                 Min="0"
+                                 Max="@TaskGroupInvitationConsts.MaxAllowedUses"
+                                 Required="true"
+                                 Immediate="true"
+                                 Class="mb-4" />
+
+                <!-- Default Role -->
+                <MudText Typo="Typo.body1" Class="mb-2">@L["DefaultRole"]</MudText>
+                <MudRadioGroup @bind-Value="@Model.DefaultRole" T="UserTaskGroupRole" Class="mb-4">
+                    <MudRadio T="UserTaskGroupRole" Value="UserTaskGroupRole.Subscriber" Color="Color.Success">
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.body1" Class="fw-bold">@L["Role:Subscriber"]</MudText>
+                            <MudText Typo="Typo.body2" Class="text-muted">@L["SubscriberRoleDescription"]</MudText>
+                        </div>
+                    </MudRadio>
+                    <MudRadio T="UserTaskGroupRole" Value="UserTaskGroupRole.CoOwner" Color="Color.Info" Class="mt-3">
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.body1" Class="fw-bold">@L["Role:CoOwner"]</MudText>
+                            <MudText Typo="Typo.body2" Class="text-muted">@L["CoOwnerRoleDescription"]</MudText>
+                        </div>
+                    </MudRadio>
+                </MudRadioGroup>
+
+                <!-- Preview -->
+                <MudAlert Severity="Severity.Normal" Class="mt-4">
+                    <MudText Typo="Typo.body2" Class="mb-2">
+                        <strong>@L["InvitationPreview"]:</strong>
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        @L["ExpiresOn"]: @GetExpirationPreview()
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        @L["MaxUsage"]: @GetMaxUsagePreview()
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        @L["JoinersWillHaveRole"]: @L[$"Role:{Model.DefaultRole}"]
+                    </MudText>
+                </MudAlert>
+            </MudForm>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@L["Cancel"]</MudButton>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   OnClick="Submit"
+                   Disabled="@(!IsFormValid || IsCreating)">
+            @if (IsCreating)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                @L["Creating"]
+            }
+            else
+            {
+                @L["CreateInvitation"]
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>

@@ -9,6 +9,7 @@ using TaskTracking.Blazor.Client.Components;
 using TaskTracking.TaskGroupAggregate;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
+using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using Volo.Abp.Application.Dtos;
 
@@ -25,13 +26,17 @@ public partial class ManageTaskGroupUsers
     [Inject] private IDialogService DialogService { get; set; } = null!;
 
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
-    
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
+
     private TaskGroupDto? TaskGroup { get; set; }
     private List<UserTaskGroupDto> CurrentUsers { get; set; } = new();
     private List<UserSearchResultDto> SearchResults { get; set; } = new();
+    private List<TaskGroupInvitationDto> Invitations { get; set; } = new();
     private string SearchKeyword { get; set; } = string.Empty;
     private bool IsLoadingUsers { get; set; } = true;
     private bool IsSearchingUsers { get; set; } = false;
+    private bool IsLoadingInvitations { get; set; } = true;
     private int ActiveTabIndex { get; set; } = 0;
 
     private List<BreadcrumbItem> _breadcrumbItems = new();
@@ -40,6 +45,7 @@ public partial class ManageTaskGroupUsers
     {
         await LoadTaskGroup();
         await LoadCurrentUsers();
+        await LoadInvitations();
         SetupBreadcrumbs();
     }
 
@@ -236,4 +242,127 @@ public partial class ManageTaskGroupUsers
             _ => string.Empty
         };
     }
+
+    #region Invitation Management
+
+    private async Task LoadInvitations()
+    {
+        try
+        {
+            IsLoadingInvitations = true;
+            Invitations = await TaskGroupAppService.GetTaskGroupInvitationsAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(L["ErrorLoadingInvitations"], Severity.Error);
+            Console.WriteLine($"Error loading invitations: {ex.Message}");
+        }
+        finally
+        {
+            IsLoadingInvitations = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CreateInvitation()
+    {
+        var parameters = new DialogParameters<InvitationCreateDialog>();
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var result = await DialogService.ShowAsync<InvitationCreateDialog>(L["CreateInvitation"], parameters, options);
+        var dialogResult = await result.Result;
+
+        if (!dialogResult.Canceled && dialogResult.Data is CreateTaskGroupInvitationDto createDto)
+        {
+            try
+            {
+                var invitation = await TaskGroupAppService.GenerateInvitationLinkAsync(Id, createDto);
+                Snackbar.Add(L["InvitationCreatedSuccessfully"], Severity.Success);
+
+                // Refresh invitations list
+                await LoadInvitations();
+
+                // Optionally copy the link to clipboard immediately
+                await CopyInvitationLink(invitation);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(L["ErrorCreatingInvitation"], Severity.Error);
+                Console.WriteLine($"Error creating invitation: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task CopyInvitationLink(TaskGroupInvitationDto invitation)
+    {
+        try
+        {
+            var baseUrl = NavigationManager.BaseUri.TrimEnd('/');
+            var invitationUrl = $"{baseUrl}/join/{invitation.InvitationToken}";
+
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", invitationUrl);
+            Snackbar.Add(L["InvitationLinkCopied"], Severity.Success);
+        }
+        catch (Exception)
+        {
+            // Fallback for browsers that don't support clipboard API
+            var baseUrl = NavigationManager.BaseUri.TrimEnd('/');
+            var invitationUrl = $"{baseUrl}/join/{invitation.InvitationToken}";
+            Snackbar.Add($"Could not copy to clipboard. Please copy manually: {invitationUrl}", Severity.Warning);
+        }
+    }
+
+    private async Task DeleteInvitation(TaskGroupInvitationDto invitation)
+    {
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.ContentText, L["DeleteInvitationConfirmation"] },
+            { x => x.ButtonText, L["Delete"] },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        var result = await DialogService.ShowAsync<ConfirmationDialog>(L["DeleteInvitation"], parameters, options);
+        var dialogResult = await result.Result;
+
+        if (!dialogResult.Canceled && dialogResult.Data is true)
+        {
+            try
+            {
+                await TaskGroupAppService.DeleteInvitationAsync(invitation.Id);
+                Snackbar.Add(L["InvitationDeletedSuccessfully"], Severity.Success);
+
+                // Refresh invitations list
+                await LoadInvitations();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(L["ErrorDeletingInvitation"], Severity.Error);
+                Console.WriteLine($"Error deleting invitation: {ex.Message}");
+            }
+        }
+    }
+
+    private Color GetInvitationStatusColor(TaskGroupInvitationDto invitation)
+    {
+        if (invitation.IsExpired)
+            return Color.Error;
+        if (invitation.IsMaxUsesReached)
+            return Color.Warning;
+        if (invitation.IsValid)
+            return Color.Success;
+        return Color.Default;
+    }
+
+    private string GetInvitationStatusText(TaskGroupInvitationDto invitation)
+    {
+        if (invitation.IsExpired)
+            return L["Expired"];
+        if (invitation.IsMaxUsesReached)
+            return L["MaxUsesReached"];
+        if (invitation.IsValid)
+            return L["Active"];
+        return L["Invalid"];
+    }
+
+    #endregion
 }

@@ -115,4 +115,9 @@ public interface ITaskGroupAppService :
     ///     Gets all invitations for a specific task group.
     /// </summary>
     Task<List<TaskGroupInvitationDto>> GetTaskGroupInvitationsAsync(Guid id);
+
+    /// <summary>
+    ///     Deletes an invitation.
+    /// </summary>
+    Task DeleteInvitationAsync(Guid invitationId);
 }

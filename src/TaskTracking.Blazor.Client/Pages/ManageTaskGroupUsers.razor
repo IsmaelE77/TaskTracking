@@ -2,6 +2,8 @@
 @using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups
 @using TaskTracking.TaskGroupAggregate.UserTaskGroups
 @using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations
+@using TaskTracking.TaskGroupAggregate.TaskGroupInvitations
 @inherits TaskTrackingComponentBase
 @attribute [Authorize]
 
@@ -235,6 +237,123 @@
                             @L["SearchForUsersDescription"]
                         </MudText>
                     </div>
+                }
+            </div>
+        </MudTabPanel>
+
+        <!-- Invitations Tab -->
+        <MudTabPanel Text="@L["Invitations"]" Icon="@Icons.Material.Filled.Link">
+            <div class="d-flex flex-column" style="min-height: 400px;">
+                @if (IsLoadingInvitations)
+                {
+                    <div class="d-flex justify-center align-center" style="height: 300px;">
+                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-4 d-flex justify-space-between align-center">
+                        <MudText Typo="Typo.h6">
+                            @string.Format(L["InvitationsCount"], Invitations.Count)
+                        </MudText>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   OnClick="CreateInvitation">
+                            @L["CreateInvitation"]
+                        </MudButton>
+                    </div>
+
+                    @if (!Invitations.Any())
+                    {
+                        <div class="text-center py-8">
+                            <MudIcon Icon="@Icons.Material.Filled.LinkOff" Size="Size.Large" Color="Color.Default" Class="mb-4" />
+                            <MudText Typo="Typo.h5" Class="mb-3">@L["NoInvitations"]</MudText>
+                            <MudText Typo="Typo.body1" Class="text-muted mb-4">
+                                @L["NoInvitationsDescription"]
+                            </MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       OnClick="CreateInvitation">
+                                @L["CreateFirstInvitation"]
+                            </MudButton>
+                        </div>
+                    }
+                    else
+                    {
+                        <MudGrid>
+                            @foreach (var invitation in Invitations)
+                            {
+                                <MudItem xs="12" md="6" lg="4">
+                                    <MudCard Elevation="2" Class="pa-4">
+                                        <div class="d-flex justify-space-between align-center mb-3">
+                                            <MudChip T="string" Size="Size.Small" Color="@GetInvitationStatusColor(invitation)" Variant="Variant.Filled">
+                                                @GetInvitationStatusText(invitation)
+                                            </MudChip>
+                                            <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small">
+                                                @if (invitation.IsValid)
+                                                {
+                                                    <MudMenuItem OnClick="@(() => CopyInvitationLink(invitation))" Icon="@Icons.Material.Filled.ContentCopy">
+                                                        @L["CopyLink"]
+                                                    </MudMenuItem>
+                                                }
+                                                <MudMenuItem OnClick="@(() => DeleteInvitation(invitation))" Icon="@Icons.Material.Filled.Delete">
+                                                    @L["Delete"]
+                                                </MudMenuItem>
+                                            </MudMenu>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <MudText Typo="Typo.body2" Class="text-muted mb-1">@L["DefaultRole"]</MudText>
+                                            <MudChip T="string" Size="Size.Small" Color="@GetRoleColor(invitation.DefaultRole)" Variant="Variant.Text">
+                                                @L[$"Role:{invitation.DefaultRole}"]
+                                            </MudChip>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <MudText Typo="Typo.body2" Class="text-muted mb-1">@L["Usage"]</MudText>
+                                            <MudText Typo="Typo.body2">
+                                                @if (invitation.MaxUses == 0)
+                                                {
+                                                    @string.Format(L["UsageUnlimited"], invitation.CurrentUses)
+                                                }
+                                                else
+                                                {
+                                                    @string.Format(L["UsageLimited"], invitation.CurrentUses, invitation.MaxUses)
+                                                }
+                                            </MudText>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <MudText Typo="Typo.body2" Class="text-muted mb-1">@L["ExpirationDate"]</MudText>
+                                            <MudText Typo="Typo.body2">
+                                                @invitation.ExpirationDate.ToString("MMM dd, yyyy HH:mm")
+                                            </MudText>
+                                        </div>
+
+                                        <div>
+                                            <MudText Typo="Typo.body2" Class="text-muted mb-1">@L["CreatedBy"]</MudText>
+                                            <MudText Typo="Typo.body2">@invitation.CreatedByUserName</MudText>
+                                        </div>
+
+                                        @if (invitation.IsValid)
+                                        {
+                                            <MudDivider Class="my-3" />
+                                            <MudButton Variant="Variant.Outlined"
+                                                       Color="Color.Primary"
+                                                       StartIcon="@Icons.Material.Filled.ContentCopy"
+                                                       OnClick="@(() => CopyInvitationLink(invitation))"
+                                                       FullWidth="true"
+                                                       Size="Size.Small">
+                                                @L["CopyInvitationLink"]
+                                            </MudButton>
+                                        }
+                                    </MudCard>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
                 }
             </div>
         </MudTabPanel>

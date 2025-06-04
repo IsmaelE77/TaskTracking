@@ -1,0 +1,152 @@
+@page "/join/{InvitationCode}"
+@using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations
+@using TaskTracking.TaskGroupAggregate.UserTaskGroups
+@inherits TaskTrackingComponentBase
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>@L["JoinTaskGroup"]</PageTitle>
+
+<div class="islamic-pattern-bg">
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="py-4">
+        @if (IsLoading)
+        {
+            <div class="text-center py-8">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                <MudText Typo="Typo.h6" Class="mt-4">@L["LoadingInvitation"]</MudText>
+            </div>
+        }
+        else if (HasError)
+        {
+            <MudCard Elevation="3" Class="pa-6">
+                <div class="text-center">
+                    <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Large" Color="Color.Error" Class="mb-4" />
+                    <MudText Typo="Typo.h5" Class="mb-3" Color="Color.Error">@L["InvitationError"]</MudText>
+                    <MudText Typo="Typo.body1" Class="mb-4">@ErrorMessage</MudText>
+                    <MudButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               StartIcon="@Icons.Material.Filled.Home"
+                               OnClick="@(() => NavigationManager.NavigateTo("/"))">
+                        @L["GoToDashboard"]
+                    </MudButton>
+                </div>
+            </MudCard>
+        }
+        else if (InvitationDetails != null)
+        {
+            <MudCard Elevation="3" Class="pa-6">
+                <div class="text-center mb-6">
+                    <MudIcon Icon="@Icons.Material.Filled.GroupAdd" Size="Size.Large" Color="Color.Primary" Class="mb-3" />
+                    <MudText Typo="Typo.h4" Class="mb-2">@L["JoinTaskGroup"]</MudText>
+                    <MudText Typo="Typo.body1" Class="text-muted">@L["YouHaveBeenInvitedToJoin"]</MudText>
+                </div>
+
+                <!-- Task Group Information -->
+                <MudCard Elevation="1" Class="mb-4">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Class="mb-2">@InvitationDetails.TaskGroupTitle</MudText>
+                        @if (!string.IsNullOrEmpty(InvitationDetails.TaskGroupDescription))
+                        {
+                            <MudText Typo="Typo.body2" Class="text-muted mb-3">@InvitationDetails.TaskGroupDescription</MudText>
+                        }
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Class="text-muted">@L["InvitedBy"]</MudText>
+                                <MudText Typo="Typo.body1">@InvitationDetails.CreatedByUserName</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2" Class="text-muted">@L["YourRole"]</MudText>
+                                <MudChip T="string" Size="Size.Small" Color="@GetRoleColor(InvitationDetails.DefaultRole)" Variant="Variant.Filled">
+                                    @L[$"Role:{InvitationDetails.DefaultRole}"]
+                                </MudChip>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardContent>
+                </MudCard>
+
+                <!-- Invitation Details -->
+                <MudAlert Severity="Severity.Info" Class="mb-4">
+                    <MudText Typo="Typo.body2">
+                        <strong>@L["InvitationDetails"]:</strong><br/>
+                        @L["ExpiresOn"]: @InvitationDetails.ExpirationDate.ToString("MMM dd, yyyy HH:mm")<br/>
+                        @if (InvitationDetails.MaxUses > 0)
+                        {
+                            @string.Format(L["UsageLimited"], InvitationDetails.CurrentUses, InvitationDetails.MaxUses)
+                        }
+                        else
+                        {
+                            @string.Format(L["UsageUnlimited"], InvitationDetails.CurrentUses)
+                        }
+                    </MudText>
+                </MudAlert>
+
+                <!-- Validation Messages -->
+                @if (!InvitationDetails.IsValid)
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-4">
+                        @if (InvitationDetails.IsExpired)
+                        {
+                            @L["InvitationExpiredMessage"]
+                        }
+                        else if (InvitationDetails.IsMaxUsesReached)
+                        {
+                            @L["InvitationMaxUsesReachedMessage"]
+                        }
+                        else
+                        {
+                            @L["InvitationInvalidMessage"]
+                        }
+                    </MudAlert>
+                }
+
+                <!-- Action Buttons -->
+                <div class="text-center">
+                    @if (InvitationDetails.IsValid)
+                    {
+                        @if (IsAuthenticated)
+                        {
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       Size="Size.Large"
+                                       StartIcon="@Icons.Material.Filled.GroupAdd"
+                                       OnClick="JoinGroup"
+                                       Disabled="IsJoining"
+                                       Class="me-3">
+                                @if (IsJoining)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                    @L["Joining"]
+                                }
+                                else
+                                {
+                                    @L["JoinGroup"]
+                                }
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body1" Class="mb-3">@L["PleaseLoginToJoin"]</MudText>
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       Size="Size.Large"
+                                       StartIcon="@Icons.Material.Filled.Login"
+                                       OnClick="Login"
+                                       Class="me-3">
+                                @L["Login"]
+                            </MudButton>
+                        }
+                    }
+                    
+                    <MudButton Variant="Variant.Outlined" 
+                               Color="Color.Default" 
+                               Size="Size.Large"
+                               StartIcon="@Icons.Material.Filled.Home"
+                               OnClick="@(() => NavigationManager.NavigateTo("/"))">
+                        @L["GoToDashboard"]
+                    </MudButton>
+                </div>
+            </MudCard>
+        }
+    </MudContainer>
+</div>

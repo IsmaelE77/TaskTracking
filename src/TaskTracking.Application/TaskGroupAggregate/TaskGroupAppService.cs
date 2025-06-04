@@ -15,6 +15,7 @@ using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Data;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Identity;
@@ -37,13 +38,14 @@ public class TaskGroupAppService :
     private readonly IRepository<UserTaskGroup, Guid> _userTaskGroupRepository;
     private readonly ICurrentUser _currentUser;
     private readonly IReadOnlyRepository<TaskGroup, Guid> _taskGroupRepository;
+    private readonly IDataFilter _dataFilter;
 
     public TaskGroupAppService(
         IRepository<TaskGroup, Guid> repository,
         ITaskGroupManager taskGroupManager,
         IIdentityUserRepository userRepository,
         IRepository<UserTaskGroup, Guid> userTaskGroupRepository,
-        ICurrentUser currentUser, IReadOnlyRepository<TaskGroup, Guid> taskGroupRepository)
+        ICurrentUser currentUser, IReadOnlyRepository<TaskGroup, Guid> taskGroupRepository, IDataFilter dataFilter)
         : base(repository)
     {
         _taskGroupManager = taskGroupManager;
@@ -51,6 +53,7 @@ public class TaskGroupAppService :
         _userTaskGroupRepository = userTaskGroupRepository;
         _currentUser = currentUser;
         _taskGroupRepository = taskGroupRepository;
+        _dataFilter = dataFilter;
     }
 
     public override async Task<PagedResultDto<TaskGroupDto>> GetListAsync(PagedAndSortedResultRequestDto input)
@@ -438,8 +441,8 @@ public class TaskGroupAppService :
         dto.IsExpired = invitation.IsExpired();
         dto.IsMaxUsesReached = invitation.IsMaxUsesReached();
 
-        // Generate invitation URL (this would typically include your domain)
-        dto.InvitationUrl = $"/join-task-group?token={invitation.InvitationToken}";
+        // Store invitation token for URL generation in client
+        dto.InvitationToken = invitation.InvitationToken;
 
         return dto;
     }
@@ -447,6 +450,9 @@ public class TaskGroupAppService :
     [AllowAnonymous]
     public async Task<TaskGroupInvitationDetailsDto> GetInvitationDetailsAsync(string invitationToken)
     {
+        using var _ = _dataFilter.Disable<IHaveTaskGroup>();
+        using var __ = _dataFilter.Disable<IAccessibleTaskGroup>();
+
         var invitation = await _taskGroupManager.GetInvitationByTokenAsync(invitationToken);
         var taskGroup = await _taskGroupManager.GetWithDetailsAsync(invitation.TaskGroupId);
         var createdByUser = await _userRepository.GetAsync(invitation.CreatedByUserId);
@@ -505,11 +511,18 @@ public class TaskGroupAppService :
             dto.IsValid = invitation.IsValid();
             dto.IsExpired = invitation.IsExpired();
             dto.IsMaxUsesReached = invitation.IsMaxUsesReached();
-            dto.InvitationUrl = $"/join-task-group?token={invitation.InvitationToken}";
+            dto.InvitationToken = invitation.InvitationToken;
 
             dtos.Add(dto);
         }
 
         return dtos;
+    }
+
+    [Authorize(UserTaskGroupPermissions.GenerateInvitations)]
+    public async Task DeleteInvitationAsync(Guid invitationId)
+    {
+        var currentUserId = _currentUser.GetId();
+        await _taskGroupManager.DeleteInvitationAsync(invitationId, currentUserId);
     }
 }

@@ -95,4 +95,6 @@ public interface ITaskGroupManager : IDomainService
         Guid userId);
 
     Task<List<TaskGroupInvitation>> GetTaskGroupInvitationsAsync(Guid taskGroupId);
+
+    Task DeleteInvitationAsync(Guid invitationId, Guid requestingUserId);
 }
