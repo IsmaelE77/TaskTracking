@@ -55,11 +55,6 @@ public partial class EditTaskGroup
                 EndDatePicker = TaskGroup.EndDate;
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(L["ErrorLoadingTaskGroup"], Severity.Error);
-            Console.WriteLine($"Error loading task group: {ex.Message}");
-        }
         finally
         {
             IsLoading = false;

@@ -205,19 +205,11 @@ public partial class ManageTaskGroupUsers
 
         if (!dialogResult.Canceled && dialogResult.Data is UserTaskGroupRole selectedRole && selectedRole != user.Role)
         {
-            try
-            {
-                await TaskGroupAppService.UpdateUserRoleAsync(Id, user.UserId, selectedRole);
-                Snackbar.Add(string.Format(L["UserRoleChangedSuccessfully"], user.UserName), Severity.Success);
+            await TaskGroupAppService.UpdateUserRoleAsync(Id, user.UserId, selectedRole);
+            Snackbar.Add(string.Format(L["UserRoleChangedSuccessfully"], user.UserName), Severity.Success);
 
-                // Refresh the current users list
-                await LoadCurrentUsers();
-            }
-            catch (Exception ex)
-            {
-                Snackbar.Add(L["ErrorChangingUserRole"], Severity.Error);
-                Console.WriteLine($"Error changing user role: {ex.Message}");
-            }
+            // Refresh the current users list
+            await LoadCurrentUsers();
         }
     }
 

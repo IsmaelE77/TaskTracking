@@ -64,11 +64,6 @@ public partial class CreateTaskGroup
                 // Navigate to the newly created task group or back to dashboard
                 NavigationManager.NavigateTo("/");
             }
-            catch (Exception ex)
-            {
-                Snackbar.Add(L["ErrorCreatingTaskGroup"], Severity.Error);
-                Console.WriteLine($"Error creating task group: {ex.Message}");
-            }
             finally
             {
                 IsSubmitting = false;

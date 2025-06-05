@@ -57,11 +57,6 @@ public partial class EditTaskItem
                 InitializeFormWithTaskData();
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(L["ErrorLoadingTask"], Severity.Error);
-            Console.WriteLine($"Error loading task: {ex.Message}");
-        }
         finally
         {
             IsLoading = false;
