@@ -79,6 +79,11 @@ public class TaskTrackingHttpApiHostModule : AbpModule
         {
             options.IsDynamicClaimsEnabled = true;
         });
+        context.Services.AddAuthentication().AddGoogle(google =>
+            {
+                google.ClientId = context.Services.GetConfiguration()["Authentication:Google:ClientId"];
+                google.ClientSecret = context.Services.GetConfiguration()["Authentication:Google:ClientSecret"];
+            });
     }
 
     private void ConfigureBundles()
