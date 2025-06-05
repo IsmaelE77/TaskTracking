@@ -1,5 +1,6 @@
 @using Microsoft.Extensions.Localization
 @using TaskTracking.Localization
+@using Volo.Abp.BlazoriseUI.Components
 @inherits LayoutComponentBase
 @inject IJSRuntime JsRuntime
 @inject IStringLocalizer<TaskTrackingResource> L
@@ -101,6 +102,8 @@
     </MudDrawer>
 
     <MudMainContent Class="islamic-main-content">
+        <UiMessageAlert />
+        <UiNotificationAlert />
         @Body
     </MudMainContent>
 </MudLayout>

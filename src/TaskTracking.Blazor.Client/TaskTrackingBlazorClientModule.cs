@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Net.Http;
+using Blazorise.Bootstrap5;
+using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +39,7 @@ public class TaskTrackingBlazorClientModule : AbpModule
         ConfigureAuthentication(builder);
         ConfigureHttpClient(context, environment);
         ConfigureMudBlazor(context);
+        ConfigureBlazorise(context);
         ConfigureRouter(context);
         ConfigureMenu(context);
         ConfigureAutoMapper(context);
@@ -64,6 +67,13 @@ public class TaskTrackingBlazorClientModule : AbpModule
         context.Services.AddMudMarkdownServices();
     }
 
+    private void ConfigureBlazorise(ServiceConfigurationContext context)
+    {
+        context.Services
+            .AddBootstrap5Providers()
+            .AddFontAwesomeIcons();
+    }
+    
     private static void ConfigureAuthentication(WebAssemblyHostBuilder builder)
     {
         builder.Services.AddOidcAuthentication(options =>
