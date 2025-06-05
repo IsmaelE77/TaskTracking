@@ -508,8 +508,12 @@ public class TaskGroupAppService :
         return dto;
     }
 
+    [Authorize]
     public async Task<UserTaskGroupDto> JoinTaskGroupByInvitationAsync(JoinTaskGroupByInvitationDto input)
     {
+        using var _ = _dataFilter.Disable<IHaveTaskGroup>();
+        using var __ = _dataFilter.Disable<IAccessibleTaskGroup>();
+        
         var currentUserId = _currentUser.GetId();
 
         var userTaskGroup = await _taskGroupManager.JoinTaskGroupByInvitationAsync(
