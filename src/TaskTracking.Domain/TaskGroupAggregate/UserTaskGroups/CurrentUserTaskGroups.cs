@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Volo.Abp.Caching;
 using Volo.Abp.Domain.Repositories;
@@ -54,5 +55,11 @@ public class CurrentUserTaskGroups : DomainService
     public bool HasAccessToTaskGroup(Guid taskGroupId)
     {
         return GetAccessibleTaskGroupIds().Contains(taskGroupId);
+    }
+
+    public async Task ClearCacheAsync(Guid userId)
+    {
+        var cacheKey = BuildCacheKey(userId);
+        await DistributedCache.RemoveAsync(cacheKey);
     }
 }

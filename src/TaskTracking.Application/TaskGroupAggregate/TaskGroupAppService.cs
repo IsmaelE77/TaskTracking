@@ -13,6 +13,7 @@ using TaskTracking.TaskGroupAggregate.TaskItems;
 using TaskTracking.TaskGroupAggregate.TaskGroupInvitations;
 using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using TaskTracking.TaskGroupAggregate.UserTaskProgresses;
+using TaskTracking.Permissions.Services;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Data;
@@ -39,13 +40,19 @@ public class TaskGroupAppService :
     private readonly ICurrentUser _currentUser;
     private readonly IReadOnlyRepository<TaskGroup, Guid> _taskGroupRepository;
     private readonly IDataFilter _dataFilter;
+    private readonly IUserTaskGroupRoleCacheService _roleCacheService;
+    private readonly CurrentUserTaskGroups _currentUserTaskGroups;
 
     public TaskGroupAppService(
         IRepository<TaskGroup, Guid> repository,
         ITaskGroupManager taskGroupManager,
         IIdentityUserRepository userRepository,
         IRepository<UserTaskGroup, Guid> userTaskGroupRepository,
-        ICurrentUser currentUser, IReadOnlyRepository<TaskGroup, Guid> taskGroupRepository, IDataFilter dataFilter)
+        ICurrentUser currentUser,
+        IReadOnlyRepository<TaskGroup, Guid> taskGroupRepository,
+        IDataFilter dataFilter,
+        IUserTaskGroupRoleCacheService roleCacheService,
+        CurrentUserTaskGroups currentUserTaskGroups)
         : base(repository)
     {
         _taskGroupManager = taskGroupManager;
@@ -54,6 +61,8 @@ public class TaskGroupAppService :
         _currentUser = currentUser;
         _taskGroupRepository = taskGroupRepository;
         _dataFilter = dataFilter;
+        _roleCacheService = roleCacheService;
+        _currentUserTaskGroups = currentUserTaskGroups;
     }
 
     public override async Task<PagedResultDto<TaskGroupDto>> GetListAsync(PagedAndSortedResultRequestDto input)
@@ -102,7 +111,18 @@ public class TaskGroupAppService :
     [Authorize(UserTaskGroupPermissions.Delete)]
     public override async Task DeleteAsync(Guid id)
     {
+        // Get all users in the task group before deletion to clear their caches
+        var taskGroup = await _taskGroupManager.GetWithDetailsAsync(id);
+        var userIds = taskGroup.UserTaskGroups.Select(utg => utg.UserId).ToList();
+
         await _taskGroupManager.DeleteAsync(id);
+
+        // Clear caches for all affected users
+        foreach (var userId in userIds)
+        {
+            await _roleCacheService.ClearAsync(userId, id);
+            await _currentUserTaskGroups.ClearCacheAsync(userId);
+        }
     }
 
     public async Task<PagedResultDto<TaskGroupDto>> GetMyOwnedTaskGroupsAsync(PagedResultRequestDto input)
@@ -131,6 +151,10 @@ public class TaskGroupAppService :
     {
         var userTaskGroup = await _taskGroupManager.AddUserToGroupAsync(id, userId, role);
 
+        // Clear caches for the affected user
+        await _roleCacheService.ClearAsync(userId, id);
+        await _currentUserTaskGroups.ClearCacheAsync(userId);
+
         var dto = ObjectMapper.Map<UserTaskGroup, UserTaskGroupDto>(userTaskGroup);
         var user = await _userRepository.GetAsync(userId);
         dto.UserName = user.UserName;
@@ -142,6 +166,10 @@ public class TaskGroupAppService :
     public async Task RemoveUserAsync(Guid id, Guid userId)
     {
         await _taskGroupManager.RemoveUserFromGroupAsync(id, userId);
+
+        // Clear caches for the affected user
+        await _roleCacheService.ClearAsync(userId, id);
+        await _currentUserTaskGroups.ClearCacheAsync(userId);
     }
 
     [Authorize(UserTaskGroupPermissions.ManageUsers)]
@@ -208,6 +236,9 @@ public class TaskGroupAppService :
     public async Task<UserTaskGroupDto> UpdateUserRoleAsync(Guid id, Guid userId, UserTaskGroupRole newRole)
     {
         await _taskGroupManager.ChangeUserGroupPermissionAsync(id, userId, newRole);
+
+        // Clear caches for the affected user (role changed, so role cache needs clearing)
+        await _roleCacheService.ClearAsync(userId, id);
 
         var userTaskGroup =
             await _userTaskGroupRepository.GetAsync(utg => utg.TaskGroupId == id && utg.UserId == userId);
@@ -484,6 +515,10 @@ public class TaskGroupAppService :
         var userTaskGroup = await _taskGroupManager.JoinTaskGroupByInvitationAsync(
             input.InvitationToken,
             currentUserId);
+
+        // Clear caches for the current user who just joined
+        await _roleCacheService.ClearAsync(currentUserId, userTaskGroup.TaskGroupId);
+        await _currentUserTaskGroups.ClearCacheAsync(currentUserId);
 
         var dto = ObjectMapper.Map<UserTaskGroup, UserTaskGroupDto>(userTaskGroup);
         var user = await _userRepository.GetAsync(currentUserId);
