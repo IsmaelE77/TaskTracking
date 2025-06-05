@@ -87,19 +87,6 @@ public partial class JoinTaskGroup
             // Navigate to the task group
             NavigationManager.NavigateTo($"/task-groups/{InvitationDetails.TaskGroupId}");
         }
-        catch (Exception ex)
-        {
-            var errorMessage = ex.Message switch
-            {
-                var msg when msg.Contains("UserAlreadyInGroup") => L["AlreadyMemberOfGroup"],
-                var msg when msg.Contains("InvitationExpired") => L["InvitationExpiredMessage"],
-                var msg when msg.Contains("InvitationMaxUsesReached") => L["InvitationMaxUsesReachedMessage"],
-                _ => L["ErrorJoiningGroup"]
-            };
-            
-            Snackbar.Add(errorMessage, Severity.Error);
-            Console.WriteLine($"Error joining group: {ex.Message}");
-        }
         finally
         {
             IsJoining = false;
