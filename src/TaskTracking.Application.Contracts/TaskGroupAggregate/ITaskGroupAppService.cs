@@ -120,4 +120,7 @@ public interface ITaskGroupAppService :
     ///     Deletes an invitation.
     /// </summary>
     Task DeleteInvitationAsync(Guid invitationId);
+
+    Task<UserTaskGroupRole> GetUserRoleAsync(Guid id);
+
 }

@@ -1,4 +1,5 @@
 using System;
+using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using Volo.Abp.Application.Dtos;
 
 namespace TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
@@ -34,4 +35,6 @@ public class TaskGroupDto : AuditedEntityDto<Guid>
     public bool IsCompleted { get; set; }
 
     public double ProgressPercentageCompleted { get; set; }
+    public UserTaskGroupRole CurrentUserRole { get; set; } // The user's role in THIS group
+
 }

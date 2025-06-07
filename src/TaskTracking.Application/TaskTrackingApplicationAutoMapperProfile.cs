@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using AutoMapper;
+using TaskTracking.TaskGroupAggregate;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroupInvitations;
@@ -23,13 +24,16 @@ public class TaskTrackingApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.ProgressPercentageCompleted,
                 opt => opt.MapFrom(src =>
                     src.Tasks.Count(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100)) * 100 / (src.Tasks.Count > 0 ? src.Tasks.Count : 1)
-                ));
+                ))
+            .AfterMap<TaskGroupDtoMappingAction>();
 
         CreateMap<TaskGroup, TaskGroupDetailsDto>()
             .ForMember(dest => dest.Tasks, opt => opt.MapFrom(src => src.Tasks))
             .ForMember(dest => dest.UserTaskGroups, opt => opt.MapFrom(src => src.UserTaskGroups))
             .ForMember(dest => dest.IsCompleted, opt => opt.MapFrom(src =>
-                src.Tasks.Count > 0 && src.Tasks.All(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100))));
+                src.Tasks.Count > 0 && src.Tasks.All(t => t.UserProgresses.Any(up => up.ProgressPercentage == 100))))
+            .AfterMap<TaskGroupDetailsMappingDto>();
+
 
         // TaskItem mappings
         CreateMap<TaskItem, TaskItemDto>()

@@ -564,4 +564,18 @@ public class TaskGroupAppService :
         var currentUserId = _currentUser.GetId();
         await _taskGroupManager.DeleteInvitationAsync(invitationId, currentUserId);
     }
+
+    public async Task<UserTaskGroupRole> GetUserRoleAsync(Guid id)
+    {
+        var group = await _taskGroupRepository.GetAsync(id);
+
+        var role = group!.UserTaskGroups.FirstOrDefault(utg => utg.UserId == _currentUser.Id)?.Role;
+
+        if (role is null)
+        {
+            throw new EntityNotFoundException();
+        }
+
+        return role.Value;
+    }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.Dtos.UserTaskGroups;
+using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 
 namespace TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 
@@ -41,4 +42,5 @@ public class TaskGroupDetailsDto
     ///     The user subscriptions to this task group.
     /// </summary>
     public List<UserTaskGroupDto> UserTaskGroups { get; set; } = new();
+    public UserTaskGroupRole CurrentUserRole { get; set; } // The user's role in THIS group
 }
