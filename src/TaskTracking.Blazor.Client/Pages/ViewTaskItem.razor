@@ -2,6 +2,7 @@
 @inherits TaskTrackingComponentBase
 @using Severity = MudBlazor.Severity
 @using TaskTracking.TaskGroupAggregate.TaskItems
+@using TaskTracking.TaskGroupAggregate.UserTaskGroups
 
 <div class="islamic-pattern-bg">
     <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
@@ -28,23 +29,27 @@
             <!-- Action Buttons -->
             <MudItem xs="12" sm="4" md="3">
                 <MudStack Row="true" Spacing="2" Class="d-none d-sm-flex justify-end">
-                    <MudButton Variant="Variant.Outlined"
-                               Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.Edit"
-                               OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))">
-                        @L["Edit"]
-                    </MudButton>
+                    <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.UpdateTaskItems" Role="@UserTaskGroupRole">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))">
+                            @L["Edit"]
+                        </MudButton>
+                    </TaskGroupAuthorizeView>
                 </MudStack>
-                
+
                 <!-- Mobile Buttons -->
                 <MudStack Spacing="2" Class="d-block d-sm-none">
-                    <MudButton Variant="Variant.Outlined"
-                               Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.Edit"
-                               OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))"
-                               FullWidth="true">
-                        @L["Edit"]
-                    </MudButton>
+                    <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.UpdateTaskItems" Role="@UserTaskGroupRole">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))"
+                                   FullWidth="true">
+                            @L["Edit"]
+                        </MudButton>
+                    </TaskGroupAuthorizeView>
                 </MudStack>
             </MudItem>
         </MudGrid>
@@ -287,20 +292,24 @@
                         <div class="d-flex gap-2">
                             @if (TaskItem != null && !TaskItem.IsCompleted)
                             {
-                                <MudButton Variant="Variant.Filled"
-                                           Color="Color.Success"
-                                           StartIcon="@Icons.Material.Filled.CheckCircle"
-                                           OnClick="@RecordProgress">
-                                    @L["RecordProgress"]
-                                </MudButton>
+                                <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.RecordProgress" Role="@UserTaskGroupRole">
+                                    <MudButton Variant="Variant.Filled"
+                                               Color="Color.Success"
+                                               StartIcon="@Icons.Material.Filled.CheckCircle"
+                                               OnClick="@RecordProgress">
+                                        @L["RecordProgress"]
+                                    </MudButton>
+                                </TaskGroupAuthorizeView>
                             }
 
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Edit"
-                                       OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))">
-                                @L["EditTask"]
-                            </MudButton>
+                            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.UpdateTaskItems" Role="@UserTaskGroupRole">
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Edit"
+                                           OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))">
+                                    @L["EditTask"]
+                                </MudButton>
+                            </TaskGroupAuthorizeView>
                         </div>
                     </MudStack>
 
@@ -308,22 +317,26 @@
                     <MudStack Spacing="2" Class="d-block d-sm-none">
                         @if (TaskItem != null && !TaskItem.IsCompleted)
                         {
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Success"
-                                       StartIcon="@Icons.Material.Filled.CheckCircle"
-                                       OnClick="@RecordProgress"
-                                       FullWidth="true">
-                                @L["RecordProgress"]
-                            </MudButton>
+                            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.RecordProgress" Role="@UserTaskGroupRole">
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Success"
+                                           StartIcon="@Icons.Material.Filled.CheckCircle"
+                                           OnClick="@RecordProgress"
+                                           FullWidth="true">
+                                    @L["RecordProgress"]
+                                </MudButton>
+                            </TaskGroupAuthorizeView>
                         }
 
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.Edit"
-                                   OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))"
-                                   FullWidth="true">
-                            @L["EditTask"]
-                        </MudButton>
+                        <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.UpdateTaskItems" Role="@UserTaskGroupRole">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Edit"
+                                       OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}/tasks/{TaskItemId}/edit"))"
+                                       FullWidth="true">
+                                @L["EditTask"]
+                            </MudButton>
+                        </TaskGroupAuthorizeView>
                         <MudButton Variant="Variant.Text"
                                    Color="Color.Default"
                                    StartIcon="@Icons.Material.Filled.ArrowBack"

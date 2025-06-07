@@ -1,10 +1,12 @@
 @using TaskTracking.TaskGroupAggregate.Dtos.TaskItems
 @using TaskTracking.TaskGroupAggregate.TaskItems
 @using TaskTracking.TaskGroupAggregate
+@using TaskTracking.TaskGroupAggregate.UserTaskGroups
 @inherits TaskTrackingComponentBase
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 @inject ITaskGroupAppService TaskGroupAppService
+
 <MudCard Class="task-item-card h-100" Elevation="2" Style="display: flex; padding: 1.5rem !important; flex-wrap: nowrap; justify-content: space-between; flex-direction: column;">    <MudCardHeader>
         <CardHeaderContent>
             <div class="d-flex justify-content-between align-items-start">
@@ -110,27 +112,33 @@
 
             @if (!TaskItem.IsCompleted)
             {
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Success"
-                           StartIcon="@Icons.Material.Filled.CheckCircle"
-                           Size="Size.Small"
-                           OnClick="@(() => RecordProgress())">
-                    @L["RecordProgress"]
-                </MudButton>
+                <TaskGroupTaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.RecordProgress" Role="@UserTaskGroupRole">
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Success"
+                               StartIcon="@Icons.Material.Filled.CheckCircle"
+                               Size="Size.Small"
+                               OnClick="@(() => RecordProgress())">
+                        @L["RecordProgress"]
+                    </MudButton>
+                </TaskGroupTaskGroupAuthorizeView>
             }
         </div>
 
         <div>
-            <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                           Color="Color.Primary"
-                           Size="Size.Small"
-                           OnClick="@(() => EditTask())"
-                           title="@L["Edit"]" />
-            <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                           Color="Color.Error"
-                           Size="Size.Small"
-                           OnClick="@(() => DeleteTask())"
-                           title="@L["Delete"]" />
+            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.UpdateTaskItems" Role="@UserTaskGroupRole">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditTask())"
+                               title="@L["Edit"]" />
+            </TaskGroupAuthorizeView>
+            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.DeleteTaskItems" Role="@UserTaskGroupRole">
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteTask())"
+                               title="@L["Delete"]" />
+            </TaskGroupAuthorizeView>
         </div>
     </MudCardActions>
 </MudCard>
@@ -138,6 +146,8 @@
 @code {
     [Parameter] public TaskItemDto TaskItem { get; set; } = null!;
     [Parameter] public Guid TaskGroupId { get; set; }
+    [Parameter] public UserTaskGroupRole UserTaskGroupRole { get; set; }
+
     [Parameter] public EventCallback OnTaskDeleted { get; set; }
     [Parameter] public EventCallback OnTaskUpdated { get; set; }
 

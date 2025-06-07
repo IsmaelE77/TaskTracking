@@ -7,6 +7,7 @@ using TaskTracking.Blazor.Client.Components;
 using TaskTracking.TaskGroupAggregate;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskItems;
 using TaskTracking.TaskGroupAggregate.TaskItems;
+using TaskTracking.TaskGroupAggregate.UserTaskGroups;
 using Severity = MudBlazor.Severity;
 
 namespace TaskTracking.Blazor.Client.Pages;
@@ -20,6 +21,8 @@ public partial class ViewTaskItem
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     [Inject] private IDialogService DialogService { get; set; } = null!;
+
+    private UserTaskGroupRole UserTaskGroupRole { get; set; }
 
     private TaskItemDto? TaskItem { get; set; }
     private bool IsLoading { get; set; } = true;
@@ -35,6 +38,7 @@ public partial class ViewTaskItem
         try
         {
             TaskItem = await ItemAppService.GetAsync(TaskItemId);
+            UserTaskGroupRole = await TaskGroupAppService.GetUserRoleAsync(TaskGroupId);
         }
         catch (Exception ex)
         {

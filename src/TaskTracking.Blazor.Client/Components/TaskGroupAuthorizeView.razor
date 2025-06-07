@@ -1,0 +1,38 @@
+@using TaskTracking.TaskGroupAggregate.UserTaskGroups
+@inject TaskGroupPermissionEvaluator PermissionEvaluator
+
+@if (HasPermission())
+{
+    @ChildContent
+}
+
+@code {
+    /// <summary>
+    /// The UserTaskGroupRole of the current user for the specific context.
+    /// </summary>
+    [Parameter]
+    public UserTaskGroupRole Role { get; set; }
+
+    /// <summary>
+    /// The permission required to render the content (e.g., UserTaskGroupPermissions.ManageUsers).
+    /// </summary>
+    [Parameter]
+    public string Permission { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The content to be rendered if authorization is successful.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private bool HasPermission()
+    {
+        if (string.IsNullOrEmpty(Permission))
+        {
+            return true; // No permission specified, show the content by default.
+        }
+
+        // Use the injected evaluator with the provided role and permission
+        return PermissionEvaluator.IsPermissionGrantedForRole(Role, Permission);
+    }
+}

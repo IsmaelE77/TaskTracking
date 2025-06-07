@@ -59,12 +59,14 @@
                         <MudText Typo="Typo.body1" Class="text-muted mb-4">
                             @L["NoUsersInGroupDescription"]
                         </MudText>
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.PersonAdd"
-                                   OnClick="@(() => ActiveTabIndex = 1)">
-                            @L["AddFirstUser"]
-                        </MudButton>
+                        <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.ManageUsers" Role="@TaskGroup.CurrentUserRole">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                                       OnClick="@(() => ActiveTabIndex = 1)">
+                                @L["AddFirstUser"]
+                            </MudButton>
+                        </TaskGroupAuthorizeView>
                     </div>
                 }
                 else
@@ -73,12 +75,14 @@
                         <MudText Typo="Typo.h6">
                             @string.Format(L["UsersInGroup"], CurrentUsers.Count)
                         </MudText>
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.PersonAdd"
-                                   OnClick="@(() => ActiveTabIndex = 1)">
-                            @L["AddUser"]
-                        </MudButton>
+                        <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.ManageUsers" Role="@TaskGroup.CurrentUserRole">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                                       OnClick="@(() => ActiveTabIndex = 1)">
+                                @L["AddUser"]
+                            </MudButton>
+                        </TaskGroupAuthorizeView>
                     </div>
 
                     <MudGrid>
@@ -98,14 +102,16 @@
                                         </div>
                                         @if (user.Role != UserTaskGroupRole.Owner)
                                         {
-                                            <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small">
-                                                <MudMenuItem OnClick="@(() => ChangeUserRole(user))" Icon="@Icons.Material.Filled.Security">
-                                                    @L["ChangeRole"]
-                                                </MudMenuItem>
-                                                <MudMenuItem OnClick="@(() => RemoveUser(user))" Icon="@Icons.Material.Filled.PersonRemove">
-                                                    @L["RemoveUser"]
-                                                </MudMenuItem>
-                                            </MudMenu>
+                                            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.ManageUsers" Role="@TaskGroup.CurrentUserRole">
+                                                <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small">
+                                                    <MudMenuItem OnClick="@(() => ChangeUserRole(user))" Icon="@Icons.Material.Filled.Security">
+                                                        @L["ChangeRole"]
+                                                    </MudMenuItem>
+                                                    <MudMenuItem OnClick="@(() => RemoveUser(user))" Icon="@Icons.Material.Filled.PersonRemove">
+                                                        @L["RemoveUser"]
+                                                    </MudMenuItem>
+                                                </MudMenu>
+                                            </TaskGroupAuthorizeView>
                                         }
                                         else
                                         {
@@ -204,13 +210,15 @@
                                         }
                                         else
                                         {
-                                            <MudButton Variant="Variant.Filled"
-                                                       Color="Color.Primary"
-                                                       Size="Size.Small"
-                                                       StartIcon="@Icons.Material.Filled.PersonAdd"
-                                                       OnClick="@(() => AddUser(user))">
-                                                @L["Add"]
-                                            </MudButton>
+                                            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.ManageUsers" Role="@TaskGroup.CurrentUserRole">
+                                                <MudButton Variant="Variant.Filled"
+                                                           Color="Color.Primary"
+                                                           Size="Size.Small"
+                                                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                                                           OnClick="@(() => AddUser(user))">
+                                                    @L["Add"]
+                                                </MudButton>
+                                            </TaskGroupAuthorizeView>
                                         }
                                     </div>
                                 </MudCard>
@@ -256,12 +264,14 @@
                         <MudText Typo="Typo.h6">
                             @string.Format(L["InvitationsCount"], Invitations.Count)
                         </MudText>
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.Add"
-                                   OnClick="CreateInvitation">
-                            @L["CreateInvitation"]
-                        </MudButton>
+                        <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.GenerateInvitations" Role="@TaskGroup.CurrentUserRole">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       OnClick="CreateInvitation">
+                                @L["CreateInvitation"]
+                            </MudButton>
+                        </TaskGroupAuthorizeView>
                     </div>
 
                     @if (!Invitations.Any())
@@ -272,12 +282,14 @@
                             <MudText Typo="Typo.body1" Class="text-muted mb-4">
                                 @L["NoInvitationsDescription"]
                             </MudText>
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       OnClick="CreateInvitation">
-                                @L["CreateFirstInvitation"]
-                            </MudButton>
+                            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.GenerateInvitations" Role="@TaskGroup.CurrentUserRole">
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           OnClick="CreateInvitation">
+                                    @L["CreateFirstInvitation"]
+                                </MudButton>
+                            </TaskGroupAuthorizeView>
                         </div>
                     }
                     else
@@ -298,9 +310,11 @@
                                                         @L["CopyLink"]
                                                     </MudMenuItem>
                                                 }
-                                                <MudMenuItem OnClick="@(() => DeleteInvitation(invitation))" Icon="@Icons.Material.Filled.Delete">
-                                                    @L["Delete"]
-                                                </MudMenuItem>
+                                                <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.GenerateInvitations" Role="@TaskGroup.CurrentUserRole">
+                                                    <MudMenuItem OnClick="@(() => DeleteInvitation(invitation))" Icon="@Icons.Material.Filled.Delete">
+                                                        @L["Delete"]
+                                                    </MudMenuItem>
+                                                </TaskGroupAuthorizeView>
                                             </MudMenu>
                                         </div>
 

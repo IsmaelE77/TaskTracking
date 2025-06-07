@@ -2,6 +2,7 @@
 @inherits TaskTrackingComponentBase
 @using TaskTracking.TaskGroupAggregate.Dtos.TaskItems
 @using TaskTracking.TaskGroupAggregate.TaskItems
+@using TaskTracking.TaskGroupAggregate.UserTaskGroups
 @using Volo.Abp.Application.Dtos
 
 <div class="islamic-pattern-bg">
@@ -133,7 +134,7 @@
                         @foreach (var task in Tasks)
                         {
                             <MudItem xs="12" sm="6" md="4" lg="3">
-                                <TaskItemCard TaskItem="@task" TaskGroupId="@task.TaskGroupId" OnTaskDeleted="@OnTaskDeleted" OnTaskUpdated="@OnTaskUpdated"/>
+                                <TaskItemCard TaskItem="@task" TaskGroupId="@task.TaskGroupId" UserTaskGroupRole="@UserTaskGroupRole.Subscriber" OnTaskDeleted="@OnTaskDeleted" OnTaskUpdated="@OnTaskUpdated"/>
                             </MudItem>
                         }
                     </MudGrid>

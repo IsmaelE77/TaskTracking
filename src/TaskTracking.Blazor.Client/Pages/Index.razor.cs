@@ -56,13 +56,13 @@ public partial class Index
         try
         {
             IsLoadingMore = true;
-            var request = new PagedResultRequestDto
+            var input = new PagedAndSortedResultRequestDto
             {
+                MaxResultCount = PageSize,
                 SkipCount = CurrentPage * PageSize,
-                MaxResultCount = PageSize
             };
 
-            var moreTaskGroups = await TaskGroupAppService.GetMyActiveTaskGroupsAsync(request);
+            var moreTaskGroups = await TaskGroupAppService.GetListAsync(input);
             
             if (moreTaskGroups.Items.Count > 0)
             {
