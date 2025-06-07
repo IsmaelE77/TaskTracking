@@ -15,7 +15,6 @@ public class TaskGroupPermissionEvaluator : ITransientDependency
                 UserTaskGroupRole.Owner,
                 new HashSet<string>
                 {
-                    UserTaskGroupPermissions.Create,
                     UserTaskGroupPermissions.Update,
                     UserTaskGroupPermissions.Delete,
                     UserTaskGroupPermissions.ManageUsers,
@@ -31,7 +30,6 @@ public class TaskGroupPermissionEvaluator : ITransientDependency
                 UserTaskGroupRole.CoOwner,
                 new HashSet<string>
                 {
-                    UserTaskGroupPermissions.Create,
                     UserTaskGroupPermissions.Update,
                     UserTaskGroupPermissions.Delete,
                     UserTaskGroupPermissions.RecordProgress,

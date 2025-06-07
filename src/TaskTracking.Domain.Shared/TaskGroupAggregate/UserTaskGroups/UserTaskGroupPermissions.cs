@@ -4,7 +4,6 @@ public static class UserTaskGroupPermissions
 {
     public const string GroupName = "TaskGroups";
 
-    public const string Create = GroupName + ".Create";
     public const string Update = GroupName + ".Update";
     public const string Delete = GroupName + ".Delete";
     public const string ManageUsers = GroupName + ".ManageUsers";

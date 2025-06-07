@@ -14,10 +14,6 @@ public class TaskTrackingPermissionDefinitionProvider : PermissionDefinitionProv
             L("Permission:TaskGroups"));
 
         taskGroupsPermission.AddPermission(
-            UserTaskGroupPermissions.Create,
-            L("Permission:TaskGroups.Create"));
-
-        taskGroupsPermission.AddPermission(
             UserTaskGroupPermissions.Update,
             L("Permission:TaskGroups.Update"));
 
