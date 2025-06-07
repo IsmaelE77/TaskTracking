@@ -96,9 +96,13 @@ public partial class JoinTaskGroup
 
     private void Login()
     {
-        // Store the current URL to return after login
-        var returnUrl = NavigationManager.Uri;
-        NavigationManager.NavigateTo($"/authentication/login?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+        InteractiveRequestOptions interactiveRequestOptions = new()
+        {
+            Interaction = InteractionType.SignIn,
+            ReturnUrl = $"/join/{InvitationCode}"
+        };
+
+        NavigationManager.NavigateToLogin($"authentication/login", interactiveRequestOptions);
     }
 
     private Color GetRoleColor(UserTaskGroupRole role)
