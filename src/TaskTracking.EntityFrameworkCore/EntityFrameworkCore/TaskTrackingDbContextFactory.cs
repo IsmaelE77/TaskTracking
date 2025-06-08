@@ -17,7 +17,7 @@ public class TaskTrackingDbContextFactory : IDesignTimeDbContextFactory<TaskTrac
         var configuration = BuildConfiguration();
 
         var builder = new DbContextOptionsBuilder<TaskTrackingDbContext>()
-            .UseMySql(configuration.GetConnectionString("Default"), MySqlServerVersion.LatestSupportedServerVersion);
+            .UseNpgsql(configuration.GetConnectionString("Default"));
 
         return new TaskTrackingDbContext(builder.Options);
     }
