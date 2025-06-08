@@ -1,0 +1,40 @@
+# Dockerfile for TaskTracking.DbMigrator (Database Migration Tool)
+FROM mcr.microsoft.com/dotnet/runtime:9.0 AS base
+WORKDIR /app
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+# Copy solution file and project files
+COPY ["TaskTracking.sln", "."]
+COPY ["common.props", "."]
+COPY ["NuGet.Config", "."]
+
+# Copy all project files for dependency resolution
+COPY ["src/TaskTracking.DbMigrator/TaskTracking.DbMigrator.csproj", "src/TaskTracking.DbMigrator/"]
+COPY ["src/TaskTracking.Application/TaskTracking.Application.csproj", "src/TaskTracking.Application/"]
+COPY ["src/TaskTracking.Application.Contracts/TaskTracking.Application.Contracts.csproj", "src/TaskTracking.Application.Contracts/"]
+COPY ["src/TaskTracking.Domain/TaskTracking.Domain.csproj", "src/TaskTracking.Domain/"]
+COPY ["src/TaskTracking.Domain.Shared/TaskTracking.Domain.Shared.csproj", "src/TaskTracking.Domain.Shared/"]
+COPY ["src/TaskTracking.EntityFrameworkCore/TaskTracking.EntityFrameworkCore.csproj", "src/TaskTracking.EntityFrameworkCore/"]
+
+# Restore dependencies
+RUN dotnet restore "src/TaskTracking.DbMigrator/TaskTracking.DbMigrator.csproj"
+
+# Copy source code
+COPY . .
+
+# Build the application
+WORKDIR "/src/src/TaskTracking.DbMigrator"
+RUN dotnet build "TaskTracking.DbMigrator.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "TaskTracking.DbMigrator.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+ENTRYPOINT ["dotnet", "TaskTracking.DbMigrator.dll"]

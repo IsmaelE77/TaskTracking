@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: tasktracking-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: MyStrongPassword123!
+      MYSQL_DATABASE: TaskTracking
+      MYSQL_USER: tasktracking
+      MYSQL_PASSWORD: TaskTrackingPassword123!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - tasktracking-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Database Migrator (runs once to set up the database)
+  migrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrator
+    container_name: tasktracking-migrator
+    environment:
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=TaskTracking;Uid=tasktracking;Pwd=TaskTrackingPassword123!;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - tasktracking-network
+    restart: "no"
+
+  # API Host Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: tasktracking-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=TaskTracking;Uid=tasktracking;Pwd=TaskTrackingPassword123!;
+      - App__SelfUrl=http://localhost:8081
+      - App__CorsOrigins=http://localhost:8080,http://localhost:3000
+      - App__RedirectAllowedUrls=http://localhost:8080
+      - AuthServer__Authority=http://localhost:8081
+      - AuthServer__RequireHttpsMetadata=false
+    ports:
+      - "8081:8080"
+    depends_on:
+      - migrator
+    networks:
+      - tasktracking-network
+    restart: unless-stopped
+
+  # Blazor Server Application
+  blazor:
+    build:
+      context: .
+      dockerfile: Dockerfile.blazor
+    container_name: tasktracking-blazor
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=TaskTracking;Uid=tasktracking;Pwd=TaskTrackingPassword123!;
+      - AuthServer__Authority=http://localhost:8081
+      - AuthServer__RequireHttpsMetadata=false
+      - RemoteServices__Default__BaseUrl=http://api:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
+    networks:
+      - tasktracking-network
+    restart: unless-stopped
+
+  # Traditional Web Application (optional - uncomment if needed)
+  # web:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.web
+  #   container_name: tasktracking-web
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #     - ASPNETCORE_URLS=http://+:8080
+  #     - ConnectionStrings__Default=Server=mysql;Port=3306;Database=TaskTracking;Uid=tasktracking;Pwd=TaskTrackingPassword123!;
+  #   ports:
+  #     - "8082:8080"
+  #   depends_on:
+  #     - migrator
+  #   networks:
+  #     - tasktracking-network
+  #   restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  tasktracking-network:
+    driver: bridge

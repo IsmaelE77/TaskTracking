@@ -1,0 +1,57 @@
+# docker-compose.override.yml
+# This file provides development-specific overrides for docker-compose.yml
+# It's automatically used when running docker-compose up in development
+
+version: '3.8'
+
+services:
+  mysql:
+    environment:
+      # Use simpler passwords for development
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      # Mount a local directory for easier database inspection during development
+      - ./data/mysql:/var/lib/mysql
+
+  migrator:
+    environment:
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=TaskTracking;Uid=tasktracking;Pwd=password;
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=TaskTracking;Uid=tasktracking;Pwd=password;
+      - App__SelfUrl=http://localhost:8081
+      - App__CorsOrigins=http://localhost:8080,http://localhost:3000,https://localhost:44335,https://localhost:44379
+      - App__RedirectAllowedUrls=http://localhost:8080,https://localhost:44335
+      - AuthServer__Authority=http://localhost:8081
+      - AuthServer__RequireHttpsMetadata=false
+      - Logging__LogLevel__Default=Debug
+    volumes:
+      # Mount source code for hot reload during development (optional)
+      - ./src:/app/src:ro
+
+  blazor:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=TaskTracking;Uid=tasktracking;Pwd=password;
+      - AuthServer__Authority=http://localhost:8081
+      - AuthServer__RequireHttpsMetadata=false
+      - RemoteServices__Default__BaseUrl=http://api:8080
+      - Logging__LogLevel__Default=Debug
+    volumes:
+      # Mount source code for hot reload during development (optional)
+      - ./src:/app/src:ro
+
+  # Uncomment if using the web service
+  # web:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ConnectionStrings__Default=Server=mysql;Port=3306;Database=TaskTracking;Uid=tasktracking;Pwd=password;
+  #     - Logging__LogLevel__Default=Debug
+  #   volumes:
+  #     - ./src:/app/src:ro
