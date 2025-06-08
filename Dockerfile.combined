@@ -1,21 +1,14 @@
-# Base image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-WORKDIR /app
-EXPOSE 8080
-
-# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# Build stage for API Host
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS api-build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy solution and common files
 COPY ["TaskTracking.sln", "."]
 COPY ["common.props", "."]
 COPY ["NuGet.Config", "."]
 
-# Copy all project files
+# Copy all project files for dependency resolution
 COPY ["src/TaskTracking.HttpApi.Host/TaskTracking.HttpApi.Host.csproj", "src/TaskTracking.HttpApi.Host/"]
-COPY ["src/TaskTracking.DbMigrator/TaskTracking.DbMigrator.csproj", "src/TaskTracking.DbMigrator/"]
 COPY ["src/TaskTracking.Application/TaskTracking.Application.csproj", "src/TaskTracking.Application/"]
 COPY ["src/TaskTracking.Application.Contracts/TaskTracking.Application.Contracts.csproj", "src/TaskTracking.Application.Contracts/"]
 COPY ["src/TaskTracking.Domain/TaskTracking.Domain.csproj", "src/TaskTracking.Domain/"]
@@ -24,35 +17,58 @@ COPY ["src/TaskTracking.EntityFrameworkCore/TaskTracking.EntityFrameworkCore.csp
 COPY ["src/TaskTracking.HttpApi/TaskTracking.HttpApi.csproj", "src/TaskTracking.HttpApi/"]
 COPY ["src/TaskTracking.HttpApi.Client/TaskTracking.HttpApi.Client.csproj", "src/TaskTracking.HttpApi.Client/"]
 
-# Restore
-RUN dotnet restore "TaskTracking.sln"
+# Restore dependencies
+RUN dotnet restore "src/TaskTracking.HttpApi.Host/TaskTracking.HttpApi.Host.csproj"
 
-# Copy the rest of the source
+# Copy source code
 COPY . .
 
-# Build and publish API
+# Build and publish the API host
 WORKDIR "/src/src/TaskTracking.HttpApi.Host"
-RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/api /p:UseAppHost=false
+RUN dotnet publish "TaskTracking.HttpApi.Host.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Build and publish Migrator
+
+# Build stage for DbMigrator
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS migrator-build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+COPY ["TaskTracking.sln", "."]
+COPY ["common.props", "."]
+COPY ["NuGet.Config", "."]
+
+# Copy all project files for dependency resolution
+COPY ["src/TaskTracking.DbMigrator/TaskTracking.DbMigrator.csproj", "src/TaskTracking.DbMigrator/"]
+COPY ["src/TaskTracking.Application/TaskTracking.Application.csproj", "src/TaskTracking.Application/"]
+COPY ["src/TaskTracking.Application.Contracts/TaskTracking.Application.Contracts.csproj", "src/TaskTracking.Application.Contracts/"]
+COPY ["src/TaskTracking.Domain/TaskTracking.Domain.csproj", "src/TaskTracking.Domain/"]
+COPY ["src/TaskTracking.Domain.Shared/TaskTracking.Domain.Shared.csproj", "src/TaskTracking.Domain.Shared/"]
+COPY ["src/TaskTracking.EntityFrameworkCore/TaskTracking.EntityFrameworkCore.csproj", "src/TaskTracking.EntityFrameworkCore/"]
+
+# Restore dependencies
+RUN dotnet restore "src/TaskTracking.DbMigrator/TaskTracking.DbMigrator.csproj"
+
+# Copy source code
+COPY . .
+
+# Build and publish the DbMigrator
 WORKDIR "/src/src/TaskTracking.DbMigrator"
-RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/migrator /p:UseAppHost=false
+RUN dotnet publish "TaskTracking.DbMigrator.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Final image
-FROM base AS final
+
+# Final stage: Combine both applications in one runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 
-# Copy published apps
-COPY --from=build /app/api ./api
-COPY --from=build /app/migrator ./migrator
+# Copy API Host output
+COPY --from=api-build /app/publish ./api
+# Copy DbMigrator output
+COPY --from=migrator-build /app/publish ./migrator
 
-# Add entrypoint script
-COPY ./docker/entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
+# Expose ports for the API
+EXPOSE 8080
+EXPOSE 8081
 
-# Environment
-ENV ASPNETCORE_ENVIRONMENT=Production
+# Set environment variables for API
 ENV ASPNETCORE_URLS=http://+:8080
-
-ENTRYPOINT ["./entrypoint.sh"]
-
+ENV ASPNETCORE_ENVIRONMENT=Production
