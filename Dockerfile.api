@@ -1,19 +1,39 @@
-# Dockerfile for TaskTracking.HttpApi.Host (API Host Application)
+# Base image for runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 80
+EXPOSE 443
 
+# SDK image for build
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Install ABP CLI
+RUN dotnet tool install -g Volo.Abp.Cli --version 9
+
+# Install Node
+ENV NODE_VERSION 16.13.0
+ENV NODE_DOWNLOAD_URL https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz
+ENV NODE_DOWNLOAD_SHA 589b7e7eb22f8358797a2c14a0bd865459d0b44458b8f05d2721294dacc7f734
+
+RUN curl -SL "$NODE_DOWNLOAD_URL" --output nodejs.tar.gz \
+    && echo "$NODE_DOWNLOAD_SHA nodejs.tar.gz" | sha256sum -c - \
+    && tar -xzf "nodejs.tar.gz" -C /usr/local --strip-components=1 \
+    && rm nodejs.tar.gz \
+    && ln -s /usr/local/bin/node /usr/local/bin/nodejs
+
+RUN npm install -g yarn
+RUN yarn config set registry https://registry.npmmirror.com
+RUN apt update && apt -y install gnupg
+
+# Set working directory
 WORKDIR /src
 
-# Copy solution file and project files
+# Copy solution and project files
 COPY ["TaskTracking.sln", "."]
 COPY ["common.props", "."]
 COPY ["NuGet.Config", "."]
-
-# Copy all project files for dependency resolution
 COPY ["src/TaskTracking.HttpApi.Host/TaskTracking.HttpApi.Host.csproj", "src/TaskTracking.HttpApi.Host/"]
 COPY ["src/TaskTracking.Application/TaskTracking.Application.csproj", "src/TaskTracking.Application/"]
 COPY ["src/TaskTracking.Application.Contracts/TaskTracking.Application.Contracts.csproj", "src/TaskTracking.Application.Contracts/"]
@@ -22,30 +42,43 @@ COPY ["src/TaskTracking.Domain.Shared/TaskTracking.Domain.Shared.csproj", "src/T
 COPY ["src/TaskTracking.EntityFrameworkCore/TaskTracking.EntityFrameworkCore.csproj", "src/TaskTracking.EntityFrameworkCore/"]
 COPY ["src/TaskTracking.HttpApi/TaskTracking.HttpApi.csproj", "src/TaskTracking.HttpApi/"]
 COPY ["src/TaskTracking.HttpApi.Client/TaskTracking.HttpApi.Client.csproj", "src/TaskTracking.HttpApi.Client/"]
-
-# Copy package.json for npm dependencies
 COPY ["src/TaskTracking.HttpApi.Host/package.json", "src/TaskTracking.HttpApi.Host/"]
 
 # Restore dependencies
 RUN dotnet restore "src/TaskTracking.HttpApi.Host/TaskTracking.HttpApi.Host.csproj"
 
-# Copy source code
+# Install ABP Libs
+RUN abp install-libs
+
+# Create cert directory for build stage
+RUN mkdir /https
+
+# Generate HTTPS certificate
+RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p "4FC92473F3DAB3160FE2FC52896"
+
+# Copy all source code
 COPY . .
 
-# Build the application
+# Build the app
 WORKDIR "/src/src/TaskTracking.HttpApi.Host"
 RUN dotnet build "TaskTracking.HttpApi.Host.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+# Publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "TaskTracking.HttpApi.Host.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# Final runtime image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=build /https /https
 
-# Set environment variables
-ENV ASPNETCORE_URLS=http://+:8080
+# Set environment for HTTPS support
 ENV ASPNETCORE_ENVIRONMENT=Production
+
+
+EXPOSE 80
+EXPOSE 443
 
 ENTRYPOINT ["dotnet", "TaskTracking.HttpApi.Host.dll"]
