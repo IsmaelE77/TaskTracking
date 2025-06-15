@@ -43,11 +43,6 @@ public class CreateTaskGroupDtoValidator : AbstractValidator<CreateTaskGroupDto>
             .WithName(_localizer["StartDate"])
             .WithMessage(_localizer["The {PropertyName} field is required."]);
 
-        RuleFor(x => x.StartDate)
-            .GreaterThanOrEqualTo(DateTime.Today)
-            .WithName(_localizer["StartDate"])
-            .WithMessage(_localizer["StartDateCannotBeInPast"]);
-
         RuleFor(x => x.EndDate)
             .GreaterThan(x => x.StartDate)
             .When(x => x.EndDate.HasValue)
