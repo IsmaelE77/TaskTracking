@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -76,6 +77,12 @@ public class TaskTrackingHttpApiHostModule : AbpModule
             configure.EnableAuthorizationEndpointPassthrough();
             configure.EnableTokenEndpointPassthrough();
             configure.DisableTransportSecurityRequirement();
+        });
+        context.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
         });
     }
 
@@ -192,6 +199,8 @@ public class TaskTrackingHttpApiHostModule : AbpModule
         var app = context.GetApplicationBuilder();
         var env = context.GetEnvironment();
 
+        app.UseForwardedHeaders();
+        
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
