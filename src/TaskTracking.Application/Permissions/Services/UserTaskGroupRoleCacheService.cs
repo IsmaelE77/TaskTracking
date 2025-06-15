@@ -11,7 +11,7 @@ using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Users;
 
-namespace TaskTracking.Permissions;
+namespace TaskTracking.Permissions.Services;
 
 public class UserTaskGroupRoleCacheService : IUserTaskGroupRoleCacheService, ITransientDependency
 {

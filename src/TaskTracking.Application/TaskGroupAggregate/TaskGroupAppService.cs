@@ -92,6 +92,8 @@ public class TaskGroupAppService :
             input.EndDate,
             currentUserId);
 
+        await _roleCacheService.ClearAsync(currentUserId, taskGroup.Id);
+
         return ObjectMapper.Map<TaskGroup, TaskGroupDto>(taskGroup);
     }
 
