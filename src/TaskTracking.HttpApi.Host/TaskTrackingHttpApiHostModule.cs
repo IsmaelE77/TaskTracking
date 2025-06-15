@@ -70,6 +70,11 @@ public class TaskTrackingHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+        
+        Configure<OpenIddictServerAspNetCoreBuilder>(configure =>
+        {
+            configure.DisableTransportSecurityRequirement();
+        });
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
