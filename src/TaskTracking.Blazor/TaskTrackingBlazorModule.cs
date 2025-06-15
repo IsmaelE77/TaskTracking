@@ -6,6 +6,7 @@ using TaskTracking.Blazor.Client;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Components.WebAssembly.LeptonXLiteTheme.Bundling;
 using Volo.Abp.AspNetCore.Components.WebAssembly.WebApp;
+using Volo.Abp.AspNetCore.Mvc.Libs;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
@@ -25,6 +26,11 @@ public class TaskTrackingBlazorModule : AbpModule
         Configure<RouteOptions>(options =>
         {
             options.SuppressCheckForUnhandledSecurityMetadata = true;
+        });
+        
+        Configure<AbpMvcLibsOptions>(options =>
+        {
+            options.CheckLibs = false;
         });
 
         // Add services to the container.
