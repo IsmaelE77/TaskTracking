@@ -7,7 +7,7 @@
     --islamic-accent: #059669;       /* Emerald Green */
     --islamic-gold: #f59e0b;         /* Gold */
     --islamic-navy: #1e293b;         /* Navy Blue */
-    --islamic-cream: #fef7ed;        /* Cream */
+    --islamic-cream: #b1863d;        /* Cream */
     --islamic-pearl: #f8fafc;        /* Pearl White */
     --islamic-shadow: rgba(30, 58, 138, 0.1);
 }
@@ -241,7 +241,6 @@
 
 .drawer-header {
     padding: 1.5rem 1rem;
-    background: linear-gradient(135deg, var(--islamic-cream) 0%, var(--islamic-pearl) 100%);
     border-bottom: 1px solid #e2e8f0;
 }
 
