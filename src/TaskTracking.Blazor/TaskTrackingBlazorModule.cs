@@ -1,4 +1,6 @@
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,6 +35,14 @@ public class TaskTrackingBlazorModule : AbpModule
             options.CheckLibs = false;
         });
 
+        context.Services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+            options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat([
+                "application/octet-stream", "application/wasm"
+            ]);
+        });
+
         // Add services to the container.
         context.Services.AddRazorComponents()
             .AddInteractiveWebAssemblyComponents();
@@ -58,6 +68,7 @@ public class TaskTrackingBlazorModule : AbpModule
         app.MapAbpStaticAssets();
         app.UseRouting();
         app.UseAntiforgery();
+        app.UseResponseCompression();
 
         app.UseConfiguredEndpoints(builder =>
         {
