@@ -1,4 +1,5 @@
-﻿using TaskTracking.Permissions.ManagementProviders;
+﻿using System;
+using TaskTracking.Permissions.ManagementProviders;
 using TaskTracking.Permissions.ValueProviders;
 using Volo.Abp.Account;
 using Volo.Abp.Authorization.Permissions;
@@ -9,6 +10,7 @@ using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
+using Volo.Abp.Timing;
 
 namespace TaskTracking;
 
@@ -40,6 +42,11 @@ public class TaskTrackingApplicationModule : AbpModule
         Configure<AbpPermissionOptions>(options =>
         {
             options.ValueProviders.Add<UserTaskGroupRolePermissionValueProvider>();
+        });
+
+        Configure<AbpClockOptions>(options =>
+        {
+            options.Kind = DateTimeKind.Utc;
         });
     }
 }

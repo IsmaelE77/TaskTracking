@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TaskTracking.MultiTenancy;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
@@ -16,6 +17,7 @@ using Volo.Abp.PermissionManagement.Identity;
 using Volo.Abp.PermissionManagement.OpenIddict;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
+using Volo.Abp.Timing;
 
 namespace TaskTracking;
 
@@ -67,6 +69,11 @@ public class TaskTrackingDomainModule : AbpModule
         {
             options.DefaultStates[typeof(IHaveTaskGroup)] = new DataFilterState(isEnabled: true);
             options.DefaultStates[typeof(IAccessibleTaskGroup)] = new DataFilterState(isEnabled: true);
+        });
+
+        Configure<AbpClockOptions>(options =>
+        {
+            options.Kind = DateTimeKind.Utc;
         });
 
 
