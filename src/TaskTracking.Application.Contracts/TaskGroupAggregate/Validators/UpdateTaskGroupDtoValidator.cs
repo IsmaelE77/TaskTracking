@@ -7,16 +7,19 @@ using TaskTracking.Localization;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using TaskTracking.TaskGroupAggregate.TaskGroups;
 using Microsoft.Extensions.Localization;
+using Volo.Abp.Timing;
 
 namespace TaskTracking.TaskGroupAggregate.Validators;
 
 public class UpdateTaskGroupDtoValidator : AbstractValidator<UpdateTaskGroupDto>
 {
     private readonly IStringLocalizer<TaskTrackingResource> _localizer;
+    private readonly IClock _clock;
 
-    public UpdateTaskGroupDtoValidator(IStringLocalizer<TaskTrackingResource> localizer)
+    public UpdateTaskGroupDtoValidator(IStringLocalizer<TaskTrackingResource> localizer, IClock clock)
     {
         _localizer = localizer;
+        _clock = clock;
 
         RuleFor(x => x.Title)
             .NotEmpty()
@@ -39,7 +42,7 @@ public class UpdateTaskGroupDtoValidator : AbstractValidator<UpdateTaskGroupDto>
             .WithMessage(_localizer["The {PropertyName} field must not exceed {MaxLength} characters."]);
 
         RuleFor(x => x.StartDate)
-            .GreaterThanOrEqualTo(DateTime.Today)
+            .GreaterThanOrEqualTo(_clock.Now.Date)
             .WithName(_localizer["StartDate"])
             .WithMessage(_localizer["StartDateCannotBeInPast"]);
 

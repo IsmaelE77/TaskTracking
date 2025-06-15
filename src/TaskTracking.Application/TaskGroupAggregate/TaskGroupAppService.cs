@@ -296,7 +296,7 @@ public class TaskGroupAppService :
             TotalDueCount = taskItem.GetDueCount(),
             CompletedCount = userProgress?.ProgressEntries.Count ?? 0,
             IsFullyCompleted = userProgress?.ProgressPercentage == 100,
-            IsDueToday = taskItem.IsDue(DateTime.Today, CurrentUser.GetId()),
+            IsDueToday = taskItem.IsDue(Clock.Now.Date, CurrentUser.GetId()),
             CanRecordToday = userProgress != null && !userProgress.ProgressEntries.Any(pe => pe.Date == DateOnly.FromDateTime(DateTime.Today))
         };
 
@@ -389,7 +389,7 @@ public class TaskGroupAppService :
             return dueDates;
 
         var startDate = taskItem.StartDate;
-        var endDate = taskItem.RecurrencePattern.EndDate ?? taskItem.EndDate ?? DateTime.Today.AddYears(1);
+        var endDate = taskItem.RecurrencePattern.EndDate ?? taskItem.EndDate ?? Clock.Now.Date.AddYears(1);
         var current = startDate;
 
         switch (taskItem.RecurrencePattern.RecurrenceType)
