@@ -154,7 +154,8 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
     {
         var taskGroup = await GetWithDetailsAsync(taskGroupId);
 
-        var taskItem = taskGroup.UpdateTaskItem(taskItemId, title, description, startDate, taskType, endDate, recurrencePattern);
+        var taskItem = taskGroup.UpdateTaskItem(taskItemId, title, description, startDate, taskType, endDate,
+            recurrencePattern);
 
         await _taskGroupRepository.UpdateAsync(taskGroup);
 
@@ -269,7 +270,8 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
     /// <summary>
     /// Gets all task groups for a specific user.
     /// </summary>
-    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount)
+    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserTaskGroupsAsync(Guid userId, int skipCount,
+        int maxResultCount)
     {
         var userTaskGroupsQueryable = await _userTaskGroupReadOnlyRepository.GetQueryableAsync();
         userTaskGroupsQueryable = userTaskGroupsQueryable
@@ -294,28 +296,18 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
     /// <summary>
     /// Gets all active task groups for a specific user.
     /// </summary>
-    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserActiveTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount)
+    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserActiveTaskGroupsAsync(Guid userId, int skipCount,
+        int maxResultCount)
     {
-        var userTaskGroupsQueryable = await _userTaskGroupReadOnlyRepository.GetQueryableAsync();
-        userTaskGroupsQueryable = userTaskGroupsQueryable
-            .Where(utg => utg.UserId == userId);
-
-        var totalCount = await AsyncExecuter.CountAsync(userTaskGroupsQueryable);
-        var taskGroupIds = await AsyncExecuter.ToListAsync(
-            userTaskGroupsQueryable
-                .Select(utg => utg.TaskGroupId)
-                .PageBy(skipCount, maxResultCount)
-        );
-
         var today = Clock.Now.Date;
 
         var taskGroupQuery = await _taskGroupRepository.WithDetailsAsync();
+        taskGroupQuery = taskGroupQuery.Where(tg => tg.StartDate <= today &&
+                                                    (!tg.EndDate.HasValue || tg.EndDate.Value >= today));
 
-        var result = await AsyncExecuter.ToListAsync(
-            taskGroupQuery.Where(tg =>
-                taskGroupIds.Contains(tg.Id) &&
-                tg.StartDate <= today &&
-                (!tg.EndDate.HasValue || tg.EndDate.Value >= today)));
+        var totalCount = await AsyncExecuter.CountAsync(taskGroupQuery);
+
+        var result = await AsyncExecuter.ToListAsync(taskGroupQuery.PageBy(skipCount,maxResultCount));
 
         return (result, totalCount);
     }
@@ -323,26 +315,15 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
     /// <summary>
     /// Gets all task groups owned by a specific user.
     /// </summary>
-    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserOwnedTaskGroupsAsync(Guid userId, int skipCount, int maxResultCount)
+    public async Task<(List<TaskGroup> Items, int TotalCount)> GetUserOwnedTaskGroupsAsync(Guid userId, int skipCount,
+        int maxResultCount)
     {
-        var userTaskGroupsQueryable = await _userTaskGroupReadOnlyRepository.GetQueryableAsync();
-        userTaskGroupsQueryable = userTaskGroupsQueryable
-            .Where(utg => utg.UserId == userId && utg.Role == UserTaskGroupRole.Owner);
-
-        var totalCount = await AsyncExecuter.CountAsync(userTaskGroupsQueryable);
-
-
-        var taskGroupIds =await AsyncExecuter.ToListAsync(
-            userTaskGroupsQueryable
-                .Select(utg => utg.TaskGroupId)
-                .PageBy(skipCount, maxResultCount)
-        );
-
         var taskGroupQuery = await _taskGroupRepository.WithDetailsAsync();
 
-        var items = await AsyncExecuter.ToListAsync(
-            taskGroupQuery.Where(tg =>
-                taskGroupIds.Contains(tg.Id)));
+        var totalCount = await AsyncExecuter.CountAsync(taskGroupQuery);
+
+
+        var items = await AsyncExecuter.ToListAsync(taskGroupQuery.PageBy(skipCount, maxResultCount));
 
         return (items, totalCount);
     }
@@ -444,5 +425,4 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
 
         await _invitationRepository.DeleteAsync(invitation);
     }
-
 }
