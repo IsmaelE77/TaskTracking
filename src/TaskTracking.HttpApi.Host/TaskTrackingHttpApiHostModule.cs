@@ -73,6 +73,8 @@ public class TaskTrackingHttpApiHostModule : AbpModule
         
         Configure<OpenIddictServerAspNetCoreBuilder>(configure =>
         {
+            configure.EnableAuthorizationEndpointPassthrough();
+            configure.EnableTokenEndpointPassthrough();
             configure.DisableTransportSecurityRequirement();
         });
     }
