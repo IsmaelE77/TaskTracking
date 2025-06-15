@@ -71,23 +71,17 @@ public class TaskTrackingHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
-        
-        Configure<OpenIddictServerAspNetCoreBuilder>(configure =>
-        {
-            configure.EnableAuthorizationEndpointPassthrough();
-            configure.EnableTokenEndpointPassthrough();
-            configure.DisableTransportSecurityRequirement();
-        });
+    }
+
+    private void ConfigureAuthentication(ServiceConfigurationContext context)
+    {
         context.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             options.KnownNetworks.Clear();
             options.KnownProxies.Clear();
         });
-    }
-
-    private void ConfigureAuthentication(ServiceConfigurationContext context)
-    {
+        
         context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
         context.Services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
         {
