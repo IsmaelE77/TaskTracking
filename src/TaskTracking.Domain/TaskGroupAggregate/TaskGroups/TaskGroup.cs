@@ -192,7 +192,7 @@ public class TaskGroup : FullAuditedAggregateRoot<Guid>, IAccessibleTaskGroup
 
     internal void RecordTaskProgress(Guid taskItemId, Guid userId, DateOnly date)
     {
-        if (date > DateOnly.FromDateTime(DateTime.Today))
+        if (date > DateOnly.FromDateTime(DateTime.UtcNow.Date))
         {
             throw new BusinessException(TaskTrackingDomainErrorCodes.ProgressDateInFuture);
         }
