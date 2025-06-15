@@ -302,7 +302,7 @@ public class TaskGroupManager : DomainService, ITaskGroupManager
         var today = Clock.Now.Date;
 
         var taskGroupQuery = await _taskGroupRepository.WithDetailsAsync();
-        taskGroupQuery = taskGroupQuery.Where(tg => tg.StartDate <= today &&
+        taskGroupQuery = taskGroupQuery.Where(tg => tg.StartDate.Date <= today &&
                                                     (!tg.EndDate.HasValue || tg.EndDate.Value >= today));
 
         var totalCount = await AsyncExecuter.CountAsync(taskGroupQuery);
