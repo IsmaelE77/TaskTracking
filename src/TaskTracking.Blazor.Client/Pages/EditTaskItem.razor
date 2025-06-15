@@ -123,8 +123,7 @@
                                                Variant="Variant.Outlined"
                                                Required="true"
                                                DateFormat="dd/MM/yyyy"
-                                               HelperText="@L["SelectStartDate"]"
-                                               For="@(() => UpdateDto.StartDate)" />
+                                               HelperText="@L["SelectStartDate"]" />
                             </MudItem>
                             <MudItem xs="12" md="6">
                                 <MudDatePicker @bind-Date="EndDatePicker"
@@ -132,8 +131,7 @@
                                                Variant="Variant.Outlined"
                                                DateFormat="dd/MM/yyyy"
                                                Clearable="true"
-                                               HelperText="@L["OptionalEndDate"]"
-                                               For="@(() => UpdateDto.EndDate)" />
+                                               HelperText="@L["OptionalEndDate"]" />
                             </MudItem>
                         </MudGrid>
 

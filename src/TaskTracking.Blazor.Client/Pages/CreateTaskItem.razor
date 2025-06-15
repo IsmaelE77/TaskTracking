@@ -12,10 +12,10 @@
                     <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                                    Color="Color.Primary"
                                    OnClick="@(() => NavigationManager.NavigateTo($"/task-groups/{TaskGroupId}"))"
-                                   Class="me-3" />
+                                   Class="me-3"/>
                     <div>
                         <MudText Typo="Typo.h4" Class="section-title mb-1">
-                            <MudIcon Icon="@Icons.Material.Filled.Add" Class="me-2" />
+                            <MudIcon Icon="@Icons.Material.Filled.Add" Class="me-2"/>
                             @L["CreateTask"]
                         </MudText>
                         <MudText Typo="Typo.body2" Class="text-muted d-none d-sm-block">
@@ -24,7 +24,7 @@
                     </div>
                 </div>
             </MudItem>
-            
+
             <!-- Action Buttons -->
             <MudItem xs="12" sm="4" md="3">
                 <MudStack Row="true" Spacing="2" Class="d-none d-sm-flex justify-end">
@@ -35,7 +35,7 @@
                         @L["ViewGroup"]
                     </MudButton>
                 </MudStack>
-                
+
                 <!-- Mobile Buttons -->
                 <MudStack Spacing="2" Class="d-block d-sm-none">
                     <MudButton Variant="Variant.Outlined"
@@ -52,7 +52,7 @@
         @if (IsLoading)
         {
             <div class="text-center py-5">
-                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true"/>
                 <MudText Typo="Typo.body1" Class="mt-3">@L["LoadingTaskGroup"]</MudText>
             </div>
         }
@@ -60,7 +60,7 @@
         {
             <MudCard Class="text-center py-5" Elevation="2">
                 <MudCardContent>
-                    <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Large" Color="Color.Error" Class="mb-3" />
+                    <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Large" Color="Color.Error" Class="mb-3"/>
                     <MudText Typo="Typo.h6" Class="mb-2">@L["TaskGroupNotFound"]</MudText>
                     <MudText Typo="Typo.body2" Class="text-muted mb-4">
                         @L["TaskGroupNotFoundDescription"]
@@ -80,7 +80,7 @@
             <MudCard Class="islamic-card mb-4" Elevation="2">
                 <MudCardContent Class="pa-4">
                     <MudText Typo="Typo.h6" Class="mb-2">
-                        <MudIcon Icon="@Icons.Material.Filled.Group" Class="me-2" />
+                        <MudIcon Icon="@Icons.Material.Filled.Group" Class="me-2"/>
                         @TaskGroup.Title
                     </MudText>
                     <MudText Typo="Typo.body2" Class="text-muted">
@@ -92,7 +92,8 @@
             <!-- Create Form -->
             <MudCard Class="islamic-card" Elevation="3">
                 <MudCardContent Class="pa-6">
-                    <MudForm Model="@CreateDto" @ref="@form" Validation="@(CreateTaskItemDtoValidator.ValidateValue)" ValidationDelay="0">
+                    <MudForm Model="@CreateDto" @ref="@form" Validation="@(CreateTaskItemDtoValidator.ValidateValue)"
+                             ValidationDelay="0">
                         <!-- Title Field -->
                         <MudTextField @bind-Value="CreateDto.Title"
                                       Label="@L["Title"]"
@@ -103,7 +104,7 @@
                                       Counter="256"
                                       HelperText="@L["EnterTaskTitle"]"
                                       For="@(() => CreateDto.Title)"
-                                      Immediate="true" />
+                                      Immediate="true"/>
 
                         <!-- Description Field -->
                         <MudGrid Class="mb-4" Spacing="10">
@@ -136,8 +137,7 @@
                                                Variant="Variant.Outlined"
                                                Required="true"
                                                DateFormat="dd/MM/yyyy"
-                                               HelperText="@L["SelectStartDate"]"
-                                               For="@(() => CreateDto.StartDate)" />
+                                               HelperText="@L["SelectStartDate"]"/>
                             </MudItem>
                             <MudItem xs="12" md="6">
                                 <MudDatePicker @bind-Date="EndDatePicker"
@@ -145,8 +145,7 @@
                                                Variant="Variant.Outlined"
                                                DateFormat="dd/MM/yyyy"
                                                Clearable="true"
-                                               HelperText="@L["OptionalEndDate"]"
-                                               For="@(() => CreateDto.EndDate)" />
+                                               HelperText="@L["OptionalEndDate"]"/>
                             </MudItem>
                         </MudGrid>
 
@@ -157,11 +156,13 @@
                                 <MudRadioGroup @bind-Value="CreateDto.TaskType" T="TaskType" Class="mb-3">
                                     <MudRadio Value="TaskType.OneTime" Color="Color.Primary">
                                         <MudText>@L["OneTimeTask"]</MudText>
-                                        <MudText Typo="Typo.caption" Class="text-muted">@L["OneTimeTaskDescription"]</MudText>
+                                        <MudText Typo="Typo.caption"
+                                                 Class="text-muted">@L["OneTimeTaskDescription"]</MudText>
                                     </MudRadio>
                                     <MudRadio Value="TaskType.Recurring" Color="Color.Primary">
                                         <MudText>@L["RecurringTask"]</MudText>
-                                        <MudText Typo="Typo.caption" Class="text-muted">@L["RecurringTaskDescription"]</MudText>
+                                        <MudText Typo="Typo.caption"
+                                                 Class="text-muted">@L["RecurringTaskDescription"]</MudText>
                                     </MudRadio>
                                 </MudRadioGroup>
                             </MudItem>
@@ -174,7 +175,7 @@
                                 <MudCardHeader>
                                     <CardHeaderContent>
                                         <MudText Typo="Typo.h6">
-                                            <MudIcon Icon="@Icons.Material.Filled.Repeat" Class="me-2" />
+                                            <MudIcon Icon="@Icons.Material.Filled.Repeat" Class="me-2"/>
                                             @L["RecurrencePattern"]
                                         </MudText>
                                     </CardHeaderContent>
@@ -189,8 +190,10 @@
                                                        Required="true"
                                                        HelperText="@L["SelectRecurrenceType"]">
                                                 <MudSelectItem Value="RecurrenceType.Daily">@L["Daily"]</MudSelectItem>
-                                                <MudSelectItem Value="RecurrenceType.Weekly">@L["Weekly"]</MudSelectItem>
-                                                <MudSelectItem Value="RecurrenceType.Monthly">@L["Monthly"]</MudSelectItem>
+                                                <MudSelectItem
+                                                    Value="RecurrenceType.Weekly">@L["Weekly"]</MudSelectItem>
+                                                <MudSelectItem
+                                                    Value="RecurrenceType.Monthly">@L["Monthly"]</MudSelectItem>
                                             </MudSelect>
                                         </MudItem>
                                         <MudItem xs="12" md="6">
@@ -199,7 +202,7 @@
                                                              Variant="Variant.Outlined"
                                                              Required="true"
                                                              Min="1"
-                                                             HelperText="@GetIntervalHelperText()" />
+                                                             HelperText="@GetIntervalHelperText()"/>
                                         </MudItem>
                                     </MudGrid>
 
@@ -217,7 +220,7 @@
                                                                      ValueChanged="@((bool value) => SetDayOfWeekSelection(currentDay, value))"
                                                                      Label="@L[day.ToString()]"
                                                                      Color="Color.Primary"
-                                                                     Dense="true" />
+                                                                     Dense="true"/>
                                                     }
                                                 </MudStack>
                                             </MudItem>
@@ -248,7 +251,7 @@
                                                                Label="@L["RecurrenceEndDate"]"
                                                                Variant="Variant.Outlined"
                                                                DateFormat="dd/MM/yyyy"
-                                                               HelperText="@L["SelectRecurrenceEndDate"]" />
+                                                               HelperText="@L["SelectRecurrenceEndDate"]"/>
                                             </MudItem>
                                         }
                                         else
@@ -258,7 +261,7 @@
                                                                  Label="@L["NumberOfOccurrences"]"
                                                                  Variant="Variant.Outlined"
                                                                  Min="1"
-                                                                 HelperText="@L["EnterNumberOfOccurrences"]" />
+                                                                 HelperText="@L["EnterNumberOfOccurrences"]"/>
                                             </MudItem>
                                         }
                                     </MudGrid>
@@ -269,13 +272,14 @@
                         <!-- Information Card -->
                         <MudAlert Severity="Severity.Info" Class="mb-4">
                             <MudText Typo="Typo.body2">
-                                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="me-2" />
+                                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="me-2"/>
                                 @L["CreateTaskInfo"]
                             </MudText>
                         </MudAlert>
 
                         <!-- Action Buttons -->
-                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="d-none d-sm-flex">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center"
+                                  Class="d-none d-sm-flex">
                             <MudButton Variant="Variant.Text"
                                        Color="Color.Default"
                                        StartIcon="@Icons.Material.Filled.Cancel"
@@ -290,7 +294,7 @@
                                        Disabled="@IsSubmitting">
                                 @if (IsSubmitting)
                                 {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2"/>
                                 }
                                 @L["CreateTask"]
                             </MudButton>
@@ -306,7 +310,7 @@
                                        FullWidth="true">
                                 @if (IsSubmitting)
                                 {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2"/>
                                 }
                                 @L["CreateTask"]
                             </MudButton>
@@ -326,7 +330,7 @@
             <MudCard Class="mt-4" Elevation="2">
                 <MudCardContent Class="pa-4">
                     <MudText Typo="Typo.h6" Class="mb-3">
-                        <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="me-2" Color="Color.Warning" />
+                        <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="me-2" Color="Color.Warning"/>
                         @L["TaskCreationTips"]
                     </MudText>
                     <MudList T="string" Dense="true">

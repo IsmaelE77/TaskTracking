@@ -10,10 +10,10 @@
                     <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                                    Color="Color.Primary"
                                    OnClick="@(() => NavigationManager.NavigateTo("/"))"
-                                   Class="me-3" />
+                                   Class="me-3"/>
                     <div>
                         <MudText Typo="Typo.h4" Class="section-title mb-1">
-                            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="me-2" />
+                            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="me-2"/>
                             @L["EditTaskGroup"]
                         </MudText>
                         <MudText Typo="Typo.body2" Class="text-muted d-none d-sm-block">
@@ -22,7 +22,7 @@
                     </div>
                 </div>
             </MudItem>
-            
+
             <!-- Action Buttons -->
             <MudItem xs="12" sm="4" md="3">
                 <MudStack Row="true" Spacing="2" Class="d-none d-sm-flex justify-end">
@@ -39,7 +39,7 @@
                         @L["MyGroups"]
                     </MudButton>
                 </MudStack>
-                
+
                 <!-- Mobile Buttons -->
                 <MudStack Spacing="2" Class="d-block d-sm-none">
                     <MudButton Variant="Variant.Outlined"
@@ -63,7 +63,7 @@
         @if (IsLoading)
         {
             <div class="text-center py-5">
-                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true"/>
                 <MudText Typo="Typo.body1" Class="mt-3">@L["LoadingTaskGroup"]</MudText>
             </div>
         }
@@ -78,7 +78,8 @@
             <!-- Edit Form -->
             <MudCard Class="islamic-card" Elevation="3">
                 <MudCardContent Class="pa-6">
-                    <MudForm Model="@UpdateDto" @ref="@form" Validation="@(UpdateTaskGroupDtoValidator.ValidateValue)" ValidationDelay="0">
+                    <MudForm Model="@UpdateDto" @ref="@form" Validation="@(UpdateTaskGroupDtoValidator.ValidateValue)"
+                             ValidationDelay="0">
                         <!-- Title Field -->
                         <MudTextField @bind-Value="UpdateDto.Title"
                                       Label="@L["Title"]"
@@ -89,7 +90,7 @@
                                       Counter="200"
                                       HelperText="@L["EnterTaskGroupTitle"]"
                                       For="@(() => UpdateDto.Title)"
-                                      Immediate="true" />
+                                      Immediate="true"/>
 
                         <!-- Description Field -->
                         <MudGrid Class="mb-4" Spacing="10">
@@ -121,8 +122,7 @@
                                                Label="@L["StartDate"]"
                                                Variant="Variant.Outlined"
                                                Required="true"
-                                               DateFormat="dd/MM/yyyy"
-                                               For="@(() => UpdateDto.StartDate)" />
+                                               DateFormat="dd/MM/yyyy"/>
                             </MudItem>
                             <MudItem xs="12" md="6">
                                 <MudDatePicker @bind-Date="EndDatePicker"
@@ -130,13 +130,13 @@
                                                Variant="Variant.Outlined"
                                                DateFormat="dd/MM/yyyy"
                                                Clearable="true"
-                                               HelperText="@L["OptionalEndDate"]"
-                                               For="@(() => UpdateDto.EndDate)" />
+                                               HelperText="@L["OptionalEndDate"]"/>
                             </MudItem>
                         </MudGrid>
 
                         <!-- Action Buttons -->
-                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="d-none d-sm-flex">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center"
+                                  Class="d-none d-sm-flex">
                             <MudButton Variant="Variant.Text"
                                        Color="Color.Default"
                                        StartIcon="@Icons.Material.Filled.Cancel"
@@ -151,7 +151,7 @@
                                        Disabled="@IsSubmitting">
                                 @if (IsSubmitting)
                                 {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2"/>
                                 }
                                 @L["SaveChanges"]
                             </MudButton>
@@ -167,7 +167,7 @@
                                        FullWidth="true">
                                 @if (IsSubmitting)
                                 {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2"/>
                                 }
                                 @L["SaveChanges"]
                             </MudButton>
