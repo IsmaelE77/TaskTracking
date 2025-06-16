@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
@@ -10,7 +10,6 @@ using MudBlazor.Services;
 using TaskTracking.Blazor.Client.Menus;
 using OpenIddict.Abstractions;
 using Volo.Abp.AspNetCore.Components.Web.Theming.Routing;
-using Volo.Abp.AspNetCore.Components.WebAssembly.LeptonXLiteTheme;
 using Volo.Abp.Autofac.WebAssembly;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Identity.Blazor.WebAssembly;
@@ -18,13 +17,14 @@ using Volo.Abp.Modularity;
 using Volo.Abp.SettingManagement.Blazor.WebAssembly;
 using Volo.Abp.TenantManagement.Blazor.WebAssembly;
 using Volo.Abp.UI.Navigation;
+using Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme;
 
 namespace TaskTracking.Blazor.Client;
 
 [DependsOn(
     typeof(AbpAutofacWebAssemblyModule),
     typeof(TaskTrackingHttpApiClientModule),
-    typeof(AbpAspNetCoreComponentsWebAssemblyLeptonXLiteThemeModule),
+    typeof(AbpAspNetCoreComponentsWebAssemblyBasicThemeModule),
     typeof(AbpIdentityBlazorWebAssemblyModule),
     typeof(AbpTenantManagementBlazorWebAssemblyModule),
     typeof(AbpSettingManagementBlazorWebAssemblyModule)
