@@ -18,6 +18,7 @@ using Volo.Abp.SettingManagement.Blazor.WebAssembly;
 using Volo.Abp.TenantManagement.Blazor.WebAssembly;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme;
+using Volo.Abp.AspNetCore.Components.Web.BasicTheme;
 
 namespace TaskTracking.Blazor.Client;
 
@@ -29,7 +30,8 @@ namespace TaskTracking.Blazor.Client;
     typeof(AbpTenantManagementBlazorWebAssemblyModule),
     typeof(AbpSettingManagementBlazorWebAssemblyModule)
 )]
-public class TaskTrackingBlazorClientModule : AbpModule
+[DependsOn(typeof(AbpAspNetCoreComponentsWebBasicThemeModule))]
+    public class TaskTrackingBlazorClientModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {

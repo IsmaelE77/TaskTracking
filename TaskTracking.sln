@@ -47,6 +47,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskTracking.Blazor", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskTracking.Blazor.Client", "src\TaskTracking.Blazor.Client\TaskTracking.Blazor.Client.csproj", "{D24A8C98-1F46-4758-9651-F5990D3D4673}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme", "src\Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme\Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme.csproj", "{CE800BDA-22CB-4FFC-ACC9-0604D68C2100}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volo.Abp.AspNetCore.Components.Web.BasicTheme", "src\Volo.Abp.AspNetCore.Components.Web.BasicTheme\Volo.Abp.AspNetCore.Components.Web.BasicTheme.csproj", "{DDE827C3-16AD-4DDC-AE3B-91D2B6283A18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +129,14 @@ Global
 		{D24A8C98-1F46-4758-9651-F5990D3D4673}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D24A8C98-1F46-4758-9651-F5990D3D4673}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D24A8C98-1F46-4758-9651-F5990D3D4673}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE800BDA-22CB-4FFC-ACC9-0604D68C2100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE800BDA-22CB-4FFC-ACC9-0604D68C2100}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE800BDA-22CB-4FFC-ACC9-0604D68C2100}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE800BDA-22CB-4FFC-ACC9-0604D68C2100}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDE827C3-16AD-4DDC-AE3B-91D2B6283A18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDE827C3-16AD-4DDC-AE3B-91D2B6283A18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDE827C3-16AD-4DDC-AE3B-91D2B6283A18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDE827C3-16AD-4DDC-AE3B-91D2B6283A18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -150,6 +162,8 @@ Global
 		{9E701B08-5AE8-4C25-B1B4-0E205A5235EE} = {AD9644A0-B8AA-40EC-A8A2-D28BE8B80B9E}
 		{1D2A6256-9BAC-475C-91A5-45C0AE3CEFB5} = {AD9644A0-B8AA-40EC-A8A2-D28BE8B80B9E}
 		{D24A8C98-1F46-4758-9651-F5990D3D4673} = {AD9644A0-B8AA-40EC-A8A2-D28BE8B80B9E}
+		{CE800BDA-22CB-4FFC-ACC9-0604D68C2100} = {AD9644A0-B8AA-40EC-A8A2-D28BE8B80B9E}
+		{DDE827C3-16AD-4DDC-AE3B-91D2B6283A18} = {AD9644A0-B8AA-40EC-A8A2-D28BE8B80B9E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {28315BFD-90E7-4E14-A2EA-F3D23AF4126F}
