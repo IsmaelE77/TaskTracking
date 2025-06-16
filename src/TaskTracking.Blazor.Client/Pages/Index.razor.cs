@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using TaskTracking.TaskGroupAggregate;
 using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups;
 using Volo.Abp.Application.Dtos;
@@ -22,11 +21,6 @@ public partial class Index
 
     protected override async Task OnInitializedAsync()
     {
-        if (!CurrentUser.IsAuthenticated)
-        {
-            NavigationManager.NavigateToLogin("authentication/login");
-        }
-
         await LoadTaskGroups();
     }
 
