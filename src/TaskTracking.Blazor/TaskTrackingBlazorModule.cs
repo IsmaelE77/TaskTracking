@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using TaskTracking.Blazor.Client;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme.Bundling;
+using Volo.Abp.AspNetCore.Components.WebAssembly.Theming.Bundling;
 using Volo.Abp.AspNetCore.Components.WebAssembly.WebApp;
 using Volo.Abp.AspNetCore.Mvc.Libs;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
@@ -29,7 +30,13 @@ public class TaskTrackingBlazorModule : AbpModule
         {
             options.SuppressCheckForUnhandledSecurityMetadata = true;
         });
-        
+
+        Configure<AbpBundlingOptions>(options =>
+        {
+            var globalStyles = options.StyleBundles.Get(BlazorWebAssemblyStandardBundles.Styles.Global);
+            globalStyles.AddContributors(typeof(TaskTrackingStyleBundleContributor));
+        });
+
         Configure<AbpMvcLibsOptions>(options =>
         {
             options.CheckLibs = false;
