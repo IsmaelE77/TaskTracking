@@ -35,6 +35,11 @@ public partial class AllTaskGroups
         await LoadTaskGroups();
     }
 
+    private async Task LoadTaskGroups()
+    {
+        await LoadTaskGroups(false);
+    }
+
     private async Task LoadTaskGroups(bool append = false)
     {
         try

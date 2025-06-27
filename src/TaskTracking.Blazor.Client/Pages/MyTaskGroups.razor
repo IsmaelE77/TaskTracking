@@ -185,7 +185,7 @@
                 @foreach (var taskGroup in FilteredTaskGroups)
                 {
                     <MudItem xs="12" sm="6" md="4" lg="3">
-                        <TaskGroupCard TaskGroup="@taskGroup" />
+                        <TaskGroupCard TaskGroup="@taskGroup" OnTaskGroupDeleted="@LoadMyTaskGroups" />
                     </MudItem>
                 }
             </MudGrid>

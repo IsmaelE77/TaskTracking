@@ -1,7 +1,10 @@
+@using TaskTracking.TaskGroupAggregate
 @using TaskTracking.TaskGroupAggregate.Dtos.TaskGroups
 @using TaskTracking.TaskGroupAggregate.UserTaskGroups
 @inherits TaskTrackingComponentBase
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ITaskGroupAppService TaskGroupAppService
 
 <MudCard Class="task-group-card h-100" Elevation="3">
     <MudCardHeader>
@@ -82,12 +85,12 @@
                                OnClick="@(() => EditTaskGroup())"
                                title="@L["Edit"]" />
             </TaskGroupAuthorizeView>
-            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.ManageUsers" Role="@TaskGroup.CurrentUserRole">
-                <MudIconButton Icon="@Icons.Material.Filled.MoreVert"
-                               Color="Color.Default"
+            <TaskGroupAuthorizeView Permission="@UserTaskGroupPermissions.Delete" Role="@TaskGroup.CurrentUserRole">
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
                                Size="Size.Small"
-                               OnClick="@(() => ShowOptions())"
-                               title="@L["Options"]" />
+                               OnClick="@(() => DeleteGroup())"
+                               title="@L["Delete"]" />
             </TaskGroupAuthorizeView>
         </div>
     </MudCardActions>
@@ -95,6 +98,7 @@
 
 @code {
     [Parameter] public TaskGroupDto TaskGroup { get; set; } = null!;
+    [Parameter] public EventCallback OnTaskGroupDeleted { get; set; }
 
     private Color GetProgressColor()
     {
@@ -117,8 +121,32 @@
         NavigationManager.NavigateTo($"/task-groups/{TaskGroup.Id}/edit");
     }
     
-    private void ShowOptions()
+    private async Task DeleteGroup()
     {
-        // Show context menu with additional options
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.ContentText, string.Format(L["DeleteTaskConfirmation"], TaskGroup.Title) },
+            { x => x.ButtonText, L["Delete"] },
+            { x => x.Color, Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var result = await DialogService.ShowAsync<ConfirmationDialog>(L["DeleteTask"], parameters, options);
+        var dialogResult = await result.Result;
+
+        if (!dialogResult.Canceled && dialogResult.Data is true)
+        {
+            try
+            {
+                await TaskGroupAppService.DeleteAsync(TaskGroup.Id);
+                await OnTaskGroupDeleted.InvokeAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting task: {ex.Message}");
+                // You might want to show an error message to the user here
+            }
+        }
     }
 }

@@ -77,6 +77,12 @@ public partial class MyTaskGroups
         await LoadMyTaskGroups();
     }
 
+    private async Task LoadMyTaskGroups()
+    {
+        await LoadMyTaskGroups(false);
+    }
+
+
     private async Task LoadMyTaskGroups(bool append = false)
     {
         try
